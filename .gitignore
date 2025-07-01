@@ -1,0 +1,45 @@
+# Build folders
+**/bin/
+**/obj/
+
+# Visual Studio settings
+.vs/
+*.user
+*.suo
+
+# Build results
+*.dll
+*.exe
+*.app
+*.pdb
+*.cache
+*.log
+*.vspscc
+*.vssscc
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# User-specific files
+*.userprefs
+
+# ASP.NET temp files
+*.Publish.xml
+
+# Config transforms
+appsettings*.Development.json
+
+# Rider IDE
+.idea/
+
+# Ignore local secrets
+secrets.json
+
+# Prevent accidental exclusion of app layers
+!Farmacheck.Application/
+!Farmacheck.Infrastructure/

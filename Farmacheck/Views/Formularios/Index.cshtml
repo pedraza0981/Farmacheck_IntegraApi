@@ -1,0 +1,131 @@
+﻿@model List<FormularioViewModel>
+@{
+    ViewData["Title"] = "Formularios";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Formularios</h4>
+        <a asp-controller="Formularios" asp-action="ConfigurarFormulario" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Agregar Formulario
+        </a>
+    </div>
+
+    <table class="table table-bordered custom-table" id="tablaFormularios">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Id</th>
+                <th style="width: 30%;">Nombre</th>
+                <th style="width: 20%;">Fecha</th>
+                <th style="width: 10%;">Publicar</th>
+                <th style="width: 30%;" class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in Model)
+            {
+                <tr>
+                    <td>@f.Id</td>
+                    <td>@f.Nombre</td>
+                    <td>@f.Fecha.ToString("yyyy-MM-dd")</td>
+                    <td>@(f.Publicar ? "Sí" : "No")</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Previsualizar", "Formularios", new { id = f.Id })">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a class="btn btn-outline-success btn-sm" href="@Url.Action("ConfigurarFormulario", "Formularios", new { id = f.Id })">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("ConfigurarSecciones", "Formularios", new { id = f.Id })">
+                                <i class="bi bi-gear"></i>
+                            </a>
+                            <a class="btn btn-outline-warning btn-sm" href="@Url.Action("Configurar", "Formularios", new { id = f.Id })">
+                                <i class="bi bi-sliders"></i>
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm" onclick="eliminarFormulario(@f.Id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@* <a asp-controller="Formularios" asp-action="ConfigurarFormulario" class="btn btn-primary mb-3">
+    Agregar Formulario
+</a> *@
+
+@section Scripts {
+    <script>
+            const urlPreview = '@Url.Action("Previsualizar", "Formularios")';
+            const urlConstruir = '@Url.Action("Construir", "Formularios")';
+            const urlSecciones = '@Url.Action("ConfigurarSecciones", "Formularios")';
+            const urlConfigurar = '@Url.Action("Configurar", "Formularios")';
+            const urlFormulario = '@Url.Action("ConfigurarFormulario", "Formularios")';
+
+
+            let tabla;
+
+            $(document).ready(function () {
+                   tabla = $('#tablaFormularios').DataTable();
+                   cargarFormularios();
+
+                   const params = new URLSearchParams(window.location.search);
+                   if (params.get('mensaje') === 'guardado') {
+                       showAlert('Formulario guardado correctamente', 'success');
+                   }
+            });
+
+            function cargarFormularios() {
+            $.get('@Url.Action("ListarFormularios", "Formularios")', function (r) {
+                if (r.success) {
+                    tabla.clear();
+                    r.formularios.forEach(f => {
+                        tabla.row.add([
+                            f.id,
+                            f.nombre,
+                            f.fecha,
+                            f.publicar ? 'Sí' : 'No',
+                            `<div class="btn-group" role="group">
+                                <a class="btn btn-outline-primary btn-sm" href="${urlPreview}/${f.id}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a class="btn btn-outline-success btn-sm" href="${urlFormulario}?id=${f.id}">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a class="btn btn-outline-secondary btn-sm" href="${urlSecciones}/${f.id}">
+                                    <i class="bi bi-gear"></i>
+                                </a>
+                                <a class="btn btn-outline-warning btn-sm" href="${urlConfigurar}/${f.id}">
+                                    <i class="bi bi-sliders"></i>
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm" onclick="eliminarFormulario(${f.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>`
+                        ]);
+                    });
+                    tabla.draw();
+                }
+            });
+        }
+
+        function eliminarFormulario(id) {
+             confirmAction('¿Deseas eliminar este formulario?').then(function (ok) {
+                if (!ok) return;
+                $.post('@Url.Action("EliminarFormulario", "Formularios")', { id }, function (r) {
+                    if (r.success) {
+                        cargarFormularios();
+                    } else {
+                        showAlert(r.error || 'Error al eliminar', 'error');
+                    }
+                });
+            });
+        }
+    </script>
+}

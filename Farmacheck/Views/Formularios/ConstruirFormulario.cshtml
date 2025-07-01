@@ -1,0 +1,321 @@
+﻿@model FormularioBuilderViewModel
+@{
+    ViewData["Title"] = "Construir Formulario";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
+<div class="container-fluid mt-3">
+    <h3>@Model.NombreFormulario</h3>
+
+    <div class="row">
+        <!-- Panel Izquierdo -->
+        <div class="col-md-6 border-end" id="panel-izquierdo">
+            <div class="accordion" id="accordionSecciones">
+                @foreach (var seccion in Model.Secciones)
+                {
+                    var seccionCollapseId = $"collapse{seccion.Id}";
+                    <div class="accordion-item mb-2" data-seccion-id="@seccion.Id">
+                        <h2 class="accordion-header" id="heading@seccion.Id">
+                            <div class="d-flex justify-content-between align-items-center bg-secondary text-white px-3 py-2 rounded-top">
+                                <span class="fs-5 fw-bold">@seccion.Titulo</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-sm btn-outline-light border-0" onclick="mostrarConfigSeccion('@seccion.Id')" title="Configurar sección">
+                                        <i class="bi bi-gear"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-light border-0" onclick="descargarSeccion('@seccion.Id')" title="Descargar sección">
+                                        <i class="bi bi-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-light border-0" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#@seccionCollapseId"
+                                            aria-expanded="false" aria-controls="@seccionCollapseId">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </h2>
+                        <div id="@seccionCollapseId" class="accordion-collapse collapse" aria-labelledby="heading@seccion.Id" data-bs-parent="#accordionSecciones">
+                            <div class="accordion-body">
+                                <div class="d-flex justify-content-end mb-2">
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="agregarPregunta('@seccion.Id')" title="Agregar pregunta">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="descargarSeccion('@seccion.Id')" title="Eliminar sección">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+
+                                @foreach (var pregunta in seccion.Preguntas)
+                                {
+                                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                        <span>@pregunta.Titulo</span>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="mostrarConfigPregunta('@pregunta.Id')" title="Configurar pregunta">
+                                            <i class="bi bi-gear"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <button class="btn btn-outline-primary mt-3" onclick="mostrarNuevaSeccion()">
+                <i class="bi bi-plus-lg"></i> Añadir sección
+            </button>
+        </div>
+
+        <!-- Panel Derecho -->
+        <div class="col-md-6" id="panel-derecho">
+            <div id="detalle-contenido" class="bg-white shadow-sm border rounded-3 p-4">
+                <h5 class="fw-semibold text-dark mb-4">Propiedades</h5>
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-medium" for="propTitulo">Título</label>
+                    <input type="text" class="form-control form-control-sm" id="propTitulo" placeholder="Título de la pregunta o sección" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-medium" for="propDescripcion">Descripción</label>
+                    <textarea class="form-control form-control-sm" id="propDescripcion" rows="3" placeholder="Descripción opcional..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-medium">Tipo</label>
+                    <select class="form-select form-select-sm">
+                        <option>Opción múltiple</option>
+                        <option>Respuesta abierta</option>
+                        <option>Escala de valores</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="propRequerido">
+                    <label class="form-check-label" for="propRequerido">Requerido</label>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button class="btn btn-outline-secondary">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        // Contador interno para generar IDs únicos
+        let nuevoContadorSecciones = 0;
+
+        function mostrarConfigSeccion(seccionId) {
+            document.getElementById('detalle-contenido').innerHTML = `
+                <h5 class="fw-semibold">Propiedades</h5>
+                <!-- aquí iría la carga dinámica de los datos de la sección ${seccionId} -->
+                <div class="mb-3">
+                    <label class="form-label fw-light small">Título</label>
+                    <input type="text" class="form-control" value="APERTURA" />
+                </div>
+                <!-- resto del formulario de configuración -->
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+            `;
+        }
+
+        function mostrarConfigPregunta(preguntaId) {
+            document.getElementById('detalle-contenido').innerHTML = `
+                <h5 class="fw-semibold">Propiedades</h5>
+                <!-- aquí iría la carga dinámica de los datos de la pregunta ${preguntaId} -->
+                <div class="mb-3">
+                    <label class="form-label fw-light small">Título</label>
+                    <input type="text" class="form-control" value="REPORTE DE APERTURA..." />
+                </div>
+                <!-- resto del formulario de configuración -->
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+            `;
+        }
+
+        function mostrarNuevaSeccion() {
+            document.getElementById('detalle-contenido').innerHTML = `
+                <h5 class="fw-semibold">Nueva sección</h5>
+
+                <div class="mb-3">
+                    <label class="form-label fw-light small">Título</label>
+                    <input id="nuevaSeccionTitulo" type="text" class="form-control" placeholder="Ej. Cierre, Inventario, Seguridad" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input id="nuevaSeccionNA" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label" for="nuevaSeccionNA">
+                        Activar NA
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-light small">Descripción</label>
+                    <textarea id="nuevaSeccionDescripcion" class="form-control" rows="3" placeholder="Opcional: Describe el objetivo de esta sección."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-light small">Semáforo de rangos</label>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text" style="background-color: #198754; border: none;"><i class="bi bi-circle-fill text-white"></i></span>
+                        <input id="nuevaSeccionRangoVerde" type="text" class="form-control" placeholder="Rango verde">
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text" style="background-color: #ffc107; border: none;"><i class="bi bi-circle-fill text-white"></i></span>
+                        <input id="nuevaSeccionRangoAmarillo" type="text" class="form-control" placeholder="Rango amarillo">
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text" style="background-color: #dc3545; border: none;"><i class="bi bi-circle-fill text-white"></i></span>
+                        <input id="nuevaSeccionRangoRojo" type="text" class="form-control" placeholder="Rango rojo">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary" onclick="document.getElementById('detalle-contenido').innerHTML = 'Selecciona una sección o pregunta para ver su configuración.'">
+                        Cancelar
+                    </button>
+                    <button id="btnGuardarNuevaSeccion" class="btn btn-primary">Crear sección</button>
+                </div>
+            `;
+
+            // Enganchamos el listener al botón recién inyectado:
+            document
+                .getElementById('btnGuardarNuevaSeccion')
+                .addEventListener('click', crearSeccion);
+        }
+
+         async function crearSeccion() {
+          // 1) Leemos los valores
+          const titulo        = document.getElementById('nuevaSeccionTitulo').value.trim();
+          const activarNA     = document.getElementById('nuevaSeccionNA').checked;
+          const descripcion   = document.getElementById('nuevaSeccionDescripcion').value.trim();
+          const rangoVerde    = document.getElementById('nuevaSeccionRangoVerde').value.trim();
+          const rangoAmarillo = document.getElementById('nuevaSeccionRangoAmarillo').value.trim();
+          const rangoRojo     = document.getElementById('nuevaSeccionRangoRojo').value.trim();
+
+          if (!titulo) {
+            showAlert('El título de la sección es obligatorio', 'warning');
+            return;
+          }
+
+          // 2) Preparamos el payload para el servidor
+          const payload = {
+            FormularioId: @Model.FormularioId,
+            Titulo:       titulo,
+            ActivarNA:    activarNA,
+            Descripcion:  descripcion,
+            RangoVerde:   rangoVerde,
+            RangoAmarillo:rangoAmarillo,
+            RangoRojo:    rangoRojo
+          };
+
+          try {
+            // 3) Enviamos por AJAX al controller stub
+            const response = await fetch('@Url.Action("CrearSeccion", "Formularios")', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+            const json = await response.json();
+
+            if (!json.success) {
+                showAlert(json.error, 'error');
+                return;
+            }
+
+            // 4) Usamos el newId que devuelve el servidor para generar IDs únicos
+            const newId      = json.newId;           // e.g. 1, 2, 3...
+            const uniqId     = 'new' + newId;        // e.g. "new1"
+            const headingId  = 'heading'  + uniqId;  // "headingnew1"
+            const collapseId = 'collapse' + uniqId;  // "collapsenew1"
+
+            // 5) Construir el nuevo panel acordeón
+            const nuevoItem = document.createElement('div');
+            nuevoItem.className = 'accordion-item mb-2';
+            nuevoItem.setAttribute('data-seccion-id', newId);
+            nuevoItem.innerHTML = `
+              <h2 class="accordion-header" id="${headingId}">
+                <div class="d-flex justify-content-between align-items-center
+                            bg-secondary text-white px-3 py-2 rounded-top">
+                  <span class="fs-5 fw-bold">${titulo}</span>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-light border-0"
+                            onclick="mostrarConfigSeccion('${newId}')"
+                            title="Configurar sección">
+                      <i class="bi bi-gear"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light border-0"
+                            onclick="descargarSeccion('${newId}')"
+                            title="Eliminar sección">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light border-0"
+                            type="button" data-bs-toggle="collapse"
+                            data-bs-target="#${collapseId}"
+                            aria-expanded="false"
+                            aria-controls="${collapseId}">
+                      <i class="bi bi-chevron-down"></i>
+                    </button>
+                  </div>
+                </div>
+              </h2>
+              <div id="${collapseId}" class="accordion-collapse collapse"
+                   aria-labelledby="${headingId}" data-bs-parent="#accordionSecciones">
+                <div class="accordion-body">
+                  <div class="d-flex justify-content-end mb-2">
+                    <button class="btn btn-outline-primary btn-sm me-2"
+                            onclick="agregarPregunta('${newId}')"
+                            title="Agregar pregunta">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm"
+                            onclick="descargarSeccion('${newId}')"
+                            title="Eliminar sección">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                  <!-- Aquí irán las preguntas si se agregan -->
+                </div>
+              </div>
+              <!-- Inputs ocultos para model binding si luego haces un submit tradicional -->
+              <input type="hidden" name="Secciones.Index" value="${uniqId}" />
+              <input type="hidden" name="Secciones[${uniqId}].Titulo" value="${titulo}" />
+              <input type="hidden" name="Secciones[${uniqId}].ActivarNA" value="${activarNA}" />
+              <input type="hidden" name="Secciones[${uniqId}].Descripcion" value="${descripcion}" />
+              <input type="hidden" name="Secciones[${uniqId}].RangoVerde" value="${rangoVerde}" />
+              <input type="hidden" name="Secciones[${uniqId}].RangoAmarillo" value="${rangoAmarillo}" />
+              <input type="hidden" name="Secciones[${uniqId}].RangoRojo" value="${rangoRojo}" />
+            `;
+
+            // 6) Insertarlo al acordeón y resetear el panel derecho
+            document.getElementById('accordionSecciones')
+                    .appendChild(nuevoItem);
+            document.getElementById('detalle-contenido').innerHTML =
+              'Selecciona una sección o pregunta para ver su configuración.';
+          }
+          catch (e) {
+            console.error(e);
+            showAlert('Error en la petición AJAX.', 'error');
+          }
+        }
+
+
+
+        function agregarPregunta(seccionId) {
+            document.getElementById('detalle-contenido').innerHTML = `
+                <h5 class="fw-semibold">Nueva pregunta (Sección ${seccionId})</h5>
+                <!-- formulario de nueva pregunta -->
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary">Cancelar</button>
+                    <button class="btn btn-success">Crear pregunta</button>
+                </div>
+            `;
+        }
+
+        function descargarSeccion(seccionId) {
+            showAlert("Función Descargar/Eliminar sección " + seccionId + " (a implementar)");
+        }
+    </script>
+}

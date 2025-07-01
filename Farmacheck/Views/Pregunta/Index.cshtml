@@ -1,0 +1,314 @@
+﻿@model List<PreguntaViewModel>
+@{
+    ViewData["Title"] = "Sección de preguntas";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-center mb-2">
+        <h4 class="text-dark text-center">Sección de preguntas - @ViewBag.NombreFormulario</h4>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
+           href="@Url.Action("ConfigurarSecciones", "Formularios", new { id = ViewBag.FormularioId })">
+            <i class="bi bi-arrow-left"></i> Regresar
+        </a>
+        <a href="#" id="btnNuevaPregunta" class="btn" style="background-color: #00ab8e; color:white;">
+            <i class="bi bi-plus-circle"></i> Nueva pregunta
+        </a>
+    </div>
+
+    <table class="table table-bordered custom-table">
+        <thead>
+            <tr>
+                <th style="width: 20%">Id</th>
+                <th style="width: 30%">Título</th>
+                <th class="text-center" style="width: 50%">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.Id</td>
+                    <td>@p.Titulo</td>
+                    <td class="text-center">
+                        <a class="btn btn-outline-primary btn-sm" asp-action="Visualizar" asp-route-id="@p.Id">
+                            <i class="bi bi-eye"></i> Visualizar
+                        </a>
+                        <button class="btn btn-outline-success btn-sm" onclick="editarPregunta(@p.Id)">
+                            <i class="bi bi-pencil"></i> Editar Pregunta
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="confirmarEliminarPregunta(@p.Id)">
+                            <i class="bi bi-trash"></i> Eliminar Pregunta
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalPregunta" tabindex="-1" aria-labelledby="modalPreguntaTitulo" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary_form text-white">
+                    <h5 class="modal-title" id="modalPreguntaTitulo">Nueva pregunta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="preguntaId" />
+                    <input type="hidden" id="seccionId" value="@ViewBag.SeccionId" />
+
+                    <div class="mb-2">
+                        <label>Título</label>
+                        <input type="text" class="form-control" id="titulo" placeholder="Escribe la pregunta aquí" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="2" placeholder="(Opcional)"></textarea>
+                    </div>
+
+                    <div class="mb-2 row">
+                        <div class="col-md-6">
+                            <label>Tipo de pregunta</label>
+                            <select class="form-select" id="tipoPregunta">
+                                @foreach (var tipo in ViewBag.TiposPregunta as List<SelectListItem>)
+                                {
+                                    <option value="@tipo.Value">@tipo.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check ms-3">
+                                <input type="checkbox" class="form-check-input" id="esRequerido" />
+                                <label class="form-check-label" for="esRequerido">Requerido</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Prioridad</label>
+                        <select class="form-select" id="prioridad">
+                            @foreach (var p in ViewBag.Prioridades as List<SelectListItem>)
+                            {
+                                <option value="@p.Value">@p.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Hipervínculo</label>
+                        <input type="url" class="form-control" id="hipervinculo" placeholder="http://example.com" />
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Agregar comentario</label>
+                            <select class="form-select" id="agregarComentario">
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>Agregar imagen</label>
+                            <select class="form-select" id="agregarImagen">
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>Campos extra</label>
+                            <select class="form-select" id="agregarCamposExtras">
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div>
+                        <label><strong>Lista de opciones y puntuaciones</strong></label>
+                        <div id="opcionesContainer"></div>
+                        <button class="btn btn-outline-dark btn-sm mt-2" type="button" onclick="agregarOpcion()">+ Agregar opción</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" onclick="cerrarModalPregunta()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="guardarPregunta()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalEliminarTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEliminarTitulo">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Deseas eliminar esta pregunta?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="eliminarPregunta()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('.table').DataTable();
+        $('#btnNuevaPregunta').click(function (e) {
+            e.preventDefault(); // evita navegación si es <a>
+            limpiarModalPregunta(); // ← si tienes una función para limpiar campos
+            $('#modalPreguntaTitulo').text("Nueva pregunta");
+            $('#modalPregunta').modal('show');
+        });
+
+        function abrirModalPregunta() {
+            limpiarModalPregunta();
+            $('#modalPregunta').modal('show');
+        }
+
+        function cerrarModalPregunta() {
+            limpiarModalPregunta();
+            $('#modalPregunta').modal('hide');
+        }
+
+
+        function limpiarModalPregunta() {
+            $('#preguntaId').val('');
+            $('#titulo').val('');
+            $('#descripcion').val('');
+            $('#tipoPregunta').val('');
+            $('#esRequerido').prop('checked', false);
+            $('#prioridad').val('');
+            $('#hipervinculo').val('');
+            $('#agregarComentario').val('false');
+            $('#agregarImagen').val('false');
+            $('#agregarCamposExtras').val('false');
+            $('#opcionesContainer').empty();
+        }
+
+        function agregarOpcion() {
+            const index = $('#opcionesContainer .opcion-item').length;
+            $('#opcionesContainer').append(`
+                <div class="row opcion-item mb-2">
+                    <div class="col-6">
+                        <input type="text" class="form-control" placeholder="Opción" name="opciones[${index}].Texto" />
+                    </div>
+                    <div class="col-4">
+                        <input type="number" class="form-control" placeholder="Valor" name="opciones[${index}].Valor" />
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function guardarPregunta() {
+            const data = {
+                Id: parseInt($('#preguntaId').val() || 0),
+                Titulo: $('#titulo').val(),
+                Descripcion: $('#descripcion').val(),
+                TipoPreguntaId: parseInt($('#tipoPregunta').val()),
+                EsRequerido: $('#esRequerido').is(':checked'),
+                PrioridadId: parseInt($('#prioridad').val()),
+                Hipervinculo: $('#hipervinculo').val(),
+                AgregarComentario: $('#agregarComentario').val() === "true",
+                AgregarImagen: $('#agregarImagen').val() === "true",
+                AgregarCamposExtras: $('#agregarCamposExtras').val() === "true",
+                SeccionId: parseInt($('#seccionId').val()),
+                Opciones: []
+            };
+
+            $('#opcionesContainer .opcion-item').each(function () {
+                const texto = $(this).find('input[type="text"]').val();
+                const valor = parseInt($(this).find('input[type="number"]').val() || 0);
+                data.Opciones.push({ Texto: texto, Valor: valor });
+            });
+
+            fetch('@Url.Action("Guardar", "Pregunta")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(r => {
+                if (r.success) {
+                    $('#modalPregunta').modal('hide');
+                    location.reload(); // recarga o llama función
+                } else {
+                    showAlert(r.error || "Error al guardar la pregunta", 'error');
+                }
+            });
+
+        }
+
+        function editarPregunta(id) {
+            $.get('@Url.Action("ObtenerPregunta", "Pregunta")', { id }, function (r) {
+                if (r.success) {
+                    const p = r.data;
+                    $('#modalPreguntaTitulo').text('Editar pregunta');
+                    $('#preguntaId').val(p.id);
+                    $('#titulo').val(p.titulo);
+                    $('#descripcion').val(p.descripcion);
+                    $('#tipoPregunta').val(p.tipoPreguntaId);
+                    $('#esRequerido').prop('checked', p.esRequerido);
+                    $('#prioridad').val(p.prioridadId);
+                    $('#hipervinculo').val(p.hipervinculo);
+                    $('#agregarComentario').val(p.agregarComentario.toString());
+                    $('#agregarImagen').val(p.agregarImagen.toString());
+                    $('#agregarCamposExtras').val(p.agregarCamposExtras.toString());
+                    $('#opcionesContainer').empty();
+                    if (p.opciones) {
+                        p.opciones.forEach((o, idx) => {
+                            $('#opcionesContainer').append(`
+                                <div class="row opcion-item mb-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" placeholder="Opción" name="opciones[${idx}].Texto" value="${o.texto}" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" placeholder="Valor" name="opciones[${idx}].Valor" value="${o.valor}" />
+                                    </div>
+                                    <div class="col-2">
+                                        <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                                    </div>
+                                </div>`);
+                        });
+                    }
+                    $('#modalPregunta').modal('show');
+                } else {
+                    showAlert(r.error || 'No se pudo cargar la pregunta', 'error');
+                }
+            });
+        }
+
+        let preguntaIdEliminar = 0;
+        function confirmarEliminarPregunta(id) {
+            preguntaIdEliminar = id;
+            $('#modalConfirmarEliminar').modal('show');
+        }
+
+        function eliminarPregunta() {
+            $.post('@Url.Action("EliminarPregunta", "Pregunta")', { id: preguntaIdEliminar }, function (r) {
+                if (r.success) {
+                    $('#modalConfirmarEliminar').modal('hide');
+                    location.reload();
+                } else {
+                    showAlert(r.error || 'Error al eliminar', 'error');
+                }
+            });
+        }
+    </script>
+}
+
+
+

@@ -1,0 +1,132 @@
+@model List<Farmacheck.Models.UnidadDeNegocio>
+@{
+    ViewData["Title"] = "Unidades de negocio";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Unidades de negocio</h4>
+        <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
+            <i class="bi bi-plus-circle"></i> Nueva unidad
+        </button>
+    </div>
+    <table class="table table-bordered custom-table" id="tablaDatos">
+        <thead>
+            <tr>
+                <th style="width:20%;">Id</th>
+                <th style="width:60%;">Nombre</th>
+                <th style="width:20%;" class="text-center"></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalTitulo">Nueva unidad</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="entidadId" />
+                <div class="mb-2">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            cargar();
+            $('#tablaDatos').DataTable();
+
+            $('#btnNueva').click(function () {
+                limpiar();
+                $('#modalTitulo').text('Nueva unidad');
+                $('#modalEntidad').modal('show');
+            });
+
+            $('#btnGuardar').click(function () {
+                const datos = {
+                    Id: $('#entidadId').val() || 0,
+                    Nombre: $('#nombre').val()
+                };
+                $.ajax({
+                    url: '@Url.Action("Guardar", "UnidadDeNegocio")',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(datos),
+                    success: function (r) {
+                        if (r.success) {
+                            $('#modalEntidad').modal('hide');
+                            cargar();
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
+                    }
+                });
+            });
+        });
+
+        function cargar() {
+            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+                if (r.success) {
+                    const tbody = $('#tablaDatos tbody');
+                    tbody.empty();
+                    r.data.forEach(u => {
+                        tbody.append(`<tr>
+                            <td>${u.id}</td>
+                            <td>${u.nombre}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`);
+                    });
+                }
+            });
+        }
+
+        function editar(id) {
+            $.get('@Url.Action("Obtener", "UnidadDeNegocio")', { id }, function (r) {
+                if (r.success) {
+                    const u = r.data;
+                    $('#modalTitulo').text('Editar unidad');
+                    $('#entidadId').val(u.id);
+                    $('#nombre').val(u.nombre);
+                    $('#modalEntidad').modal('show');
+                } else {
+                    showAlert(r.error || 'No se pudo cargar', 'error');
+                }
+            });
+        }
+
+        function eliminar(id) {
+            confirmAction('¿Deseas eliminar esta unidad?').then(function (ok) {
+                if (!ok) return;
+                $.post('@Url.Action("Eliminar", "UnidadDeNegocio")', { id }, function (r) {
+                    if (r.success) {
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al eliminar', 'error');
+                    }
+                });
+            });
+        }
+
+        function limpiar() {
+            $('#entidadId').val('');
+            $('#nombre').val('');
+        }
+    </script>
+}
