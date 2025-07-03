@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Farmacheck.Controllers
 {
@@ -32,10 +36,17 @@ namespace Farmacheck.Controllers
         }
 
         [HttpPost]
-        public JsonResult Guardar([FromBody] UnidadDeNegocio model)
+        public async Task<JsonResult> Guardar([FromForm] UnidadDeNegocio model, IFormFile LogotipoArchivo)
         {
             if (string.IsNullOrWhiteSpace(model.Nombre))
                 return Json(new { success = false, error = "El nombre es obligatorio." });
+
+            if (LogotipoArchivo != null && LogotipoArchivo.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await LogotipoArchivo.CopyToAsync(ms);
+                model.Logotipo = Convert.ToBase64String(ms.ToArray());
+            }
 
             if (model.Id == 0)
             {
@@ -49,6 +60,9 @@ namespace Farmacheck.Controllers
                     return Json(new { success = false, error = "No encontrado" });
 
                 existente.Nombre = model.Nombre;
+                existente.Rfc = model.Rfc;
+                if (!string.IsNullOrEmpty(model.Logotipo))
+                    existente.Logotipo = model.Logotipo;
             }
 
             return Json(new { success = true, id = model.Id });
