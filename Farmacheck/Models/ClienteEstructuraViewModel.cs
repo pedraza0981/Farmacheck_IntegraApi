@@ -4,6 +4,7 @@
     {
         // Datos del cliente
         public int ClienteId { get; set; }
+        public int? UnidadDeNegocioId { get; set; }
         public string CentroDeCosto { get; set; }
         public string Nombre { get; set; }
         public string Direccion { get; set; }
