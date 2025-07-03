@@ -1,6 +1,6 @@
 @model List<Farmacheck.Models.ClienteEstructuraViewModel>
 @{
-    ViewData["Title"] = "Clientes";
+    ViewData["Title"] = "Farmacias";
 }
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -26,74 +26,79 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary_form text-white">
-                <h5 class="modal-title" id="modalTitulo">Nuevo cliente</h5>
+                <h5 class="modal-title" id="modalTitulo">Nueva farmacia</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="clienteId" />
+
                 <div class="mb-2">
                     <h6 class="text-primary">Estructura Comercial</h6>
                 </div>
-                <div class="mb-2">
-                    <label>Unidad de Negocio</label>
-                    <select class="form-select" id="unidadNegocioSelect"></select>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label>Unidad de Negocio</label>
+                        <select class="form-select" id="unidadNegocioSelect"></select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Marca</label>
+                        <select class="form-select" id="marcaSelect"></select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Submarca</label>
+                        <select class="form-select" id="submarcaSelect"></select>
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <label>Marca</label>
-                    <select class="form-select" id="marcaSelect"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Submarca</label>
-                    <select class="form-select" id="submarcaSelect"></select>
-                </div>
+
                 <hr />
+
                 <div class="mb-2">
-                    <h6 class="text-primary">Información cliente</h6>
-                </div>
-                <div class="mb-2">
-                    <label>Centro de costo</label>
-                    <input type="text" class="form-control" id="centroCosto" />
-                </div>
-                <div class="mb-2">
-                    <label>Nombre</label>
-                    <input type="text" class="form-control" id="nombre" />
-                </div>
-                <div class="mb-2">
-                    <label>Dirección</label>
-                    <input type="text" class="form-control" id="direccion" />
-                </div>
-                <div class="mb-2">
-                    <label>Estado</label>
-                    <input type="text" class="form-control" id="estado" />
+                    <h6 class="text-primary">Información farmacia</h6>
                 </div>
                 <div class="row">
-                    <div class="col mb-2">
+                    <div class="col-md-6 mb-2">
+                        <label>Centro de costo</label>
+                        <input type="text" class="form-control" id="centroCosto" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Nombre</label>
+                        <input type="text" class="form-control" id="nombre" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Dirección</label>
+                        <input type="text" class="form-control" id="direccion" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Estado</label>
+                        <input type="text" class="form-control" id="estado" />
+                    </div>
+                    <div class="col-md-6 mb-2">
                         <label>Latitud GPS</label>
                         <input type="number" class="form-control" id="latitudGPS" />
                     </div>
-                    <div class="col mb-2">
+                    <div class="col-md-6 mb-2">
                         <label>Longitud GPS</label>
                         <input type="number" class="form-control" id="longitudGPS" />
                     </div>
-                </div>
-                <div class="mb-2">
-                    <label>Estatus</label>
-                    <select class="form-select" id="estatus">
-                        <option value="1">Activo</option>
-                        <option value="2">Inactivo</option>
-                    </select>
-                </div>
-                <div class="mb-2">
-                    <label>Radio GPS</label>
-                    <input type="number" class="form-control" id="radioGPS" />
-                </div>
-                <div class="mb-2">
-                    <label>Tipo de cliente</label>
-                    <select class="form-select" id="tipoClienteSelect"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Zona</label>
-                    <select class="form-select" id="zonaSelect"></select>
+                    <div class="col-md-6 mb-2">
+                        <label>Estatus</label>
+                        <select class="form-select" id="estatus">
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Radio GPS</label>
+                        <input type="number" class="form-control" id="radioGPS" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Tipo de cliente</label>
+                        <select class="form-select" id="tipoClienteSelect"></select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Zona</label>
+                        <select class="form-select" id="zonaSelect"></select>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -103,6 +108,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
 <script>
