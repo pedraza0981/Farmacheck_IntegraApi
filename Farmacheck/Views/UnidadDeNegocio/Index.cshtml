@@ -35,6 +35,15 @@
                     <label>Nombre</label>
                     <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
                 </div>
+                <div class="mb-2">
+                    <label>RFC</label>
+                    <input type="text" class="form-control" id="rfc" placeholder="RFC" />
+                </div>
+                <div class="mb-2">
+                    <label>Logotipo</label>
+                    <input type="file" class="form-control" id="logotipoArchivo" accept="image/*" />
+                    <input type="text" class="form-control mt-2" id="logotipo" readonly />
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -56,16 +65,27 @@
                 $('#modalEntidad').modal('show');
             });
 
+            $('#logotipoArchivo').change(function () {
+                const file = this.files[0];
+                $('#logotipo').val(file ? file.name : '');
+            });
+
             $('#btnGuardar').click(function () {
-                const datos = {
-                    Id: $('#entidadId').val() || 0,
-                    Nombre: $('#nombre').val()
-                };
+                const formData = new FormData();
+                formData.append('Id', $('#entidadId').val() || 0);
+                formData.append('Nombre', $('#nombre').val());
+                formData.append('Rfc', $('#rfc').val());
+                const file = $('#logotipoArchivo')[0].files[0];
+                if (file) {
+                    formData.append('LogotipoArchivo', file);
+                }
+
                 $.ajax({
                     url: '@Url.Action("Guardar", "UnidadDeNegocio")',
                     method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(datos),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function (r) {
                         if (r.success) {
                             $('#modalEntidad').modal('hide');
@@ -104,6 +124,9 @@
                     $('#modalTitulo').text('Editar unidad');
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
+                    $('#rfc').val(u.rfc);
+                    $('#logotipo').val('');
+                    $('#logotipoArchivo').val('');
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -127,6 +150,9 @@
         function limpiar() {
             $('#entidadId').val('');
             $('#nombre').val('');
+            $('#rfc').val('');
+            $('#logotipo').val('');
+            $('#logotipoArchivo').val('');
         }
     </script>
 }
