@@ -35,6 +35,16 @@
                     <label>Nombre</label>
                     <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
                 </div>
+                <div class="mb-2">
+                    <label>Unidad de negocio</label>
+                    <select class="form-select" id="unidadNegocio"></select>
+                </div>
+                <div class="mb-2">
+                    <label>Logotipo</label>
+                    <input type="file" class="form-control" id="logotipoArchivo" accept="image/*" />
+                    <input type="text" class="form-control mt-2" id="logotipoNombre" readonly />
+                    <input type="hidden" id="logotipoBase64" />
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -50,6 +60,7 @@
 
         $(document).ready(function () {
             cargar();
+            cargarUnidades();
             $('#tablaDatos').DataTable();
 
             $('#btnNueva').click(function () {
@@ -58,17 +69,27 @@
                 $('#modalEntidad').modal('show');
             });
 
+            $('#logotipoArchivo').change(function () {
+                const file = this.files[0];
+                $('#logotipoNombre').val(file ? file.name : '');
+            });
+
             $('#btnGuardar').click(function () {
-                const datos = {
-                    Id: $('#entidadId').val() || 0,
-                    Nombre: $('#nombre').val(),
-                    UnidadDeNegocioId: unidadId
-                };
+                const formData = new FormData();
+                formData.append('Id', $('#entidadId').val() || 0);
+                formData.append('Nombre', $('#nombre').val());
+                formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
+                formData.append('Logotipo', $('#logotipoBase64').val());
+                const file = $('#logotipoArchivo')[0].files[0];
+                if (file) {
+                    formData.append('LogotipoArchivo', file);
+                }
                 $.ajax({
                     url: '@Url.Action("Guardar", "Marca")',
                     method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(datos),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function (r) {
                         if (r.success) {
                             $('#modalEntidad').modal('hide');
@@ -80,6 +101,19 @@
                 });
             });
         });
+
+        function cargarUnidades() {
+            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+                if (r.success) {
+                    const select = $('#unidadNegocio');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                    if (unidadId) {
+                        select.val(unidadId);
+                    }
+                }
+            });
+        }
 
         function cargar() {
             $.get('@Url.Action("Listar", "Marca")', { unidadId }, function (r) {
@@ -107,6 +141,10 @@
                     $('#modalTitulo').text('Editar marca');
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
+                    $('#unidadNegocio').val(u.unidadDeNegocioId);
+                    $('#logotipoBase64').val(u.logotipo);
+                    $('#logotipoNombre').val('');
+                    $('#logotipoArchivo').val('');
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -130,6 +168,10 @@
         function limpiar() {
             $('#entidadId').val('');
             $('#nombre').val('');
+            $('#unidadNegocio').val(unidadId);
+            $('#logotipoBase64').val('');
+            $('#logotipoNombre').val('');
+            $('#logotipoArchivo').val('');
         }
     </script>
 }

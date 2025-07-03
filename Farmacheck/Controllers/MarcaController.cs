@@ -4,7 +4,8 @@ using Farmacheck.Infrastructure.Services;
 using AutoMapper;
 using Farmacheck.Infrastructure.Interfaces;
 using Farmacheck.Infrastructure.Models.Brands;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 using Farmacheck.Application.DTOs;
 
 namespace Farmacheck.Controllers
@@ -57,13 +58,20 @@ namespace Farmacheck.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> Guardar([FromBody] MarcaViewModel model)
+        public async Task<JsonResult> Guardar([FromForm] MarcaViewModel model, IFormFile? LogotipoArchivo)
         {
             if (string.IsNullOrWhiteSpace(model.Nombre))
                 return Json(new { success = false, error = "El nombre es obligatorio." });
 
-            var request = _mapper.Map<BrandRequest>(model); 
-            var id = await _apiClient.CreateAsync(request); 
+            if (LogotipoArchivo != null && LogotipoArchivo.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await LogotipoArchivo.CopyToAsync(ms);
+                model.Logotipo = Convert.ToBase64String(ms.ToArray());
+            }
+
+            var request = _mapper.Map<BrandRequest>(model);
+            var id = await _apiClient.CreateAsync(request);
             return Json(new { success = true, id });
         }
 
