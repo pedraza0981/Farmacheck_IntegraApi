@@ -62,6 +62,7 @@ namespace Farmacheck.Controllers
 
                 existente.Nombre = model.Nombre;
                 existente.Rfc = model.Rfc;
+                existente.Direccion = model.Direccion;
                 if (!string.IsNullOrEmpty(model.Logotipo))
                     existente.Logotipo = model.Logotipo;
             }

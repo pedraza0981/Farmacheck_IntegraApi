@@ -15,7 +15,8 @@
             <tr>
                 <th style="width:20%;">Id</th>
                 <th style="width:30%;">Nombre</th>
-                <th style="width:30%;">R.F.C.</th>                
+                <th style="width:25%;">R.F.C.</th>
+                <th style="width:25%;">Dirección</th>
                 <th style="width:20%;" class="text-center"></th>
             </tr>
         </thead>
@@ -39,6 +40,10 @@
                 <div class="mb-2">
                     <label>RFC</label>
                     <input type="text" class="form-control" id="rfc" placeholder="RFC" />
+                </div>
+                <div class="mb-2">
+                    <label>Dirección</label>
+                    <input type="text" class="form-control" id="direccion" placeholder="Dirección" />
                 </div>
                 <div class="mb-2">
                     <label>Logotipo</label>
@@ -76,6 +81,7 @@
                 formData.append('Id', $('#entidadId').val() || 0);
                 formData.append('Nombre', $('#nombre').val());
                 formData.append('Rfc', $('#rfc').val());
+                formData.append('Direccion', $('#direccion').val());
                 const file = $('#logotipoArchivo')[0].files[0];
                 if (file) {
                     formData.append('LogotipoArchivo', file);
@@ -109,6 +115,7 @@
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
                             <td>${u.rfc}</td>
+                            <td>${u.direccion || ''}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
                                 <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>
@@ -127,6 +134,7 @@
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#rfc').val(u.rfc);
+                    $('#direccion').val(u.direccion);
                     $('#logotipo').val(u.logotipoNombreArchivo);
                     
 
@@ -156,6 +164,7 @@
             $('#entidadId').val('');
             $('#nombre').val('');
             $('#rfc').val('');
+            $('#direccion').val('');
             $('#logotipo').val('');
             $('#logotipoArchivo').val('');
         }
