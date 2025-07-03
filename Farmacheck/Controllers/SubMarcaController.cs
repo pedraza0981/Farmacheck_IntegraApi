@@ -26,9 +26,9 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int marcaId)
+        public async Task<JsonResult> Listar()
         {
-            var lista = _submarcas.Where(s => s.MarcaId == marcaId).ToList();
+            var lista = _submarcas.ToList();
 
             var brands = await _apiClient.GetBrandsAsync();
             foreach (var s in lista)

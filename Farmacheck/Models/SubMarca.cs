@@ -7,6 +7,6 @@ namespace Farmacheck.Models
         public string Nombre { get; set; }
 
         public string? MarcaNombre { get; set; }
-        public MarcaViewModel? Marca { get; set; }
+        
     }
 }

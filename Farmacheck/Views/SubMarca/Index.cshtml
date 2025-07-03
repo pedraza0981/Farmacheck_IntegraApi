@@ -88,7 +88,7 @@
         });
 
         function cargar() {
-            $.get('@Url.Action("Listar", "SubMarca")', { marcaId }, function (r) {
+            $.get('@Url.Action("Listar", "SubMarca")', function (r) {
                 if (r.success) {
                     const tbody = $('#tablaDatos tbody');
                     tbody.empty();
