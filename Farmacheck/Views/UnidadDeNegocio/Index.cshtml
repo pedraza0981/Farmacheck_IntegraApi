@@ -14,7 +14,8 @@
         <thead>
             <tr>
                 <th style="width:20%;">Id</th>
-                <th style="width:60%;">Nombre</th>
+                <th style="width:30%;">Nombre</th>
+                <th style="width:30%;">R.F.C.</th>                
                 <th style="width:20%;" class="text-center"></th>
             </tr>
         </thead>
@@ -107,6 +108,7 @@
                         tbody.append(`<tr>
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
+                            <td>${u.rfc}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
                                 <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>
@@ -125,8 +127,11 @@
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#rfc').val(u.rfc);
-                    $('#logotipo').val('');
+                    $('#logotipo').val(u.logotipoNombreArchivo);
+                    
+
                     $('#logotipoArchivo').val('');
+                    
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');

@@ -9,7 +9,6 @@ namespace Farmacheck.Models
         public string Nombre { get; set; }
         public string Logotipo { get; set; }
 
-        public UnidadDeNegocio UnidadDeNegocio { get; set; }
-        public ICollection<SubMarca> SubMarcas { get; set; } = new List<SubMarca>();
+        
     }
 }
