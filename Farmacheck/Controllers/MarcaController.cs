@@ -68,6 +68,7 @@ namespace Farmacheck.Controllers
                 using var ms = new MemoryStream();
                 await LogotipoArchivo.CopyToAsync(ms);
                 model.Logotipo = Convert.ToBase64String(ms.ToArray());
+                model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
             }
 
             var request = _mapper.Map<BrandRequest>(model);
