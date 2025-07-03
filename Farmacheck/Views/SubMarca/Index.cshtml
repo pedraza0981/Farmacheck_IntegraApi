@@ -14,7 +14,8 @@
         <thead>
             <tr>
                 <th style="width:20%;">Id</th>
-                <th style="width:60%;">Nombre</th>
+                <th style="width:40%;">Nombre</th>
+                <th style="width:20%;">Marca</th>
                 <th style="width:20%;" class="text-center"></th>
             </tr>
         </thead>
@@ -35,6 +36,10 @@
                     <label>Nombre</label>
                     <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
                 </div>
+                <div class="mb-2">
+                    <label>Marca</label>
+                    <select class="form-select" id="marcaSelect"></select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -50,6 +55,7 @@
 
         $(document).ready(function () {
             cargar();
+            cargarMarcas();
             $('#tablaDatos').DataTable();
 
             $('#btnNueva').click(function () {
@@ -62,7 +68,7 @@
                 const datos = {
                     Id: $('#entidadId').val() || 0,
                     Nombre: $('#nombre').val(),
-                    MarcaId: marcaId
+                    MarcaId: $('#marcaSelect').val()
                 };
                 $.ajax({
                     url: '@Url.Action("Guardar", "SubMarca")',
@@ -90,12 +96,26 @@
                         tbody.append(`<tr>
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
+                            <td>${u.marcaNombre ?? ''}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
                                 <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>`);
                     });
+                }
+            });
+        }
+
+        function cargarMarcas() {
+            $.get('@Url.Action("Listar", "Marca")', function (r) {
+                if (r.success) {
+                    const select = $('#marcaSelect');
+                    select.empty();
+                    r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                    if (marcaId) {
+                        select.val(marcaId);
+                    }
                 }
             });
         }
@@ -107,6 +127,7 @@
                     $('#modalTitulo').text('Editar submarca');
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
+                    $('#marcaSelect').val(u.marcaId);
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -130,6 +151,11 @@
         function limpiar() {
             $('#entidadId').val('');
             $('#nombre').val('');
+            if (marcaId) {
+                $('#marcaSelect').val(marcaId);
+            } else {
+                $('#marcaSelect').val($('#marcaSelect option:first').val());
+            }
         }
     </script>
 }
