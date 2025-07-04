@@ -9,6 +9,7 @@ namespace Farmacheck.Helpers
         public WebMappingProfile()
         {
             CreateMap<MarcaDto, MarcaViewModel>();
+            CreateMap<BusinessUnitDto, UnidadDeNegocio>();
         }
     }
 }
