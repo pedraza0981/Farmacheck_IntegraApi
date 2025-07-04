@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Infrastructure.Models.BusinessUnits;
 using Farmacheck.Models;
 
 namespace Farmacheck.Helpers
@@ -9,7 +10,18 @@ namespace Farmacheck.Helpers
         public WebMappingProfile()
         {
             CreateMap<MarcaDto, MarcaViewModel>();
-            CreateMap<BusinessUnitDto, UnidadDeNegocio>();
+            
+            CreateMap<BusinessUnitDto, UnidadDeNegocio>()
+            .ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.Ignore()) // No viene del DTO
+            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
+            .ForMember(dest => dest.Rfc, opt => opt.MapFrom(src => src.Rfc ?? string.Empty))
+            .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.Direccion ?? string.Empty));
+
+
+            CreateMap<UnidadDeNegocio, BusinessUnitRequest>()
+            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
+            .ForMember(dest => dest.Rfc, opt => opt.MapFrom(src => src.Rfc ?? string.Empty))
+            .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.Direccion ?? string.Empty));
         }
     }
 }

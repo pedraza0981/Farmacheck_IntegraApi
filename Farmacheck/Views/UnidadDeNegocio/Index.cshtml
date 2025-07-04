@@ -77,32 +77,39 @@
             });
 
             $('#btnGuardar').click(function () {
-                const formData = new FormData();
-                formData.append('Id', $('#entidadId').val() || 0);
-                formData.append('Nombre', $('#nombre').val());
-                formData.append('Rfc', $('#rfc').val());
-                formData.append('Direccion', $('#direccion').val());
-                const file = $('#logotipoArchivo')[0].files[0];
-                if (file) {
-                    formData.append('LogotipoArchivo', file);
-                }
+            const id = parseInt($('#entidadId').val()) || 0;
+            const formData = new FormData();
+            formData.append('Id', id);
+            formData.append('Nombre', $('#nombre').val());
+            formData.append('Rfc', $('#rfc').val());
+            formData.append('Direccion', $('#direccion').val());
 
-                $.ajax({
-                    url: '@Url.Action("Guardar", "UnidadDeNegocio")',
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (r) {
-                        if (r.success) {
-                            $('#modalEntidad').modal('hide');
-                            cargar();
-                        } else {
-                            showAlert(r.error || 'Error al guardar', 'error');
-                        }
+            const file = $('#logotipoArchivo')[0].files[0];
+            if (file) {
+                formData.append('LogotipoArchivo', file);
+            }
+
+            $.ajax({
+                url: '@Url.Action("Guardar", "UnidadDeNegocio")',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (r) {
+                    if (r.success) {
+                        $('#modalEntidad').modal('hide');
+                        const mensaje = (id === 0)
+                            ? 'Unidad insertada correctamente'
+                            : 'Unidad actualizada correctamente';
+                        showAlert(mensaje, 'success');
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al guardar', 'error');
                     }
-                });
+                }
             });
+        });
+
         });
 
         function cargar() {

@@ -8,7 +8,8 @@ namespace Farmacheck.Application.DTOs
         public string Nombre { get; set; }
         public string? Rfc { get; set; }
         public string? Direccion { get; set; }
-        public string? Logotipo { get; set; }
-        public string? LogotipoNombreArchivo { get; set; }
+        public string? Logotipo { get; set; }        
+        public DateTime? ModificadaEl { get; set; }
+        public bool? Estatus { get; set; }
     }
 }

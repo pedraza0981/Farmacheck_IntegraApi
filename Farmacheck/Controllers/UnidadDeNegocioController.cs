@@ -55,32 +55,44 @@ namespace Farmacheck.Controllers
         [HttpPost]
         public async Task<JsonResult> Guardar([FromForm] UnidadDeNegocio model, IFormFile? LogotipoArchivo)
         {
-            if (string.IsNullOrWhiteSpace(model.Nombre))
-                return Json(new { success = false, error = "El nombre es obligatorio." });
-
-            if (LogotipoArchivo != null && LogotipoArchivo.Length > 0)
+            try
             {
-                using var ms = new MemoryStream();
-                await LogotipoArchivo.CopyToAsync(ms);
-                model.Logotipo = Convert.ToBase64String(ms.ToArray());
-                model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
+                if (string.IsNullOrWhiteSpace(model.Nombre))
+                    return Json(new { success = false, error = "El nombre es obligatorio." });
+
+                if (LogotipoArchivo != null && LogotipoArchivo.Length > 0)
+                {
+                    using var ms = new MemoryStream();
+                    await LogotipoArchivo.CopyToAsync(ms);
+                    model.Logotipo = Convert.ToBase64String(ms.ToArray());
+                    model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
+                    model.Estatus = true;
+
+
+                }
+
+                var request = _mapper.Map<BusinessUnitRequest>(model);
+
+                if (model.Id == 0)
+                {
+                    var id = await _apiClient.CreateAsync(request);
+                    return Json(new { success = true, id });
+                }
+                else
+                {
+                    var updated = await _apiClient.UpdateAsync(request);
+                    if (updated)
+                        return Json(new { success = true, id = model.Id });
+                    return Json(new { success = false, error = "No se pudo actualizar" });
+                }
             }
-
-            var request = _mapper.Map<BusinessUnitRequest>(model);
-
-            if (model.Id == 0)
+            catch (Exception ex)
             {
-                var id = await _apiClient.CreateAsync(request);
-                return Json(new { success = true, id });
-            }
-            else
-            {
-                var updated = await _apiClient.UpdateAsync(request);
-                if (updated)
-                    return Json(new { success = true, id = model.Id });
-                return Json(new { success = false, error = "No se pudo actualizar" });
+                // Devuelve un error como JSON, conservando el stack trace para logging si lo deseas
+                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
             }
         }
+
 
         [HttpPost]
         public async Task<JsonResult> Eliminar(int id)
