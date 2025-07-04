@@ -1,42 +1,59 @@
 using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Threading.Tasks;
+using System;
+using AutoMapper;
+using Farmacheck.Application.DTOs;
+using Farmacheck.Infrastructure.Interfaces;
+using Farmacheck.Infrastructure.Models.BusinessUnits;
 
 namespace Farmacheck.Controllers
 {
     public class UnidadDeNegocioController : Controller
     {
-        private static readonly List<UnidadDeNegocio> _unidades = new();
-        private static int _nextId = 1;
+        private readonly IBusinessUnitApiClient _apiClient;
+        private readonly IMapper _mapper;
 
-        public IActionResult Index()
+        public UnidadDeNegocioController(IBusinessUnitApiClient apiClient, IMapper mapper)
         {
-            return View(_unidades);
+            _apiClient = apiClient;
+            _mapper = mapper;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var apiData = await _apiClient.GetBusinessUnitsAsync();
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
+            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+            return View(unidades);
         }
 
         [HttpGet]
-        public JsonResult Listar()
+        public async Task<JsonResult> Listar()
         {
-            return Json(new { success = true, data = _unidades });
+            var apiData = await _apiClient.GetBusinessUnitsAsync();
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
+            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+            return Json(new { success = true, data = unidades });
         }
 
         [HttpGet]
-        public JsonResult Obtener(int id)
+        public async Task<JsonResult> Obtener(int id)
         {
-            var entidad = _unidades.FirstOrDefault(x => x.Id == id);
+            var entidad = await _apiClient.GetBusinessUnitAsync(id);
             if (entidad == null)
                 return Json(new { success = false, error = "No encontrado" });
 
-            return Json(new { success = true, data = entidad });
+            var dto = _mapper.Map<BusinessUnitDto>(entidad);
+            var model = _mapper.Map<UnidadDeNegocio>(dto);
+            return Json(new { success = true, data = model });
         }
 
         [HttpPost]
-        public async Task<JsonResult> Guardar([FromForm] UnidadDeNegocio model, IFormFile LogotipoArchivo)
+        public async Task<JsonResult> Guardar([FromForm] UnidadDeNegocio model, IFormFile? LogotipoArchivo)
         {
             if (string.IsNullOrWhiteSpace(model.Nombre))
                 return Json(new { success = false, error = "El nombre es obligatorio." });
@@ -49,35 +66,26 @@ namespace Farmacheck.Controllers
                 model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
             }
 
+            var request = _mapper.Map<BusinessUnitRequest>(model);
+
             if (model.Id == 0)
             {
-                model.Id = _nextId++;
-                _unidades.Add(model);
+                var id = await _apiClient.CreateAsync(request);
+                return Json(new { success = true, id });
             }
             else
             {
-                var existente = _unidades.FirstOrDefault(x => x.Id == model.Id);
-                if (existente == null)
-                    return Json(new { success = false, error = "No encontrado" });
-
-                existente.Nombre = model.Nombre;
-                existente.Rfc = model.Rfc;
-                existente.Direccion = model.Direccion;
-                if (!string.IsNullOrEmpty(model.Logotipo))
-                    existente.Logotipo = model.Logotipo;
+                var updated = await _apiClient.UpdateAsync(request);
+                if (updated)
+                    return Json(new { success = true, id = model.Id });
+                return Json(new { success = false, error = "No se pudo actualizar" });
             }
-
-            return Json(new { success = true, id = model.Id });
         }
 
         [HttpPost]
-        public JsonResult Eliminar(int id)
+        public async Task<JsonResult> Eliminar(int id)
         {
-            var entidad = _unidades.FirstOrDefault(x => x.Id == id);
-            if (entidad == null)
-                return Json(new { success = false, error = "No encontrado" });
-
-            _unidades.Remove(entidad);
+            await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
         }
     }
