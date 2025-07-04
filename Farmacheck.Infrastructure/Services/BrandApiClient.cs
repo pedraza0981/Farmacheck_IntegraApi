@@ -1,11 +1,6 @@
 ﻿using Farmacheck.Infrastructure.Interfaces;
 using Farmacheck.Infrastructure.Models.Brands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Farmacheck.Infrastructure.Services
 {
@@ -33,12 +28,21 @@ namespace Farmacheck.Infrastructure.Services
         {
             var response = await _http.PostAsJsonAsync("api/v1/Brands", request);
             response.EnsureSuccessStatusCode();
+
             var id = await response.Content.ReadFromJsonAsync<int>();
             return id;
         }
 
+        public async Task<bool> UpdateAsync(UpdateBrandRequest request)
+        {
+            var response = await _http.PutAsJsonAsync("api/v1/Brands", request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<bool>();
+        }
+
         public async Task DeleteAsync(int id)
-        {            
+        {
             var response = await _http.DeleteAsync($"api/v1/Brands/{id}");
             response.EnsureSuccessStatusCode();
         }
