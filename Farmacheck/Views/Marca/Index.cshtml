@@ -75,31 +75,40 @@
             });
 
             $('#btnGuardar').click(function () {
-                const formData = new FormData();
-                formData.append('Id', $('#entidadId').val() || 0);
-                formData.append('Nombre', $('#nombre').val());
-                formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
-                formData.append('Logotipo', $('#logotipoBase64').val());
-                const file = $('#logotipoArchivo')[0].files[0];
-                if (file) {
-                    formData.append('LogotipoArchivo', file);
-                }
-                $.ajax({
-                    url: '@Url.Action("Guardar", "Marca")',
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (r) {
-                        if (r.success) {
-                            $('#modalEntidad').modal('hide');
-                            cargar();
-                        } else {
-                            showAlert(r.error || 'Error al guardar', 'error');
-                        }
+            const id = parseInt($('#entidadId').val()) || 0;
+            const formData = new FormData();
+
+            formData.append('Id', id);
+            formData.append('Nombre', $('#nombre').val());
+            formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
+            formData.append('Logotipo', $('#logotipoBase64').val());
+
+            const file = $('#logotipoArchivo')[0].files[0];
+            if (file) {
+                formData.append('LogotipoArchivo', file);
+            }
+
+            $.ajax({
+                url: '@Url.Action("Guardar", "Marca")',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (r) {
+                    if (r.success) {
+                        $('#modalEntidad').modal('hide');
+                        const mensaje = id === 0
+                            ? 'Marca registrada correctamente'
+                            : 'Marca actualizada correctamente';
+                        showAlert(mensaje, 'success');
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al guardar', 'error');
                     }
-                });
+                }
             });
+        });
+
         });
 
         function cargarUnidades() {
@@ -143,7 +152,7 @@
                     $('#nombre').val(u.nombre);
                     $('#unidadNegocio').val(u.unidadDeNegocioId);
                     $('#logotipoBase64').val(u.logotipo);
-                    $('#logotipoNombre').val(u.logotipoNombreArchivo);
+                    $('#logotipoNombre').val(u.logotipo);
                     $('#logotipoArchivo').val('');
                     $('#modalEntidad').modal('show');
                 } else {
