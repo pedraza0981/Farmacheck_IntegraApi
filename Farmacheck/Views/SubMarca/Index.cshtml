@@ -65,26 +65,37 @@
             });
 
             $('#btnGuardar').click(function () {
-                const datos = {
-                    Id: $('#entidadId').val() || 0,
-                    Nombre: $('#nombre').val(),
-                    MarcaId: $('#marcaSelect').val()
-                };
-                $.ajax({
-                    url: '@Url.Action("Guardar", "SubMarca")',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(datos),
-                    success: function (r) {
-                        if (r.success) {
-                            $('#modalEntidad').modal('hide');
-                            cargar();
+            const id = $('#entidadId').val() || 0;
+
+            const datos = {
+                Id: id,
+                Nombre: $('#nombre').val(),
+                MarcaId: $('#marcaSelect').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("Guardar", "SubMarca")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function (r) {
+                    if (r.success) {
+                        $('#modalEntidad').modal('hide');
+                        cargar();
+
+                        // Mostrar mensaje según sea agregar o actualizar
+                        if (parseInt(id) === 0) {
+                            showAlert('Submarca registrada correctamente', 'success');
                         } else {
-                            showAlert(r.error || 'Error al guardar', 'error');
+                            showAlert('Submarca actualizada correctamente', 'success');
                         }
+                    } else {
+                        showAlert(r.error || 'Error al guardar', 'error');
                     }
-                });
+                }
             });
+        });
+
         });
 
         function cargar() {

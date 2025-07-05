@@ -89,9 +89,11 @@ namespace Farmacheck.Controllers
                 var request = _mapper.Map<SubbrandRequest>(model);
                 var id = await _subbrandApi.CreateAsync(request);
                 model.Id = id;
+                model.Estatus = true;
             }
             else
             {
+                model.Estatus = true;
                 var updateRequest = _mapper.Map<UpdateSubbrandRequest>(model);
                 var updated = await _subbrandApi.UpdateAsync(updateRequest);
                 if (!updated)
