@@ -6,7 +6,11 @@ namespace Farmacheck.Models
         public int MarcaId { get; set; }
         public string Nombre { get; set; }
 
-        public string? MarcaNombre { get; set; }
-        
+        //public string? MarcaNombre { get; set; }
+
+        public bool? Estatus { get; set; }
+
+        public DateTime? ModificadaEl { get; set; }
+
     }
 }
