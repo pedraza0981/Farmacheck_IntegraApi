@@ -3,7 +3,7 @@ using Farmacheck.Application.DTOs;
 using Farmacheck.Infrastructure.Models.BusinessUnits;
 using Farmacheck.Models;
 using Farmacheck.Infrastructure.Models.Brands;
-//using Farmacheck.Infrastructure.Models.Brands;
+using Farmacheck.Infrastructure.Models.SubBrands;
 
 namespace Farmacheck.Helpers
 {
@@ -21,6 +21,11 @@ namespace Farmacheck.Helpers
             .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
             .ForMember(dest => dest.Rfc, opt => opt.MapFrom(src => src.Rfc ?? string.Empty))
             .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.Direccion ?? string.Empty));
+
+
+            CreateMap<SubmarcaDto, SubMarca>();
+            CreateMap<SubMarca, SubbrandRequest>();
+            CreateMap<SubMarca, UpdateSubbrandRequest>();
 
 
             CreateMap<UnidadDeNegocio, BusinessUnitRequest>()

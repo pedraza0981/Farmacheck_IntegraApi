@@ -4,33 +4,55 @@ using System.Collections.Generic;
 using System.Linq;
 using Farmacheck.Infrastructure.Interfaces;
 using System.Threading.Tasks;
+using AutoMapper;
+using Farmacheck.Infrastructure.Models.SubBrands;
+using Farmacheck.Infrastructure.Models.Brands;
+using Farmacheck.Application.DTOs;
 
 namespace Farmacheck.Controllers
 {
     public class SubMarcaController : Controller
     {
-        private static readonly List<SubMarca> _submarcas = new();
-        private static int _nextId = 1;
-        private readonly IBrandApiClient _apiClient;
+        private readonly ISubbrandApiClient _subbrandApi;
+        private readonly IBrandApiClient _brandApi;
+        private readonly IMapper _mapper;
 
-        public SubMarcaController(IBrandApiClient apiClient)
+        public SubMarcaController(ISubbrandApiClient subbrandApi, IBrandApiClient brandApi, IMapper mapper)
         {
-            _apiClient = apiClient;
+            _subbrandApi = subbrandApi;
+            _brandApi = brandApi;
+            _mapper = mapper;
         }
 
-        public IActionResult Index(int marcaId)
+        public async Task<IActionResult> Index(int marcaId)
         {
             ViewBag.MarcaId = marcaId;
-            var lista = _submarcas.Where(s => s.MarcaId == marcaId).ToList();
+            var apiData = await _subbrandApi.GetSubbrandsAsync();
+            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
+            var lista = _mapper.Map<List<SubMarca>>(dtos);
+            if (marcaId > 0)
+            {
+                lista = lista.Where(s => s.MarcaId == marcaId).ToList();
+            }
+
+            var brands = await _brandApi.GetBrandsAsync();
+            foreach (var s in lista)
+            {
+                var b = brands.FirstOrDefault(m => m.Id == s.MarcaId);
+                s.MarcaNombre = b?.Nombre;
+            }
+
             return View(lista);
         }
 
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var lista = _submarcas.ToList();
+            var apiData = await _subbrandApi.GetSubbrandsAsync();
+            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
+            var lista = _mapper.Map<List<SubMarca>>(dtos);
 
-            var brands = await _apiClient.GetBrandsAsync();
+            var brands = await _brandApi.GetBrandsAsync();
             foreach (var s in lista)
             {
                 var b = brands.FirstOrDefault(m => m.Id == s.MarcaId);
@@ -43,14 +65,17 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Obtener(int id)
         {
-            var entidad = _submarcas.FirstOrDefault(x => x.Id == id);
-            if (entidad == null)
+            var entidadApi = await _subbrandApi.GetSubbrandAsync(id);
+            if (entidadApi == null)
                 return Json(new { success = false, error = "No encontrado" });
 
-            var marca = await _apiClient.GetBrandAsync(entidad.MarcaId);
-            entidad.MarcaNombre = marca?.Nombre;
+            var dto = _mapper.Map<SubmarcaDto>(entidadApi);
+            var model = _mapper.Map<SubMarca>(dto);
 
-            return Json(new { success = true, data = entidad });
+            var marca = await _brandApi.GetBrandAsync(model.MarcaId);
+            model.MarcaNombre = marca?.Nombre;
+
+            return Json(new { success = true, data = model });
         }
 
         [HttpPost]
@@ -61,33 +86,28 @@ namespace Farmacheck.Controllers
 
             if (model.Id == 0)
             {
-                model.Id = _nextId++;
-                _submarcas.Add(model);
+                var request = _mapper.Map<SubbrandRequest>(model);
+                var id = await _subbrandApi.CreateAsync(request);
+                model.Id = id;
             }
             else
             {
-                var existente = _submarcas.FirstOrDefault(x => x.Id == model.Id);
-                if (existente == null)
-                    return Json(new { success = false, error = "No encontrado" });
-
-                existente.Nombre = model.Nombre;
-                existente.MarcaId = model.MarcaId;
+                var updateRequest = _mapper.Map<UpdateSubbrandRequest>(model);
+                var updated = await _subbrandApi.UpdateAsync(updateRequest);
+                if (!updated)
+                    return Json(new { success = false, error = "No se pudo actualizar" });
             }
 
-            var marca = await _apiClient.GetBrandAsync(model.MarcaId);
+            var marca = await _brandApi.GetBrandAsync(model.MarcaId);
             model.MarcaNombre = marca?.Nombre;
 
             return Json(new { success = true, id = model.Id });
         }
 
         [HttpPost]
-        public JsonResult Eliminar(int id)
+        public async Task<JsonResult> Eliminar(int id)
         {
-            var entidad = _submarcas.FirstOrDefault(x => x.Id == id);
-            if (entidad == null)
-                return Json(new { success = false, error = "No encontrado" });
-
-            _submarcas.Remove(entidad);
+            await _subbrandApi.DeleteAsync(id);
             return Json(new { success = true });
         }
     }
