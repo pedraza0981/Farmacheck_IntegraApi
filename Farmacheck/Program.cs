@@ -20,6 +20,7 @@ namespace Farmacheck
                 typeof(BrandProfile),
                 typeof(BusinessUnitProfile),
                 typeof(SubbrandProfile),
+                typeof(BusinessStructureProfile),
                 typeof(CustomerProfile),
                 typeof(CustomerTypeProfile),
                 typeof(ZoneProfile));

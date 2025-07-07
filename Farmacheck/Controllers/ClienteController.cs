@@ -15,17 +15,20 @@ namespace Farmacheck.Controllers
         private readonly ICustomersApiClient _apiClient;
         private readonly ICustomerTypesApiClient _customerTypesApi;
         private readonly IZoneApiClient _zoneApi;
+        private readonly IBusinessStructureApiClient _businessStructureApi;
         private readonly IMapper _mapper;
 
         public ClienteController(
             ICustomersApiClient apiClient,
             ICustomerTypesApiClient customerTypesApi,
             IZoneApiClient zoneApi,
+            IBusinessStructureApiClient businessStructureApi,
             IMapper mapper)
         {
             _apiClient = apiClient;
             _customerTypesApi = customerTypesApi;
             _zoneApi = zoneApi;
+            _businessStructureApi = businessStructureApi;
             _mapper = mapper;
         }
 
@@ -54,6 +57,14 @@ namespace Farmacheck.Controllers
                 return Json(new { success = false, error = "No encontrado" });
 
             var dto = _mapper.Map<CustomerDto>(entidad);
+
+            var businessStructures = await _businessStructureApi.GetBusinessStructuresByCustomerAsync(id);
+            if (businessStructures.Count > 0)
+            {
+                var bsDto = _mapper.Map<BusinessStructureDto>(businessStructures[0]);
+                dto.BusinessStructure = bsDto;
+            }
+
             var model = _mapper.Map<ClienteEstructuraViewModel>(dto);
             return Json(new { success = true, data = model });
         }
