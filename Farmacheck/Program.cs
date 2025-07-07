@@ -15,7 +15,7 @@ namespace Farmacheck
 
             //builder.Services.AddAutoMapper(typeof(BrandProfile).Assembly);
             //builder.Services.AddAutoMapper(typeof(WebMappingProfile), typeof(BrandProfile));
-            builder.Services.AddAutoMapper(typeof(WebMappingProfile), typeof(BrandProfile), typeof(BusinessUnitProfile), typeof(SubbrandProfile));
+            builder.Services.AddAutoMapper(typeof(WebMappingProfile), typeof(BrandProfile), typeof(BusinessUnitProfile), typeof(SubbrandProfile), typeof(CustomerProfile));
 
             builder.Services.AddHttpClient<IBrandApiClient, BrandApiClient>(client =>
             {

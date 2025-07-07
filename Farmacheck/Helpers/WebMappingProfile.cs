@@ -4,6 +4,7 @@ using Farmacheck.Infrastructure.Models.BusinessUnits;
 using Farmacheck.Models;
 using Farmacheck.Infrastructure.Models.Brands;
 using Farmacheck.Infrastructure.Models.SubBrands;
+using Farmacheck.Infrastructure.Models.Customers;
 
 namespace Farmacheck.Helpers
 {
@@ -26,6 +27,30 @@ namespace Farmacheck.Helpers
             CreateMap<SubmarcaDto, SubMarca>();
             CreateMap<SubMarca, SubbrandRequest>();
             CreateMap<SubMarca, UpdateSubbrandRequest>();
+
+            CreateMap<CustomerDto, ClienteEstructuraViewModel>()
+                .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.BusinessStructure.UnidadDeNegocioId))
+                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.BusinessStructure.MarcaId))
+                .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.BusinessStructure.SubmarcaId))
+                .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.BusinessStructure.ZonaId))
+                .ForMember(dest => dest.LatitudGPS, opt => opt.MapFrom(src => (int?)src.LatitudGps))
+                .ForMember(dest => dest.LongitudGPS, opt => opt.MapFrom(src => (int?)src.LongitudGps))
+                .ForMember(dest => dest.ModificadoEl, opt => opt.MapFrom(src => src.ModificadoEl))
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus ? 1 : 0))
+                .ForMember(dest => dest.RadioGPS, opt => opt.MapFrom(src => (int?)src.RadioGps));
+
+            CreateMap<ClienteEstructuraViewModel, CustomerRequest>()
+                .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))
+                .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
+                .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)));
+
+            CreateMap<ClienteEstructuraViewModel, UpdateCustomerRequest>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId))
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == 1))
+                .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))
+                .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
+                .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)));
 
 
             CreateMap<UnidadDeNegocio, BusinessUnitRequest>()
