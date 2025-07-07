@@ -5,6 +5,7 @@ using Farmacheck.Models;
 using Farmacheck.Infrastructure.Models.Brands;
 using Farmacheck.Infrastructure.Models.SubBrands;
 using Farmacheck.Infrastructure.Models.Customers;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Farmacheck.Helpers
 {
@@ -57,6 +58,14 @@ namespace Farmacheck.Helpers
             .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
             .ForMember(dest => dest.Rfc, opt => opt.MapFrom(src => src.Rfc ?? string.Empty))
             .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.Direccion ?? string.Empty));
+
+            CreateMap<CustomerTypeDto, SelectListItem>()
+                .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id.ToString()))
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nombre));
+
+            CreateMap<ZoneDto, SelectListItem>()
+                .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id.ToString()))
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nombre));
         }
     }
 }
