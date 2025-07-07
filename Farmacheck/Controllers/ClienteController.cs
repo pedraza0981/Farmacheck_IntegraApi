@@ -2,14 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Farmacheck.Infrastructure.Interfaces;
+using Farmacheck.Infrastructure.Models.Customers;
+using Farmacheck.Application.DTOs;
 
 namespace Farmacheck.Controllers
 {
     public class ClienteController : Controller
     {
-        private static readonly List<ClienteEstructuraViewModel> _clientes = new();
-        private static int _nextId = 1;
+        private readonly ICustomersApiClient _apiClient;
+        private readonly IMapper _mapper;
 
         private static readonly List<SelectListItem> _tiposCliente = new()
         {
@@ -22,76 +26,71 @@ namespace Farmacheck.Controllers
             new SelectListItem { Value = "1", Text = "Zona Norte" },
             new SelectListItem { Value = "2", Text = "Zona Sur" }
         };
-
-        public IActionResult Index()
+        public ClienteController(ICustomersApiClient apiClient, IMapper mapper)
         {
-            return View(_clientes);
+            _apiClient = apiClient;
+            _mapper = mapper;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var apiData = await _apiClient.GetCustomersAsync();
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
+            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
+            return View(clientes);
         }
 
         [HttpGet]
-        public JsonResult Listar()
+        public async Task<JsonResult> Listar()
         {
-            return Json(new { success = true, data = _clientes });
+            var apiData = await _apiClient.GetCustomersAsync();
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
+            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
+            return Json(new { success = true, data = clientes });
         }
 
         [HttpGet]
-        public JsonResult Obtener(int id)
+        public async Task<JsonResult> Obtener(int id)
         {
-            var entidad = _clientes.FirstOrDefault(c => c.ClienteId == id);
+            var entidad = await _apiClient.GetCustomerAsync(id);
             if (entidad == null)
                 return Json(new { success = false, error = "No encontrado" });
-            return Json(new { success = true, data = entidad });
+
+            var dto = _mapper.Map<CustomerDto>(entidad);
+            var model = _mapper.Map<ClienteEstructuraViewModel>(dto);
+            return Json(new { success = true, data = model });
         }
 
         [HttpPost]
-        public JsonResult Guardar([FromBody] ClienteEstructuraViewModel model)
+        public async Task<JsonResult> Guardar([FromBody] ClienteEstructuraViewModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Nombre))
                 return Json(new { success = false, error = "El nombre es obligatorio." });
 
             if (model.ClienteId == 0)
             {
-                model.ClienteId = _nextId++;
-                _clientes.Add(model);
+                var request = _mapper.Map<CustomerRequest>(model);
+                var id = await _apiClient.CreateAsync(request);
+                return Json(new { success = true, id });
             }
             else
             {
-                var existente = _clientes.FirstOrDefault(c => c.ClienteId == model.ClienteId);
-                if (existente == null)
-                    return Json(new { success = false, error = "No encontrado" });
+                var updateRequest = _mapper.Map<UpdateCustomerRequest>(model);
+                var updated = await _apiClient.UpdateAsync(updateRequest);
+                if (updated)
+                    return Json(new { success = true, id = model.ClienteId });
 
-                existente.UnidadDeNegocioId = model.UnidadDeNegocioId;
-                existente.CentroDeCosto = model.CentroDeCosto;
-                existente.Nombre = model.Nombre;
-                existente.Direccion = model.Direccion;
-                existente.Estado = model.Estado;
-                existente.NumeroDeTelefono = model.NumeroDeTelefono;
-                existente.LatitudGPS = model.LatitudGPS;
-                existente.LongitudGPS = model.LongitudGPS;
-                existente.Estatus = model.Estatus;
-                existente.RadioGPS = model.RadioGPS;
-                existente.TipoDeClienteId = model.TipoDeClienteId;
-                existente.MarcaId = model.MarcaId;
-                existente.SubmarcaId = model.SubmarcaId;
-                existente.ZonaId = model.ZonaId;
-                existente.MarcaNombre = model.MarcaNombre;
-                existente.SubmarcaNombre = model.SubmarcaNombre;
-                existente.ZonaNombre = model.ZonaNombre;
-                existente.ModificadoEl = System.DateTime.Now;
+                return Json(new { success = false, error = "No se pudo actualizar" });
             }
-
-            return Json(new { success = true, id = model.ClienteId });
         }
 
         [HttpPost]
-        public JsonResult Eliminar(int id)
+        public async Task<JsonResult> Eliminar(int id)
         {
-            var entidad = _clientes.FirstOrDefault(c => c.ClienteId == id);
-            if (entidad == null)
-                return Json(new { success = false, error = "No encontrado" });
-            _clientes.Remove(entidad);
+            await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
         }
+
 
         [HttpGet]
         public JsonResult ListarTiposCliente()
