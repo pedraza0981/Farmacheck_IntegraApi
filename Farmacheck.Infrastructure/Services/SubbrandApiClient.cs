@@ -24,7 +24,12 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<List<SubbrandResponse>>($"api/v1/Subbrands/pages?page={page}&items={items}")
                    ?? new List<SubbrandResponse>();
         }
-
+        public async Task<List<SubbrandResponse>> GetSubbrandsByBrandAsync(int brandId)
+        {
+            var url = $"api/v1/Subbrands/brand/{brandId}";
+            return await _http.GetFromJsonAsync<List<SubbrandResponse>>(url)
+                   ?? new List<SubbrandResponse>();
+        }
         public async Task<SubbrandResponse?> GetSubbrandAsync(int id)
         {
             return await _http.GetFromJsonAsync<SubbrandResponse>($"api/v1/Subbrands/{id}");
