@@ -29,6 +29,20 @@ namespace Farmacheck.Helpers
             CreateMap<SubMarca, SubbrandRequest>();
             CreateMap<SubMarca, UpdateSubbrandRequest>();
 
+            CreateMap<MarcaViewModel, UpdateBrandRequest>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId))
+                .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre))
+                .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo));
+                //.ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.MapFrom(src => src.LogotipoNombreArchivo));
+
+
+            CreateMap<MarcaViewModel, BrandRequest>()
+            .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId))
+            .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre))
+            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo));
+            //.ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.MapFrom(src => src.LogotipoNombreArchivo));
+
             CreateMap<CustomerDto, ClienteEstructuraViewModel>()
                 .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.BusinessStructure.UnidadDeNegocioId))

@@ -4,9 +4,9 @@
 }
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="text-dark">Clientes</h4>
+        <h4 class="text-dark">Farmacias</h4>
         <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
-            <i class="bi bi-plus-circle"></i> Nuevo cliente
+            <i class="bi bi-plus-circle"></i> Nueva Farmacia
         </button>
     </div>
     <table class="table table-bordered custom-table" id="tablaDatos">
@@ -92,7 +92,7 @@
                         <input type="number" class="form-control" id="radioGPS" />
                     </div>
                     <div class="col-md-6 mb-2">
-                        <label>Tipo de cliente</label>
+                        <label>Tipo de farmacia</label>
                         <select class="form-select" id="tipoClienteSelect"></select>
                     </div>
                     <div class="col-md-6 mb-2">
@@ -115,11 +115,11 @@
     $(document).ready(function () {
         cargar();
         cargarCatalogos();
-        $('#tablaDatos').DataTable();
+        // $('#tablaDatos').DataTable();
 
         $('#btnNuevo').click(function () {
             limpiar();
-            $('#modalTitulo').text('Nuevo cliente');
+            $('#modalTitulo').text('Nueva farmacia');
             $('#modalEntidad').modal('show');
         });
 
@@ -140,6 +140,9 @@
                 SubmarcaId: $('#submarcaSelect').val(),
                 ZonaId: $('#zonaSelect').val()
             };
+
+            const esNuevo = datos.ClienteId == 0;
+
             $.ajax({
                 url: '@Url.Action("Guardar", "Cliente")',
                 method: 'POST',
@@ -149,12 +152,15 @@
                     if (r.success) {
                         $('#modalEntidad').modal('hide');
                         cargar();
+                        const mensaje = esNuevo ? 'Farmacia agregada correctamente' : 'Farmacia actualizada correctamente';
+                        showAlert(mensaje, 'success');
                     } else {
                         showAlert(r.error || 'Error al guardar', 'error');
                     }
                 }
             });
         });
+
     });
 
     function cargarCatalogos() {
@@ -198,7 +204,13 @@
     function cargar() {
         $.get('@Url.Action("Listar", "Cliente")', function (r) {
             if (r.success) {
-                const tbody = $('#tablaDatos tbody');
+                // const tbody = $('#tablaDatos tbody');
+                const tabla = $('#tablaDatos');
+                if ($.fn.DataTable.isDataTable(tabla)) {
+                        tabla.DataTable().destroy();
+                }
+
+                const tbody = tabla.find('tbody');
                 tbody.empty();
                 r.data.forEach(c => {
                     tbody.append(`<tr>
@@ -211,6 +223,14 @@
                         </td>
                     </tr>`);
                 });
+
+                tabla.DataTable({
+                    pageLength: 5,
+                    lengthMenu: [5, 10, 25, 50, 100],
+                    language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    }
+                });
             }
         });
     }
@@ -219,7 +239,7 @@
         $.get('@Url.Action("Obtener", "Cliente")', { id }, function (r) {
             if (r.success) {
                 const c = r.data;
-                $('#modalTitulo').text('Editar cliente');
+                $('#modalTitulo').text('Editar farmacia');
                 $('#clienteId').val(c.clienteId);
                 $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
                 $('#centroCosto').val(c.centroDeCosto);
@@ -242,7 +262,7 @@
     }
 
     function eliminar(id) {
-        confirmAction('¿Deseas eliminar este cliente?').then(function (ok) {
+        confirmAction('¿Deseas eliminar esta farmacia?').then(function (ok) {
             if (!ok) return;
             $.post('@Url.Action("Eliminar", "Cliente")', { id }, function (r) {
                 if (r.success) {

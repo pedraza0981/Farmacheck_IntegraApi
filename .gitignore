@@ -43,3 +43,4 @@ secrets.json
 # Prevent accidental exclusion of app layers
 !Farmacheck.Application/
 !Farmacheck.Infrastructure/
+/Farmacheck/Properties/PublishProfiles
