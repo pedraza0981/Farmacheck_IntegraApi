@@ -15,7 +15,14 @@ namespace Farmacheck
 
             //builder.Services.AddAutoMapper(typeof(BrandProfile).Assembly);
             //builder.Services.AddAutoMapper(typeof(WebMappingProfile), typeof(BrandProfile));
-            builder.Services.AddAutoMapper(typeof(WebMappingProfile), typeof(BrandProfile), typeof(BusinessUnitProfile), typeof(SubbrandProfile), typeof(CustomerProfile));
+            builder.Services.AddAutoMapper(
+                typeof(WebMappingProfile),
+                typeof(BrandProfile),
+                typeof(BusinessUnitProfile),
+                typeof(SubbrandProfile),
+                typeof(CustomerProfile),
+                typeof(CustomerTypeProfile),
+                typeof(ZoneProfile));
 
             builder.Services.AddHttpClient<IBrandApiClient, BrandApiClient>(client =>
             {
@@ -35,6 +42,11 @@ namespace Farmacheck
             builder.Services.AddHttpClient<ICustomersApiClient, CustomersApiClient>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration["CustomersApi:BaseUrl"]!);
+            });
+
+            builder.Services.AddHttpClient<ICustomerTypesApiClient, CustomerTypesApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["CustomerTypesApi:BaseUrl"]!);
             });
 
             builder.Services.AddHttpClient<IZoneApiClient, ZonesApiClient>(client =>

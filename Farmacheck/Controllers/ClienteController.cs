@@ -13,22 +13,19 @@ namespace Farmacheck.Controllers
     public class ClienteController : Controller
     {
         private readonly ICustomersApiClient _apiClient;
+        private readonly ICustomerTypesApiClient _customerTypesApi;
+        private readonly IZoneApiClient _zoneApi;
         private readonly IMapper _mapper;
 
-        private static readonly List<SelectListItem> _tiposCliente = new()
-        {
-            new SelectListItem { Value = "1", Text = "Tipo A" },
-            new SelectListItem { Value = "2", Text = "Tipo B" }
-        };
-
-        private static readonly List<SelectListItem> _zonas = new()
-        {
-            new SelectListItem { Value = "1", Text = "Zona Norte" },
-            new SelectListItem { Value = "2", Text = "Zona Sur" }
-        };
-        public ClienteController(ICustomersApiClient apiClient, IMapper mapper)
+        public ClienteController(
+            ICustomersApiClient apiClient,
+            ICustomerTypesApiClient customerTypesApi,
+            IZoneApiClient zoneApi,
+            IMapper mapper)
         {
             _apiClient = apiClient;
+            _customerTypesApi = customerTypesApi;
+            _zoneApi = zoneApi;
             _mapper = mapper;
         }
 
@@ -93,15 +90,21 @@ namespace Farmacheck.Controllers
 
 
         [HttpGet]
-        public JsonResult ListarTiposCliente()
+        public async Task<JsonResult> ListarTiposCliente()
         {
-            return Json(new { success = true, data = _tiposCliente });
+            var apiData = await _customerTypesApi.GetCustomerTypesAsync();
+            var dtos = _mapper.Map<List<CustomerTypeDto>>(apiData);
+            var items = _mapper.Map<List<SelectListItem>>(dtos);
+            return Json(new { success = true, data = items });
         }
 
         [HttpGet]
-        public JsonResult ListarZonas()
+        public async Task<JsonResult> ListarZonas()
         {
-            return Json(new { success = true, data = _zonas });
+            var apiData = await _zoneApi.GetZonesAsync();
+            var dtos = _mapper.Map<List<ZoneDto>>(apiData);
+            var items = _mapper.Map<List<SelectListItem>>(dtos);
+            return Json(new { success = true, data = items });
         }
     }
 }
