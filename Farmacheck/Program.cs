@@ -32,6 +32,11 @@ namespace Farmacheck
                 client.BaseAddress = new Uri(builder.Configuration["SubbrandApi:BaseUrl"]!);
             });
 
+            builder.Services.AddHttpClient<ICustomersApiClient, CustomersApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["CustomersApi:BaseUrl"]!);
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
