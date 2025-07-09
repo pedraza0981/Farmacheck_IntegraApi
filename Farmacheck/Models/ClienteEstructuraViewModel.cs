@@ -10,8 +10,8 @@
         public string Direccion { get; set; }
         public string Estado { get; set; }
         public string NumeroDeTelefono { get; set; }
-        public int? LatitudGPS { get; set; }
-        public int? LongitudGPS { get; set; }
+        public decimal? LatitudGPS { get; set; }
+        public decimal? LongitudGPS { get; set; }
         public DateTime? ModificadoEl { get; set; }
         public int Estatus { get; set; }
         public int? RadioGPS { get; set; }
