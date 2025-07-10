@@ -153,6 +153,21 @@
 
                 const esNuevo = datos.ClienteId == 0;
 
+                if (esNuevo) {
+                    if (datos.UnidadDeNegocioId == 0) {
+                        showAlert('Debe seleccionar una unidad de negocio', 'error');
+                        return;
+                    }
+                    if (datos.MarcaId == 0) {
+                        showAlert('Debe seleccionar una marca', 'error');
+                        return;
+                    }
+                    if (datos.SubmarcaId == 0) {
+                        showAlert('Debe seleccionar una submarca', 'error');
+                        return;
+                    }
+                }
+
                 $.ajax({
                     url: '@Url.Action("Guardar", "Cliente")',
                     method: 'POST',
@@ -173,25 +188,27 @@
 
         });
 
-        function cargarMarcasPorUnidad(unidadId) {
+        function cargarMarcasPorUnidad(unidadId, callback) {
             $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', { unidadId }, function (r) {
                 if (r.success) {
                     const select = $('#marcaSelect');
-                        select.empty();
-                        r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
-                    }
-                });
-            }
+                    select.empty().append('<option value="0">Seleccionar</option>');
+                    r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                }
+                if (callback) callback();
+            });
+        }
 
-        function cargarsubMarcasPorMarca(marcaId) {
+        function cargarsubMarcasPorMarca(marcaId, callback) {
             $.get('@Url.Action("ListarPorMarca", "SubMarca")', { marcaId }, function (r) {
                 if (r.success) {
                     const select = $('#submarcaSelect');
-                        select.empty();
-                        r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
-                    }
-                });
-            }
+                    select.empty().append('<option value="0">Seleccionar</option>');
+                    r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                }
+                if (callback) callback();
+            });
+        }
 
         function cargarCatalogos() {
             $.get('@Url.Action("ListarTiposCliente", "Cliente")', function (r) {
@@ -211,21 +228,21 @@
             $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
                 if (r.success) {
                     const select = $('#unidadNegocioSelect');
-                    select.empty();
+                    select.empty().append('<option value="0">Seleccionar</option>');
                     r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
                 }
             });
             $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', function (r) {
                 if (r.success) {
                     const select = $('#marcaSelect');
-                    select.empty();
+                    select.empty().append('<option value="0">Seleccionar</option>');
                     r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
                 }
             });
-                $.get('@Url.Action("ListarPorMarca", "SubMarca")', function (r) {
+            $.get('@Url.Action("ListarPorMarca", "SubMarca")', function (r) {
                 if (r.success) {
                     const select = $('#submarcaSelect');
-                    select.empty();
+                    select.empty().append('<option value="0">Seleccionar</option>');
                     r.data.forEach(s => select.append(`<option value="${s.id}">${s.nombre}</option>`));
                 }
             });
@@ -282,12 +299,13 @@
                     $('#radioGPS').val(c.radioGPS);
                     $('#tipoClienteSelect').val(c.tipoDeClienteId);
 
-                    cargarMarcasPorUnidad(c.unidadDeNegocioId); // Carga las marcas para esa unidad
-                    setTimeout(() => {
-                        $('#marcaSelect').val(c.marcaId); // Espera un poco y selecciona la marca
-                    }, 300)
-
-                    $('#submarcaSelect').val(c.submarcaId);
+                    $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
+                    cargarMarcasPorUnidad(c.unidadDeNegocioId, function () {
+                        $('#marcaSelect').val(c.marcaId);
+                        cargarsubMarcasPorMarca(c.marcaId, function () {
+                            $('#submarcaSelect').val(c.submarcaId);
+                        });
+                    });
                     $('#zonaSelect').val(c.zonaId);
                     $('#modalEntidad').modal('show');
                 } else {
@@ -311,7 +329,7 @@
 
         function limpiar() {
             $('#clienteId').val('');
-            $('#unidadNegocioSelect').val($('#unidadNegocioSelect option:first').val());
+            $('#unidadNegocioSelect').val('0');
             $('#centroCosto').val('');
             $('#nombre').val('');
             $('#direccion').val('');
@@ -321,8 +339,8 @@
             $('#estatus').val('1');
             $('#radioGPS').val('');
             $('#tipoClienteSelect').val($('#tipoClienteSelect option:first').val());
-            $('#marcaSelect').val($('#marcaSelect option:first').val());
-            $('#submarcaSelect').val($('#submarcaSelect option:first').val());
+            $('#marcaSelect').val('0');
+            $('#submarcaSelect').val('0');
             $('#zonaSelect').val($('#zonaSelect option:first').val());
         }
     </script>
