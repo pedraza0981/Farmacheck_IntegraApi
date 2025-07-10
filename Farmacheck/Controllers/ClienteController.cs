@@ -87,7 +87,7 @@ namespace Farmacheck.Controllers
                 {
                     success = false,
                     error = "Ha ocurrido un error inesperado.",
-                    detail = ex.Message // opcional en producción
+                    detail = ex.Message // opcional en producciÃ³n
                 });
             }
         }
@@ -102,6 +102,11 @@ namespace Farmacheck.Controllers
             {
                 var request = _mapper.Map<CustomerRequest>(model);
                 var id = await _apiClient.CreateAsync(request);
+
+                var bsRequest = _mapper.Map<BusinessStructureRequest>(model);
+                bsRequest.ClienteId = id;
+                await _businessStructureApi.CreateAsync(bsRequest);
+
                 return Json(new { success = true, id });
             }
             else
@@ -109,7 +114,13 @@ namespace Farmacheck.Controllers
                 var updateRequest = _mapper.Map<UpdateCustomerRequest>(model);
                 var updated = await _apiClient.UpdateAsync(updateRequest);
                 if (updated)
+                {
+                    var bsUpdate = _mapper.Map<UpdateBusinessStructureRequest>(model);
+                    bsUpdate.ClienteId = model.ClienteId;
+                    await _businessStructureApi.UpdateAsync(bsUpdate);
+
                     return Json(new { success = true, id = model.ClienteId });
+                }
 
                 return Json(new { success = false, error = "No se pudo actualizar" });
             }
@@ -119,6 +130,7 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> Eliminar(int id)
         {
             await _apiClient.DeleteAsync(id);
+            await _businessStructureApi.DeleteAsync(id);
             return Json(new { success = true });
         }
 
