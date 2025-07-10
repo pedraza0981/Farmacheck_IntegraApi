@@ -17,19 +17,22 @@ namespace Farmacheck.Controllers
         private readonly IZoneApiClient _zoneApi;
         private readonly IBusinessStructureApiClient _businessStructureApi;
         private readonly IMapper _mapper;
+        private readonly IBrandApiClient _ibrand;
 
         public ClienteController(
             ICustomersApiClient apiClient,
             ICustomerTypesApiClient customerTypesApi,
             IZoneApiClient zoneApi,
             IBusinessStructureApiClient businessStructureApi,
-            IMapper mapper)
+            IMapper mapper,
+            IBrandApiClient ibrand)
         {
             _apiClient = apiClient;
             _customerTypesApi = customerTypesApi;
             _zoneApi = zoneApi;
             _businessStructureApi = businessStructureApi;
             _mapper = mapper;
+            _ibrand = ibrand;
         }
 
         public async Task<IActionResult> Index()
@@ -52,21 +55,41 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Obtener(int id)
         {
-            var entidad = await _apiClient.GetCustomerAsync(id);
-            if (entidad == null)
-                return Json(new { success = false, error = "No encontrado" });
-
-            var dto = _mapper.Map<CustomerDto>(entidad);
-
-            var businessStructures = await _businessStructureApi.GetBusinessStructuresByCustomerAsync(id);
-            if (businessStructures.Count > 0)
+            try
             {
-                var bsDto = _mapper.Map<BusinessStructureDto>(businessStructures[0]);
-                dto.BusinessStructure = bsDto;
-            }
+                var entidad = await _apiClient.GetCustomerAsync(id);
+                if (entidad == null)
+                    return Json(new { success = false, error = "No encontrado" });
 
-            var model = _mapper.Map<ClienteEstructuraViewModel>(dto);
-            return Json(new { success = true, data = model });
+                var dto = _mapper.Map<CustomerDto>(entidad);
+
+                var businessStructure = await _businessStructureApi.GetBusinessStructureByCustomerAsync(id);
+
+                var marca = await _ibrand.GetBrandAsync(businessStructure.MarcaId);
+
+                if (businessStructure != null)
+                {
+                    var bsDto = _mapper.Map<BusinessStructureDto>(businessStructure);
+
+                    if(marca!= null)
+                        bsDto.UnidadDeNegocioId = marca.UnidadDeNegocio;
+
+                    dto.BusinessStructure = bsDto;
+                }
+
+                var model = _mapper.Map<ClienteEstructuraViewModel>(dto);
+                return Json(new { success = true, data = model });
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "Error al obtener cliente con ID {id}", id);
+                return Json(new
+                {
+                    success = false,
+                    error = "Ha ocurrido un error inesperado.",
+                    detail = ex.Message // opcional en producción
+                });
+            }
         }
 
         [HttpPost]
