@@ -63,6 +63,16 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
+        public async Task<JsonResult> ListarPorMarca(int marcaId)
+        {
+            var apiData = await _subbrandApi.GetSubbrandsByBrandAsync(marcaId);
+            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
+            var submarcas = _mapper.Map<List<SubMarca>>(dtos);
+
+            return Json(new { success = true, data = submarcas });
+        }
+
+        [HttpGet]
         public async Task<JsonResult> Obtener(int id)
         {
             var entidadApi = await _subbrandApi.GetSubbrandAsync(id);

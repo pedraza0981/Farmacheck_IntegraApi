@@ -111,204 +111,219 @@
 
 
 @section Scripts {
-<script>
-    $(document).ready(function () {
-        cargar();
-        cargarCatalogos();
-        // $('#tablaDatos').DataTable();
+    <script>
+        $(document).ready(function () {
+            cargar();
+            cargarCatalogos();
+            // $('#tablaDatos').DataTable();
 
-        $('#unidadNegocioSelect').change(function () {
-            const unidadId = $(this).val();
-            cargarMarcasPorUnidad(unidadId);
-        });
+            $('#marcaSelect').change(function () {
+                const marcaId = $(this).val();
+                cargarsubMarcasPorMarca(marcaId);
+            });
 
-        $('#btnNuevo').click(function () {
-            limpiar();
-            $('#modalTitulo').text('Nueva farmacia');
-            $('#modalEntidad').modal('show');
-        });
+            $('#unidadNegocioSelect').change(function () {
+                const unidadId = $(this).val();
+                cargarMarcasPorUnidad(unidadId);
+            });
 
-        $('#btnGuardar').click(function () {
-            const datos = {
-                ClienteId: $('#clienteId').val() || 0,
-                UnidadDeNegocioId: $('#unidadNegocioSelect').val(),
-                CentroDeCosto: $('#centroCosto').val(),
-                Nombre: $('#nombre').val(),
-                Direccion: $('#direccion').val(),
-                Estado: $('#estado').val(),
-                LatitudGPS: $('#latitudGPS').val(),
-                LongitudGPS: $('#longitudGPS').val(),
-                Estatus: $('#estatus').val(),
-                RadioGPS: $('#radioGPS').val(),
-                TipoDeClienteId: $('#tipoClienteSelect').val(),
-                MarcaId: $('#marcaSelect').val(),
-                SubmarcaId: $('#submarcaSelect').val(),
-                ZonaId: $('#zonaSelect').val()
-            };
+            $('#btnNuevo').click(function () {
+                limpiar();
+                $('#modalTitulo').text('Nueva farmacia');
+                $('#modalEntidad').modal('show');
+            });
 
-            const esNuevo = datos.ClienteId == 0;
+            $('#btnGuardar').click(function () {
+                const datos = {
+                    ClienteId: $('#clienteId').val() || 0,
+                    UnidadDeNegocioId: $('#unidadNegocioSelect').val(),
+                    CentroDeCosto: $('#centroCosto').val(),
+                    Nombre: $('#nombre').val(),
+                    Direccion: $('#direccion').val(),
+                    Estado: $('#estado').val(),
+                    LatitudGPS: $('#latitudGPS').val(),
+                    LongitudGPS: $('#longitudGPS').val(),
+                    Estatus: $('#estatus').val(),
+                    RadioGPS: $('#radioGPS').val(),
+                    TipoDeClienteId: $('#tipoClienteSelect').val(),
+                    MarcaId: $('#marcaSelect').val(),
+                    SubmarcaId: $('#submarcaSelect').val(),
+                    ZonaId: $('#zonaSelect').val()
+                };
 
-            $.ajax({
-                url: '@Url.Action("Guardar", "Cliente")',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(datos),
-                success: function (r) {
-                    if (r.success) {
-                        $('#modalEntidad').modal('hide');
-                        cargar();
-                        const mensaje = esNuevo ? 'Farmacia agregada correctamente' : 'Farmacia actualizada correctamente';
-                        showAlert(mensaje, 'success');
-                    } else {
-                        showAlert(r.error || 'Error al guardar', 'error');
+                const esNuevo = datos.ClienteId == 0;
+
+                $.ajax({
+                    url: '@Url.Action("Guardar", "Cliente")',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(datos),
+                    success: function (r) {
+                        if (r.success) {
+                            $('#modalEntidad').modal('hide');
+                            cargar();
+                            const mensaje = esNuevo ? 'Farmacia agregada correctamente' : 'Farmacia actualizada correctamente';
+                            showAlert(mensaje, 'success');
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
                     }
+                });
+            });
+
+        });
+
+        function cargarMarcasPorUnidad(unidadId) {
+            $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', { unidadId }, function (r) {
+                if (r.success) {
+                    const select = $('#marcaSelect');
+                        select.empty();
+                        r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                    }
+                });
+            }
+
+        function cargarsubMarcasPorMarca(marcaId) {
+            $.get('@Url.Action("ListarPorMarca", "SubMarca")', { marcaId }, function (r) {
+                if (r.success) {
+                    const select = $('#submarcaSelect');
+                        select.empty();
+                        r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                    }
+                });
+            }
+
+        function cargarCatalogos() {
+            $.get('@Url.Action("ListarTiposCliente", "Cliente")', function (r) {
+                if (r.success) {
+                    const select = $('#tipoClienteSelect');
+                    select.empty();
+                    r.data.forEach(t => select.append(`<option value="${t.value}">${t.text}</option>`));
                 }
             });
-        });
-
-    });
-
-    function cargarMarcasPorUnidad(unidadId) {
-        $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', { unidadId }, function (r) {
-            if (r.success) {
-                const select = $('#marcaSelect');
+            $.get('@Url.Action("ListarZonas", "Cliente")', function (r) {
+                if (r.success) {
+                    const select = $('#zonaSelect');
+                    select.empty();
+                    r.data.forEach(z => select.append(`<option value="${z.value}">${z.text}</option>`));
+                }
+            });
+            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+                if (r.success) {
+                    const select = $('#unidadNegocioSelect');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                }
+            });
+            $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', function (r) {
+                if (r.success) {
+                    const select = $('#marcaSelect');
                     select.empty();
                     r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
                 }
             });
-        }
-
-    function cargarCatalogos() {
-        $.get('@Url.Action("ListarTiposCliente", "Cliente")', function (r) {
-            if (r.success) {
-                const select = $('#tipoClienteSelect');
-                select.empty();
-                r.data.forEach(t => select.append(`<option value="${t.value}">${t.text}</option>`));
-            }
-        });
-        $.get('@Url.Action("ListarZonas", "Cliente")', function (r) {
-            if (r.success) {
-                const select = $('#zonaSelect');
-                select.empty();
-                r.data.forEach(z => select.append(`<option value="${z.value}">${z.text}</option>`));
-            }
-        });
-        $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
-            if (r.success) {
-                const select = $('#unidadNegocioSelect');
-                select.empty();
-                r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
-            }
-        });
-        $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', function (r) {
-            if (r.success) {
-                const select = $('#marcaSelect');
-                select.empty();
-                r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
-            }
-        });
-        $.get('@Url.Action("Listar", "SubMarca")', function (r) {
-            if (r.success) {
-                const select = $('#submarcaSelect');
-                select.empty();
-                r.data.forEach(s => select.append(`<option value="${s.id}">${s.nombre}</option>`));
-            }
-        });
-    }
-
-    function cargar() {
-        $.get('@Url.Action("Listar", "Cliente")', function (r) {
-            if (r.success) {
-                // const tbody = $('#tablaDatos tbody');
-                const tabla = $('#tablaDatos');
-                if ($.fn.DataTable.isDataTable(tabla)) {
-                        tabla.DataTable().destroy();
-                }
-
-                const tbody = tabla.find('tbody');
-                tbody.empty();
-                r.data.forEach(c => {
-                    tbody.append(`<tr>
-                        <td>${c.nombre}</td>
-                        <td>${c.centroDeCosto}</td>
-                        <td>${c.direccion}</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${c.clienteId})"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${c.clienteId})"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>`);
-                });
-
-                tabla.DataTable({
-                    pageLength: 5,
-                    lengthMenu: [5, 10, 25, 50, 100],
-                    language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-                    }
-                });
-            }
-        });
-    }
-
-    function editar(id) {
-        $.get('@Url.Action("Obtener", "Cliente")', { id }, function (r) {
-            if (r.success) {
-                const c = r.data;
-                $('#modalTitulo').text('Editar farmacia');
-                $('#clienteId').val(c.clienteId);
-                $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
-                $('#centroCosto').val(c.centroDeCosto);
-                $('#nombre').val(c.nombre);
-                $('#direccion').val(c.direccion);
-                $('#estado').val(c.estado);
-                $('#latitudGPS').val(c.latitudGPS);
-                $('#longitudGPS').val(c.longitudGPS);
-                $('#estatus').val(c.estatus);
-                $('#radioGPS').val(c.radioGPS);
-                $('#tipoClienteSelect').val(c.tipoDeClienteId);
-
-                cargarMarcasPorUnidad(c.unidadDeNegocioId); // Carga las marcas para esa unidad
-                setTimeout(() => {
-                    $('#marcaSelect').val(c.marcaId); // Espera un poco y selecciona la marca
-                }, 300)
-
-                $('#submarcaSelect').val(c.submarcaId);
-                $('#zonaSelect').val(c.zonaId);
-                $('#modalEntidad').modal('show');
-            } else {
-                showAlert(r.error || 'No se pudo cargar', 'error');
-            }
-        });
-    }
-
-    function eliminar(id) {
-        confirmAction('¿Deseas eliminar esta farmacia?').then(function (ok) {
-            if (!ok) return;
-            $.post('@Url.Action("Eliminar", "Cliente")', { id }, function (r) {
+                $.get('@Url.Action("ListarPorMarca", "SubMarca")', function (r) {
                 if (r.success) {
-                    cargar();
-                } else {
-                    showAlert(r.error || 'Error al eliminar', 'error');
+                    const select = $('#submarcaSelect');
+                    select.empty();
+                    r.data.forEach(s => select.append(`<option value="${s.id}">${s.nombre}</option>`));
                 }
             });
-        });
-    }
+        }
 
-    function limpiar() {
-        $('#clienteId').val('');
-        $('#unidadNegocioSelect').val($('#unidadNegocioSelect option:first').val());
-        $('#centroCosto').val('');
-        $('#nombre').val('');
-        $('#direccion').val('');
-        $('#estado').val('');
-        $('#latitudGPS').val('');
-        $('#longitudGPS').val('');
-        $('#estatus').val('1');
-        $('#radioGPS').val('');
-        $('#tipoClienteSelect').val($('#tipoClienteSelect option:first').val());
-        $('#marcaSelect').val($('#marcaSelect option:first').val());
-        $('#submarcaSelect').val($('#submarcaSelect option:first').val());
-        $('#zonaSelect').val($('#zonaSelect option:first').val());
-    }
-</script>
+        function cargar() {
+            $.get('@Url.Action("Listar", "Cliente")', function (r) {
+                if (r.success) {
+                    // const tbody = $('#tablaDatos tbody');
+                    const tabla = $('#tablaDatos');
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                            tabla.DataTable().destroy();
+                    }
+
+                    const tbody = tabla.find('tbody');
+                    tbody.empty();
+                    r.data.forEach(c => {
+                        tbody.append(`<tr>
+                            <td>${c.nombre}</td>
+                            <td>${c.centroDeCosto}</td>
+                            <td>${c.direccion}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${c.clienteId})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${c.clienteId})"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`);
+                    });
+
+                    tabla.DataTable({
+                        pageLength: 5,
+                        lengthMenu: [5, 10, 25, 50, 100],
+                        language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                        }
+                    });
+                }
+            });
+        }
+
+        function editar(id) {
+            $.get('@Url.Action("Obtener", "Cliente")', { id }, function (r) {
+                if (r.success) {
+                    const c = r.data;
+                    $('#modalTitulo').text('Editar farmacia');
+                    $('#clienteId').val(c.clienteId);
+                    $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
+                    $('#centroCosto').val(c.centroDeCosto);
+                    $('#nombre').val(c.nombre);
+                    $('#direccion').val(c.direccion);
+                    $('#estado').val(c.estado);
+                    $('#latitudGPS').val(c.latitudGPS);
+                    $('#longitudGPS').val(c.longitudGPS);
+                    $('#estatus').val(c.estatus);
+                    $('#radioGPS').val(c.radioGPS);
+                    $('#tipoClienteSelect').val(c.tipoDeClienteId);
+
+                    cargarMarcasPorUnidad(c.unidadDeNegocioId); // Carga las marcas para esa unidad
+                    setTimeout(() => {
+                        $('#marcaSelect').val(c.marcaId); // Espera un poco y selecciona la marca
+                    }, 300)
+
+                    $('#submarcaSelect').val(c.submarcaId);
+                    $('#zonaSelect').val(c.zonaId);
+                    $('#modalEntidad').modal('show');
+                } else {
+                    showAlert(r.error || 'No se pudo cargar', 'error');
+                }
+            });
+        }
+
+        function eliminar(id) {
+            confirmAction('¿Deseas eliminar esta farmacia?').then(function (ok) {
+                if (!ok) return;
+                $.post('@Url.Action("Eliminar", "Cliente")', { id }, function (r) {
+                    if (r.success) {
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al eliminar', 'error');
+                    }
+                });
+            });
+        }
+
+        function limpiar() {
+            $('#clienteId').val('');
+            $('#unidadNegocioSelect').val($('#unidadNegocioSelect option:first').val());
+            $('#centroCosto').val('');
+            $('#nombre').val('');
+            $('#direccion').val('');
+            $('#estado').val('');
+            $('#latitudGPS').val('');
+            $('#longitudGPS').val('');
+            $('#estatus').val('1');
+            $('#radioGPS').val('');
+            $('#tipoClienteSelect').val($('#tipoClienteSelect option:first').val());
+            $('#marcaSelect').val($('#marcaSelect option:first').val());
+            $('#submarcaSelect').val($('#submarcaSelect option:first').val());
+            $('#zonaSelect').val($('#zonaSelect option:first').val());
+        }
+    </script>
 }
