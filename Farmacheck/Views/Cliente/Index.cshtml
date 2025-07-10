@@ -117,6 +117,11 @@
         cargarCatalogos();
         // $('#tablaDatos').DataTable();
 
+        $('#unidadNegocioSelect').change(function () {
+            const unidadId = $(this).val();
+            cargarMarcasPorUnidad(unidadId);
+        });
+
         $('#btnNuevo').click(function () {
             limpiar();
             $('#modalTitulo').text('Nueva farmacia');
@@ -163,6 +168,16 @@
 
     });
 
+    function cargarMarcasPorUnidad(unidadId) {
+        $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', { unidadId }, function (r) {
+            if (r.success) {
+                const select = $('#marcaSelect');
+                    select.empty();
+                    r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                }
+            });
+        }
+
     function cargarCatalogos() {
         $.get('@Url.Action("ListarTiposCliente", "Cliente")', function (r) {
             if (r.success) {
@@ -185,7 +200,7 @@
                 r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
             }
         });
-        $.get('@Url.Action("Listar", "Marca")', function (r) {
+        $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', function (r) {
             if (r.success) {
                 const select = $('#marcaSelect');
                 select.empty();
@@ -251,7 +266,12 @@
                 $('#estatus').val(c.estatus);
                 $('#radioGPS').val(c.radioGPS);
                 $('#tipoClienteSelect').val(c.tipoDeClienteId);
-                $('#marcaSelect').val(c.marcaId);
+
+                cargarMarcasPorUnidad(c.unidadDeNegocioId); // Carga las marcas para esa unidad
+                setTimeout(() => {
+                    $('#marcaSelect').val(c.marcaId); // Espera un poco y selecciona la marca
+                }, 300)
+
                 $('#submarcaSelect').val(c.submarcaId);
                 $('#zonaSelect').val(c.zonaId);
                 $('#modalEntidad').modal('show');
