@@ -67,6 +67,16 @@ namespace Farmacheck.Helpers
                 .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
                 .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)));
 
+            CreateMap<ClienteEstructuraViewModel, BusinessStructureRequest>()
+                .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.ClienteId))
+                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.MarcaId ?? 0))
+                .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.SubmarcaId))
+                .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.ZonaId ?? 0));
+
+            CreateMap<ClienteEstructuraViewModel, UpdateBusinessStructureRequest>()
+                .IncludeBase<ClienteEstructuraViewModel, BusinessStructureRequest>()
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == 1));
+
 
             CreateMap<UnidadDeNegocio, BusinessUnitRequest>()
             .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
