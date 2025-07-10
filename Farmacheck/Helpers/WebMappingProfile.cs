@@ -6,6 +6,7 @@ using Farmacheck.Infrastructure.Models.Brands;
 using Farmacheck.Infrastructure.Models.SubBrands;
 using Farmacheck.Infrastructure.Models.Customers;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Farmacheck.Infrastructure.Models.BusinessStructures;
 
 namespace Farmacheck.Helpers
 {

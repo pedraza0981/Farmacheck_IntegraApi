@@ -7,6 +7,7 @@ using AutoMapper;
 using Farmacheck.Infrastructure.Interfaces;
 using Farmacheck.Infrastructure.Models.Customers;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Infrastructure.Models.BusinessStructures;
 
 namespace Farmacheck.Controllers
 {
