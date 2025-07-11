@@ -149,7 +149,7 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> ListarZonas()
         {
             var apiData = await _zoneApi.GetZonesAsync();
-            var dtos = _mapper.Map<List<ZoneDto>>(apiData);
+            var dtos = _mapper.Map<List<ZonaDto>>(apiData);
             var items = _mapper.Map<List<SelectListItem>>(dtos);
             return Json(new { success = true, data = items });
         }

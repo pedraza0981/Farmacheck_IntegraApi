@@ -8,7 +8,7 @@ namespace Farmacheck.Application.Mappings
     {
         public ZoneProfile()
         {
-            CreateMap<ZoneResponse, ZoneDto>();
+            CreateMap<ZoneResponse, ZonaDto>().ReverseMap();
         }
     }
 }

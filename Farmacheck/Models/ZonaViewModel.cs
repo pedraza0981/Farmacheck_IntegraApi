@@ -1,6 +1,6 @@
-namespace Farmacheck.Application.Models.Zones
+﻿namespace Farmacheck.Models
 {
-    public class ZoneRequest
+    public class ZonaViewModel
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = null!;

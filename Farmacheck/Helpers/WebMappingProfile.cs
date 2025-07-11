@@ -7,6 +7,7 @@ using Farmacheck.Application.Models.SubBrands;
 using Farmacheck.Application.Models.Customers;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Farmacheck.Application.Models.BusinessStructures;
+using Farmacheck.Application.Models.Zones;
 
 namespace Farmacheck.Helpers
 {
@@ -88,9 +89,18 @@ namespace Farmacheck.Helpers
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id.ToString()))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nombre));
 
-            CreateMap<ZoneDto, SelectListItem>()
+            CreateMap<ZonaDto, SelectListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id.ToString()))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nombre));
+
+
+            CreateMap<ZoneResponse, ZonaDto>().ReverseMap();
+                        
+            CreateMap<ZonaDto, ZonaViewModel>().ReverseMap();
+                        
+            CreateMap<ZonaViewModel, ZoneRequest>();
+            
+            CreateMap<ZonaViewModel, UpdateZoneRequest>();
         }
     }
 }
