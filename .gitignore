@@ -44,3 +44,4 @@ secrets.json
 !Farmacheck.Application/
 !Farmacheck.Infrastructure/
 /Farmacheck/Properties/PublishProfiles
+/Farmacheck/Properties
