@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Farmacheck.Application\Farmacheck.Application.csproj" />
+    <ProjectReference Include="..\Farmacheck.Infrastructure\Farmacheck.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

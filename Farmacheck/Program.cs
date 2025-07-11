@@ -1,7 +1,7 @@
-using Farmacheck.Infrastructure.Services;
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Mappings;
 using Farmacheck.Helpers;
+using Farmacheck.Infrastructure;
 namespace Farmacheck
 {
     public class Program
@@ -25,40 +25,7 @@ namespace Farmacheck
                 typeof(CustomerTypeProfile),
                 typeof(ZoneProfile));
 
-            builder.Services.AddHttpClient<IBrandApiClient, BrandApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["BrandApi:BaseUrl"]!);
-            });
-
-            builder.Services.AddHttpClient<IBusinessUnitApiClient, BusinessUnitApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["BusinessUnitApi:BaseUrl"]!);
-            });
-
-            builder.Services.AddHttpClient<ISubbrandApiClient, SubbrandApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["SubbrandApi:BaseUrl"]!);
-            });
-
-            builder.Services.AddHttpClient<ICustomersApiClient, CustomersApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["CustomersApi:BaseUrl"]!);
-            });
-
-            builder.Services.AddHttpClient<ICustomerTypesApiClient, CustomerTypesApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["CustomerTypesApi:BaseUrl"]!);
-            });
-
-            builder.Services.AddHttpClient<IZoneApiClient, ZonesApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["ZonesApi:BaseUrl"]!);
-            });
-
-            builder.Services.AddHttpClient<IBusinessStructureApiClient, BusinessStructureApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration["BusinessStructureApi:BaseUrl"]!);
-            });
+            builder.Services.AddInfrastructure(builder.Configuration);
 
             var app = builder.Build();
 
