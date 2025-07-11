@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Models;
 using System.Collections.Generic;
 using System.Linq;
-using Farmacheck.Infrastructure.Interfaces;
+using Farmacheck.Application.Interfaces;
 using System.Threading.Tasks;
 using AutoMapper;
-using Farmacheck.Infrastructure.Models.SubBrands;
-using Farmacheck.Infrastructure.Models.Brands;
+using Farmacheck.Application.Models.SubBrands;
+using Farmacheck.Application.Models.Brands;
 using Farmacheck.Application.DTOs;
 
 namespace Farmacheck.Controllers
