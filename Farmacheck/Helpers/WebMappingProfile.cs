@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Farmacheck.Application.DTOs;
-using Farmacheck.Infrastructure.Models.BusinessUnits;
+using Farmacheck.Application.Models.BusinessUnits;
 using Farmacheck.Models;
-using Farmacheck.Infrastructure.Models.Brands;
-using Farmacheck.Infrastructure.Models.SubBrands;
-using Farmacheck.Infrastructure.Models.Customers;
+using Farmacheck.Application.Models.Brands;
+using Farmacheck.Application.Models.SubBrands;
+using Farmacheck.Application.Models.Customers;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Farmacheck.Infrastructure.Models.BusinessStructures;
+using Farmacheck.Application.Models.BusinessStructures;
 
 namespace Farmacheck.Helpers
 {

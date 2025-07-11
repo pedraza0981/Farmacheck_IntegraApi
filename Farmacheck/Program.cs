@@ -1,5 +1,5 @@
 using Farmacheck.Infrastructure.Services;
-using Farmacheck.Infrastructure.Interfaces;
+using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Mappings;
 using Farmacheck.Helpers;
 namespace Farmacheck

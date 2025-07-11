@@ -1,6 +1,6 @@
 using AutoMapper;
 using Farmacheck.Application.DTOs;
-using Farmacheck.Infrastructure.Models.Customers;
+using Farmacheck.Application.Models.Customers;
 
 namespace Farmacheck.Application.Mappings
 {

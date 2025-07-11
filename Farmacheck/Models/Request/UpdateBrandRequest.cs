@@ -1,4 +1,4 @@
-﻿using Farmacheck.Infrastructure.Models.Brands;
+﻿using Farmacheck.Application.Models.Brands;
 
 namespace Farmacheck.Models.Request
 {

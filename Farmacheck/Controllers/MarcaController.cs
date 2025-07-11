@@ -1,7 +1,7 @@
 using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
-using Farmacheck.Infrastructure.Interfaces;
-using Farmacheck.Infrastructure.Models.Brands;
+using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.Brands;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using System.IO;
@@ -101,7 +101,7 @@ namespace Farmacheck.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+                return Json(new { success = false, error = "OcurriÃ³ un error inesperado: " + ex.Message });
             }
         }
 
