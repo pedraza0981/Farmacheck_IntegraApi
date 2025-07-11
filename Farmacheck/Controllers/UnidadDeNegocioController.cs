@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using System;
 using AutoMapper;
 using Farmacheck.Application.DTOs;
-using Farmacheck.Infrastructure.Interfaces;
-using Farmacheck.Infrastructure.Models.BusinessUnits;
+using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.BusinessUnits;
 
 namespace Farmacheck.Controllers
 {
@@ -89,7 +89,7 @@ namespace Farmacheck.Controllers
             catch (Exception ex)
             {
                 // Devuelve un error como JSON, conservando el stack trace para logging si lo deseas
-                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+                return Json(new { success = false, error = "OcurriÃ³ un error inesperado: " + ex.Message });
             }
         }
 

@@ -1,5 +1,5 @@
-using Farmacheck.Infrastructure.Interfaces;
-using Farmacheck.Infrastructure.Models.Zones;
+using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.Zones;
 using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
