@@ -150,8 +150,11 @@
             });
 
             $('#btnGuardar').click(function () {
+                const clienteIdHidden = $('#clienteId').val();
+                const esNuevo = !clienteIdHidden || clienteIdHidden == 0;
                 const datos = {
-                    ClienteId: $('#clienteId').val() || 0,
+                    ClienteId: clienteIdHidden || 0,
+                    IdCliente: $('#idCliente').val() || 0,
                     UnidadDeNegocioId: $('#unidadNegocioSelect').val(),
                     CentroDeCosto: $('#centroCosto').val(),
                     Nombre: $('#nombre').val(),
@@ -167,8 +170,6 @@
                     SubmarcaId: $('#submarcaSelect').val(),
                     ZonaId: $('#zonaSelect').val()
                 };
-
-                const esNuevo = datos.ClienteId == 0;
 
                 if (esNuevo) {
                     if (datos.UnidadDeNegocioId == 0) {
