@@ -57,8 +57,14 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-2">
+                        <label>ID</label>
+                        <input type="number" class="form-control" id="idNumero" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
                         <label>Centro de costo</label>
-                        <input type="text" class="form-control" id="centroCosto" />
+                        <input type="text" class="form-control" id="centroCosto" readonly />
                     </div>
                     <div class="col-md-6 mb-2">
                         <label>Nombre</label>
@@ -71,6 +77,10 @@
                     <div class="col-md-6 mb-2">
                         <label>Estado</label>
                         <input type="text" class="form-control" id="estado" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Número de teléfono</label>
+                        <input type="text" class="form-control" id="numeroTelefono" />
                     </div>
                     <div class="col-md-6 mb-2">
                         <label>Latitud GPS</label>
@@ -127,6 +137,12 @@
                 cargarMarcasPorUnidad(unidadId);
             });
 
+            $('#idNumero').on('input', function () {
+                const val = $(this).val();
+                const padded = val ? val.toString().padStart(5, '0') : '';
+                $('#centroCosto').val(padded);
+            });
+
             $('#btnNuevo').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nueva farmacia');
@@ -141,6 +157,7 @@
                     Nombre: $('#nombre').val(),
                     Direccion: $('#direccion').val(),
                     Estado: $('#estado').val(),
+                    NumeroDeTelefono: $('#numeroTelefono').val(),
                     LatitudGPS: $('#latitudGPS').val(),
                     LongitudGPS: $('#longitudGPS').val(),
                     Estatus: $('#estatus').val(),
@@ -290,9 +307,11 @@
                     $('#clienteId').val(c.clienteId);
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
                     $('#centroCosto').val(c.centroDeCosto);
+                    $('#idNumero').val(parseInt(c.centroDeCosto, 10));
                     $('#nombre').val(c.nombre);
                     $('#direccion').val(c.direccion);
                     $('#estado').val(c.estado);
+                    $('#numeroTelefono').val(c.numeroDeTelefono);
                     $('#latitudGPS').val(c.latitudGPS);
                     $('#longitudGPS').val(c.longitudGPS);
                     $('#estatus').val(c.estatus);
@@ -331,9 +350,11 @@
             $('#clienteId').val('');
             $('#unidadNegocioSelect').val('0');
             $('#centroCosto').val('');
+            $('#idNumero').val('');
             $('#nombre').val('');
             $('#direccion').val('');
             $('#estado').val('');
+            $('#numeroTelefono').val('');
             $('#latitudGPS').val('');
             $('#longitudGPS').val('');
             $('#estatus').val('1');
