@@ -11,5 +11,8 @@ namespace Farmacheck.Application.Models.Customers
         public decimal LongitudGps { get; set; }
         public short RadioGps { get; set; }
         public short TipoDeClienteId { get; set; }
+        public int MarcaId { get; set; }
+        public int? SubmarcaId { get; set; }
+        public int ZonaId { get; set; }
     }
 }

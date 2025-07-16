@@ -24,7 +24,7 @@
         
         //public string MarcaNombre { get; set; }
         //public string SubmarcaNombre { get; set; }
-        public string ZonaNombre { get; set; }
+        //public string ZonaNombre { get; set; }
     }
 
 }

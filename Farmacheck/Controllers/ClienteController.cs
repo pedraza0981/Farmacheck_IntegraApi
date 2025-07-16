@@ -104,9 +104,9 @@ namespace Farmacheck.Controllers
                 var request = _mapper.Map<CustomerRequest>(model);
                 var id = await _apiClient.CreateAsync(request);
 
-                var bsRequest = _mapper.Map<BusinessStructureRequest>(model);
-                bsRequest.ClienteId = id;
-                await _businessStructureApi.CreateAsync(bsRequest);
+                //var bsRequest = _mapper.Map<BusinessStructureRequest>(model);
+                //bsRequest.ClienteId = id;
+                //await _businessStructureApi.CreateAsync(bsRequest);
 
                 return Json(new { success = true, id });
             }
