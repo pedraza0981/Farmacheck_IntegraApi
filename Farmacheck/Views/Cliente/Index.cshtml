@@ -58,7 +58,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-2">
                         <label>ID</label>
-                        <input type="number" class="form-control" id="idNumero" />
+                        <input type="number" class="form-control" id="idCliente" />
                     </div>
                 </div>
                 <div class="row">
@@ -137,7 +137,7 @@
                 cargarMarcasPorUnidad(unidadId);
             });
 
-            $('#idNumero').on('input', function () {
+            $('#idCliente').on('input', function () {
                 const val = $(this).val();
                 const padded = val ? val.toString().padStart(5, '0') : '';
                 $('#centroCosto').val(padded);
@@ -307,7 +307,7 @@
                     $('#clienteId').val(c.clienteId);
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
                     $('#centroCosto').val(c.centroDeCosto);
-                    $('#idNumero').val(parseInt(c.centroDeCosto, 10));
+                    $('#idCliente').val(parseInt(c.centroDeCosto, 10));
                     $('#nombre').val(c.nombre);
                     $('#direccion').val(c.direccion);
                     $('#estado').val(c.estado);
@@ -350,7 +350,7 @@
             $('#clienteId').val('');
             $('#unidadNegocioSelect').val('0');
             $('#centroCosto').val('');
-            $('#idNumero').val('');
+            $('#idCliente').val('');
             $('#nombre').val('');
             $('#direccion').val('');
             $('#estado').val('');

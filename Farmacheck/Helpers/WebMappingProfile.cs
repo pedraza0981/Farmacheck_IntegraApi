@@ -60,7 +60,8 @@ namespace Farmacheck.Helpers
             CreateMap<ClienteEstructuraViewModel, CustomerRequest>()
                 .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))
                 .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
-                .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)));
+                .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId));
 
             CreateMap<ClienteEstructuraViewModel, UpdateCustomerRequest>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId))

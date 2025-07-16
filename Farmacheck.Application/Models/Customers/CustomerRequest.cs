@@ -2,6 +2,7 @@ namespace Farmacheck.Application.Models.Customers
 {
     public class CustomerRequest
     {
+        public int Id { get; set; }
         public string CentroDeCosto { get; set; } = null!;
         public string Nombre { get; set; } = null!;
         public string Direccion { get; set; } = null!;
