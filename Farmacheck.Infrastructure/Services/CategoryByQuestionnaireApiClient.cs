@@ -47,8 +47,18 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task DeleteAsync(byte id)
         {
-            var response = await _http.DeleteAsync($"api/v1/CategoriesByQuestionnaires/{id}");
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                var response = await _http.DeleteAsync($"api/v1/CategoriesByQuestionnaires/{id}");
+                response.EnsureSuccessStatusCode();
+            }
+            
+            catch (Exception ex)
+            {
+                // Manejo general de errores
+                Console.WriteLine($"Ocurrió un error inesperado al eliminar el recurso con ID {id}: {ex.Message}");
+                throw;
+            }
         }
     }
 }
