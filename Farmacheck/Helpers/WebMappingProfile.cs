@@ -8,6 +8,7 @@ using Farmacheck.Application.Models.Customers;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Farmacheck.Application.Models.BusinessStructures;
 using Farmacheck.Application.Models.Zones;
+using Farmacheck.Application.Models.CategoriesByQuestionnaires;
 
 namespace Farmacheck.Helpers
 {
@@ -102,6 +103,14 @@ namespace Farmacheck.Helpers
             CreateMap<ZonaViewModel, ZoneRequest>();
             
             CreateMap<ZonaViewModel, UpdateZoneRequest>();
+
+            CreateMap<CategoryByQuestionnaireResponse, CategoryByQuestionnaireDto>().ReverseMap();
+
+            CreateMap<CategoryByQuestionnaireDto, CategoriaCuestionarioViewModel>().ReverseMap();
+
+            CreateMap<CategoriaCuestionarioViewModel, CategoryByQuestionnaireRequest>();
+
+            CreateMap<CategoriaCuestionarioViewModel, UpdateCategoryByQuestionnaireRequest>();
         }
     }
 }
