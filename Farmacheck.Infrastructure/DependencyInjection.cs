@@ -44,6 +44,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["BusinessStructureApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<ICategoryByQuestionnaireApiClient, CategoryByQuestionnaireApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["CategoriesByQuestionnairesApi:BaseUrl"]!);
+        });
+
         return services;
     }
 }
