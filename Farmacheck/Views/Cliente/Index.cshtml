@@ -290,7 +290,7 @@
                     });
 
                     tabla.DataTable({
-                        pageLength: 5,
+                        pageLength: 20,
                         lengthMenu: [5, 10, 25, 50, 100],
                         language: {
                         url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
@@ -300,7 +300,7 @@
             });
         }
 
-        function editar(id) {
+               function editar(id) {
             $.get('@Url.Action("Obtener", "Cliente")', { id }, function (r) {
                 if (r.success) {
                     const c = r.data;
@@ -308,7 +308,7 @@
                     $('#clienteId').val(c.clienteId);
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
                     $('#centroCosto').val(c.centroDeCosto);
-                    $('#idCliente').val(parseInt(c.centroDeCosto, 10));
+                    $('#idCliente').val(parseInt(c.centroDeCosto, 10)).prop('disabled', true); // 🚨 Aquí
                     $('#nombre').val(c.nombre);
                     $('#direccion').val(c.direccion);
                     $('#estado').val(c.estado);
@@ -318,7 +318,6 @@
                     $('#estatus').val(c.estatus);
                     $('#radioGPS').val(c.radioGPS);
                     $('#tipoClienteSelect').val(c.tipoDeClienteId);
-
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
                     cargarMarcasPorUnidad(c.unidadDeNegocioId, function () {
                         $('#marcaSelect').val(c.marcaId);
@@ -334,6 +333,7 @@
             });
         }
 
+
         function eliminar(id) {
             confirmAction('¿Deseas eliminar esta farmacia?').then(function (ok) {
                 if (!ok) return;
@@ -347,11 +347,11 @@
             });
         }
 
-        function limpiar() {
+                function limpiar() {
             $('#clienteId').val('');
             $('#unidadNegocioSelect').val('0');
             $('#centroCosto').val('');
-            $('#idCliente').val('');
+            $('#idCliente').val('').prop('disabled', false); // 🚨 Aquí
             $('#nombre').val('');
             $('#direccion').val('');
             $('#estado').val('');
@@ -365,5 +365,6 @@
             $('#submarcaSelect').val('0');
             $('#zonaSelect').val($('#zonaSelect option:first').val());
         }
+
     </script>
 }

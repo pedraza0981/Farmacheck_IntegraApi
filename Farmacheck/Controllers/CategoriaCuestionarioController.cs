@@ -23,11 +23,19 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetCategoriesAsync();
-            var dtos = _mapper.Map<List<CategoryByQuestionnaireDto>>(apiData);
-            var categorias = _mapper.Map<List<CategoriaCuestionarioViewModel>>(dtos);
+            try
+            {
+                var apiData = await _apiClient.GetCategoriesAsync();
 
-            return View(categorias);
+                var dtos = _mapper.Map<List<CategoryByQuestionnaireDto>>(apiData); // <- puede fallar
+                var categorias = _mapper.Map<List<CategoriaCuestionarioViewModel>>(dtos);
+
+                return View(categorias);
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error en Index: {ex.Message}");
+            }
         }
 
         [HttpGet]
