@@ -10,7 +10,7 @@
 
         public int UnidadDeNegocioId { get; set; }
 
-        public int UnidadDeNegocioNombre { get; set; } 
+        public string UnidadDeNegocioNombre { get; set; }
 
         public List<int> Permisos { get; set; } = new List<int>();
     }
