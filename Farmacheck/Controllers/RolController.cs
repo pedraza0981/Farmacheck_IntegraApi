@@ -13,6 +13,7 @@ namespace Farmacheck.Controllers
     public class RolController : Controller
     {
         private readonly IRoleApiClient _apiClient;
+        private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly IMapper _mapper;
 
         private static readonly List<PermisoViewModel> _permisos = new()
@@ -24,9 +25,10 @@ namespace Farmacheck.Controllers
 
         private static readonly Dictionary<int, List<int>> _permisosPorRol = new();
 
-        public RolController(IRoleApiClient apiClient, IMapper mapper)
+        public RolController(IRoleApiClient apiClient, IBusinessUnitApiClient businessUnitApi, IMapper mapper)
         {
             _apiClient = apiClient;
+            _businessUnitApi = businessUnitApi;
             _mapper = mapper;
         }
 
@@ -41,6 +43,13 @@ namespace Farmacheck.Controllers
             if (unidadId > 0)
                 roles = roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList();
 
+            var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
+            foreach (var r in roles)
+            {
+                var u = unidadesApi.FirstOrDefault(b => b.Id == r.UnidadDeNegocioId);
+                r.UnidadDeNegocioNombre = u?.Nombre;
+            }
+
             return View(roles);
         }
 
@@ -54,6 +63,13 @@ namespace Farmacheck.Controllers
             if (unidadId > 0)
                 roles = roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList();
 
+            var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
+            foreach (var r in roles)
+            {
+                var u = unidadesApi.FirstOrDefault(b => b.Id == r.UnidadDeNegocioId);
+                r.UnidadDeNegocioNombre = u?.Nombre;
+            }
+
             return Json(new { success = true, data = roles });
         }
 
@@ -66,6 +82,10 @@ namespace Farmacheck.Controllers
 
             var dto = _mapper.Map<RoleDto>(entidad);
             var model = _mapper.Map<RolViewModel>(dto);
+
+            var unidad = await _businessUnitApi.GetBusinessUnitAsync(model.UnidadDeNegocioId);
+            model.UnidadDeNegocioNombre = unidad?.Nombre;
+
             return Json(new { success = true, data = model });
         }
 
