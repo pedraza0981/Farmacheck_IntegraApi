@@ -1,0 +1,215 @@
+@model List<Farmacheck.Models.JerarquiaViewModel>
+@{
+    ViewData["Title"] = "Jerarquía";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Jerarquía de Roles</h4>
+        <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
+            <i class="bi bi-plus-circle"></i> Nueva relación
+        </button>
+    </div>
+    <table class="table table-bordered custom-table" id="tablaDatos">
+        <thead>
+            <tr>
+                <th style="width:15%;">Id</th>
+                <th style="width:35%;">Rol Superior</th>
+                <th style="width:35%;">Rol Subordinado</th>
+                <th style="width:15%;" class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalTitulo">Nueva relación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label>Rol Superior</label>
+                        <select class="form-select" id="rolSuperior"></select>
+                    </div>
+                    <div class="col-md-5">
+                        <label>Rol Subordinado</label>
+                        <select class="form-select" id="rolSubordinado"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="btnAgregar" class="btn btn-outline-primary w-100">Agregar</button>
+                    </div>
+                </div>
+                <table class="table table-bordered mt-3" id="tablaTemp">
+                    <thead>
+                        <tr>
+                            <th>Rol Superior</th>
+                            <th>Rol Subordinado</th>
+                            <th style="width:50px"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            cargar();
+            cargarRoles();
+
+            $('#btnNuevo').click(function () {
+                limpiar();
+                $('#modalEntidad').modal('show');
+            });
+
+            $('#rolSuperior').change(function () {
+                cargarRolesSubordinado($(this).val());
+            });
+
+            $('#btnAgregar').click(function () {
+                const supId = $('#rolSuperior').val();
+                const subId = $('#rolSubordinado').val();
+                if (!supId || !subId) return;
+
+                let repetido = false;
+                $('#tablaTemp tbody tr').each(function () {
+                    if ($(this).data('sup') == supId && $(this).data('sub') == subId) {
+                        repetido = true;
+                        return false;
+                    }
+                });
+                if (repetido) {
+                    showAlert('La relación ya fue agregada.', 'warning');
+                    return;
+                }
+
+                const supText = $('#rolSuperior option:selected').text();
+                const subText = $('#rolSubordinado option:selected').text();
+                $('#tablaTemp tbody').append(`<tr data-sup="${supId}" data-sub="${subId}">
+                        <td>${supText}</td>
+                        <td>${subText}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-danger" onclick="$(this).closest('tr').remove()"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`);
+            });
+
+            $('#btnGuardar').click(function () {
+                const datos = [];
+                $('#tablaTemp tbody tr').each(function () {
+                    datos.push({
+                        RolSuperiorId: $(this).data('sup'),
+                        RolSubordinadoId: $(this).data('sub')
+                    });
+                });
+
+                if (datos.length === 0) {
+                    showAlert('Agregue al menos una relación.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("Guardar", "Jerarquia")',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(datos),
+                    success: function (r) {
+                        if (r.success) {
+                            $('#modalEntidad').modal('hide');
+                            showAlert('Relaciones guardadas', 'success');
+                            cargar();
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
+                    }
+                });
+            });
+        });
+
+        function cargar() {
+            $.get('@Url.Action("Listar", "Jerarquia")', function (r) {
+                if (r.success) {
+                    const tabla = $('#tablaDatos');
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                        tabla.DataTable().destroy();
+                    }
+
+                    const tbody = tabla.find('tbody');
+                    tbody.empty();
+                    r.data.forEach(u => {
+                        tbody.append(`<tr>
+                            <td>${u.id}</td>
+                            <td>${u.rolSuperiorNombre}</td>
+                            <td>${u.rolSubordinadoNombre}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`);
+                    });
+
+                    tabla.DataTable({
+                        pageLength: 5,
+                        lengthMenu: [5, 10, 25, 50, 100],
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                        }
+                    });
+                }
+            });
+        }
+
+        function cargarRoles() {
+            $.get('@Url.Action("Listar", "Rol")', function (r) {
+                const select = $('#rolSuperior');
+                select.empty();
+                r.data.forEach(u => {
+                    select.append(`<option value="${u.id}">${u.nombre}</option>`);
+                });
+                cargarRolesSubordinado(select.val());
+            });
+        }
+
+        function cargarRolesSubordinado(supId) {
+            $.get('@Url.Action("Listar", "Rol")', function (r) {
+                const select = $('#rolSubordinado');
+                select.empty();
+                r.data.forEach(u => {
+                    if (u.id != supId) {
+                        select.append(`<option value="${u.id}">${u.nombre}</option>`);
+                    }
+                });
+            });
+        }
+
+        function eliminar(id) {
+            confirmAction('¿Deseas eliminar esta relación?').then(function (ok) {
+                if (!ok) return;
+                $.post('@Url.Action("Eliminar", "Jerarquia")', { id }, function (r) {
+                    if (r.success) {
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al eliminar', 'error');
+                    }
+                });
+            });
+        }
+
+        function limpiar() {
+            $('#tablaTemp tbody').empty();
+            $('#rolSuperior').val('');
+            $('#rolSubordinado').empty();
+        }
+    </script>
+}

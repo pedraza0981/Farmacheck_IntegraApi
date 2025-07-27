@@ -117,6 +117,10 @@ namespace Farmacheck.Helpers
             CreateMap<CategoriaCuestionarioViewModel, CategoryByQuestionnaireRequest>();
 
             CreateMap<CategoriaCuestionarioViewModel, UpdateCategoryByQuestionnaireRequest>();
+
+            CreateMap<HierarchyByRoleDto, JerarquiaViewModel>().ReverseMap();
+            CreateMap<JerarquiaViewModel, HierarchyByRoleRequest>();
+            CreateMap<JerarquiaViewModel, UpdateHierarchyByRoleRequest>();
         }
     }
 }
