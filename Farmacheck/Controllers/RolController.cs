@@ -1,88 +1,122 @@
 using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Models;
+using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.Roles;
+using AutoMapper;
+using Farmacheck.Application.DTOs;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Farmacheck.Controllers
 {
     public class RolController : Controller
     {
-        private static readonly List<RolViewModel> _roles = new();
+        private readonly IRoleApiClient _apiClient;
+        private readonly IMapper _mapper;
+
         private static readonly List<PermisoViewModel> _permisos = new()
         {
             new PermisoViewModel { Id = 1, Nombre = "Crear" },
             new PermisoViewModel { Id = 2, Nombre = "Editar" },
             new PermisoViewModel { Id = 3, Nombre = "Eliminar" }
         };
-        private static int _nextId = 1;
 
-        public IActionResult Index(int unidadId)
+        private static readonly Dictionary<int, List<int>> _permisosPorRol = new();
+
+        public RolController(IRoleApiClient apiClient, IMapper mapper)
+        {
+            _apiClient = apiClient;
+            _mapper = mapper;
+        }
+
+        public async Task<IActionResult> Index(int unidadId)
         {
             ViewBag.UnidadId = unidadId;
-            return View(_roles);
+
+            var apiData = await _apiClient.GetRolesAsync();
+            var dtos = _mapper.Map<List<RoleDto>>(apiData);
+            var roles = _mapper.Map<List<RolViewModel>>(dtos);
+
+            if (unidadId > 0)
+                roles = roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList();
+
+            return View(roles);
         }
 
         [HttpGet]
-        public JsonResult Listar(int unidadId)
+        public async Task<JsonResult> Listar(int unidadId)
         {
-            var data = unidadId > 0
-                ? _roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList()
-                : _roles.ToList();
-            return Json(new { success = true, data });
+            var apiData = await _apiClient.GetRolesAsync();
+            var dtos = _mapper.Map<List<RoleDto>>(apiData);
+            var roles = _mapper.Map<List<RolViewModel>>(dtos);
+
+            if (unidadId > 0)
+                roles = roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList();
+
+            return Json(new { success = true, data = roles });
         }
 
         [HttpGet]
-        public JsonResult Obtener(int id)
+        public async Task<JsonResult> Obtener(int id)
         {
-            var rol = _roles.FirstOrDefault(r => r.Id == id);
-            if (rol == null)
+            var entidad = await _apiClient.GetRoleAsync((byte)id);
+            if (entidad == null)
                 return Json(new { success = false, error = "No encontrado" });
-            return Json(new { success = true, data = rol });
+
+            var dto = _mapper.Map<RoleDto>(entidad);
+            var model = _mapper.Map<RolViewModel>(dto);
+            return Json(new { success = true, data = model });
         }
 
         [HttpGet]
         public JsonResult ListarPermisos(int id)
         {
-            var asignados = _roles.FirstOrDefault(r => r.Id == id)?.Permisos ?? new List<int>();
+            _permisosPorRol.TryGetValue(id, out var asignados);
+            asignados ??= new List<int>();
+
             var data = _permisos.Select(p => new
             {
                 p.Id,
                 p.Nombre,
                 Asignado = asignados.Contains(p.Id)
             });
+
             return Json(new { success = true, data });
         }
 
         [HttpPost]
-        public JsonResult Guardar([FromBody] RolViewModel model)
+        public async Task<JsonResult> Guardar([FromBody] RolViewModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Nombre))
                 return Json(new { success = false, error = "El nombre es obligatorio." });
 
             if (model.Id == 0)
             {
-                model.Id = _nextId++;
-                _roles.Add(model);
+                var request = _mapper.Map<RoleRequest>(model);
+                var id = await _apiClient.CreateAsync(request);
+                _permisosPorRol[id] = model.Permisos ?? new List<int>();
+                return Json(new { success = true, id });
             }
             else
             {
-                var existente = _roles.FirstOrDefault(r => r.Id == model.Id);
-                if (existente == null)
-                    return Json(new { success = false, error = "No se encontró el rol." });
-                existente.Nombre = model.Nombre;
-                existente.UnidadDeNegocioId = model.UnidadDeNegocioId;
-                existente.Permisos = model.Permisos ?? new List<int>();
-            }
+                var updateRequest = _mapper.Map<UpdateRoleRequest>(model);
+                var updated = await _apiClient.UpdateAsync(updateRequest);
+                if (updated)
+                {
+                    _permisosPorRol[model.Id] = model.Permisos ?? new List<int>();
+                    return Json(new { success = true, id = model.Id });
+                }
 
-            return Json(new { success = true, id = model.Id });
+                return Json(new { success = false, error = "No se pudo actualizar" });
+            }
         }
 
         [HttpPost]
-        public JsonResult Eliminar(int id)
+        public async Task<JsonResult> Eliminar(int id)
         {
-            var rol = _roles.FirstOrDefault(r => r.Id == id);
-            if (rol != null)
-                _roles.Remove(rol);
+            await _apiClient.DeleteAsync((byte)id);
+            _permisosPorRol.Remove(id);
             return Json(new { success = true });
         }
     }
