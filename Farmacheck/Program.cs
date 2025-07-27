@@ -24,7 +24,8 @@ namespace Farmacheck
                 typeof(CustomerProfile),
                 typeof(CustomerTypeProfile),
                 typeof(ZoneProfile),
-                typeof(CategoryByQuestionnaireProfile));
+                typeof(CategoryByQuestionnaireProfile),
+                typeof(RoleProfile));
 
             builder.Services.AddInfrastructure(builder.Configuration);
 
