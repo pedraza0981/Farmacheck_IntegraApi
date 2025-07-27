@@ -43,6 +43,10 @@
                     <label>Unidad de Negocio</label>
                     <select class="form-select" id="unidadNegocio"></select>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck">
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Permisos</label>
                     <div id="contenedorPermisos" class="border rounded p-2" style="max-height:300px; overflow-y:auto;">
@@ -69,6 +73,7 @@
             $('#btnNuevo').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nuevo Rol');
+                $('#estatusCheck').prop('checked', true).prop('disabled', true);
                 $('#modalEntidad').modal('show');
                 cargarPermisos();
             });
@@ -79,6 +84,7 @@
                     Id: id,
                     Nombre: $('#nombre').val(),
                     UnidadDeNegocioId: $('#unidadNegocio').val(),
+                    Estatus: $('#estatusCheck').prop('checked'),
                     Permisos: []
                 };
 
@@ -162,6 +168,7 @@
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#unidadNegocio').val(u.unidadDeNegocioId);
+                    $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
                     $('#modalEntidad').modal('show');
                     cargarPermisos(u.id);
                 } else {
@@ -187,6 +194,7 @@
             $('#entidadId').val('');
             $('#nombre').val('');
             $('#unidadNegocio').val(unidadId || '');
+            $('#estatusCheck').prop('checked', true).prop('disabled', true);
             $('#contenedorPermisos').empty();
         }
     </script>
