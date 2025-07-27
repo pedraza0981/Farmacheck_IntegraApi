@@ -14,21 +14,19 @@ namespace Farmacheck.Controllers
     {
         private readonly IRoleApiClient _apiClient;
         private readonly IBusinessUnitApiClient _businessUnitApi;
+        private readonly IPermissionApiClient _permissionApi;
         private readonly IMapper _mapper;
-
-        private static readonly List<PermisoViewModel> _permisos = new()
-        {
-            new PermisoViewModel { Id = 1, Nombre = "Crear" },
-            new PermisoViewModel { Id = 2, Nombre = "Editar" },
-            new PermisoViewModel { Id = 3, Nombre = "Eliminar" }
-        };
 
         private static readonly Dictionary<int, List<int>> _permisosPorRol = new();
 
-        public RolController(IRoleApiClient apiClient, IBusinessUnitApiClient businessUnitApi, IMapper mapper)
+        public RolController(IRoleApiClient apiClient,
+                             IBusinessUnitApiClient businessUnitApi,
+                             IPermissionApiClient permissionApi,
+                             IMapper mapper)
         {
             _apiClient = apiClient;
             _businessUnitApi = businessUnitApi;
+            _permissionApi = permissionApi;
             _mapper = mapper;
         }
 
@@ -90,12 +88,13 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public JsonResult ListarPermisos(int id)
+        public async Task<JsonResult> ListarPermisos(int id)
         {
             _permisosPorRol.TryGetValue(id, out var asignados);
             asignados ??= new List<int>();
 
-            var data = _permisos.Select(p => new
+            var permisos = await _permissionApi.GetPermissionsAsync();
+            var data = permisos.Select(p => new
             {
                 p.Id,
                 p.Nombre,
