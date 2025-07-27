@@ -10,6 +10,7 @@ using Farmacheck.Application.Models.BusinessStructures;
 using Farmacheck.Application.Models.Zones;
 using Farmacheck.Application.Models.CategoriesByQuestionnaires;
 using Farmacheck.Application.Models.Roles;
+using Farmacheck.Application.Models.HierarchyByRoles;
 
 namespace Farmacheck.Helpers
 {
