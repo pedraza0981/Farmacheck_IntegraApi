@@ -136,7 +136,7 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> Eliminar(int id)
         {
             await _apiClient.DeleteAsync((byte)id);
-            _permisosPorRol.Remove(id);
+            //_permisosPorRol.Remove(id);
             return Json(new { success = true });
         }
     }
