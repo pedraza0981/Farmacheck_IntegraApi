@@ -5,6 +5,7 @@ using Farmacheck.Application.Models.HierarchyByRoles;
 using Farmacheck.Application.Models.Roles;
 using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Controllers
 {
@@ -26,17 +27,17 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            var models = await ObtenerJerarquiasAsync(page, _itemsPerPage);
+            var result = await ObtenerJerarquiasAsync(page, _itemsPerPage);
             ViewBag.Page = page;
-            ViewBag.HasMore = models.Count == _itemsPerPage;
-            return View(models);
+            ViewBag.HasMore = result.HasNextPage;
+            return View(result.Items.ToList());
         }
 
         [HttpGet]
         public async Task<JsonResult> Listar(int page = 1)
         {
-            var models = await ObtenerJerarquiasAsync(page, _itemsPerPage);
-            return Json(new { success = true, data = models });
+            var result = await ObtenerJerarquiasAsync(page, _itemsPerPage);
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
@@ -113,15 +114,15 @@ namespace Farmacheck.Controllers
             return Json(new { success = true });
         }
 
-        private async Task<List<JerarquiaViewModel>> ObtenerJerarquiasAsync(int page, int items)
+        private async Task<PaginatedResponse<JerarquiaViewModel>> ObtenerJerarquiasAsync(int page, int items)
         {
             var apiData = await _apiClient.GetByPageAsync(page, items);
-            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
+            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData.Items);
             var models = _mapper.Map<List<JerarquiaViewModel>>(dtos);
 
             await CompletarNombresRoles(models);
 
-            return models;
+            return new PaginatedResponse<JerarquiaViewModel>(models, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
         }
 
         private async Task CompletarNombresRoles(IEnumerable<JerarquiaViewModel> modelos)
