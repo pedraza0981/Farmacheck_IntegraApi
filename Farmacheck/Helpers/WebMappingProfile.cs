@@ -11,6 +11,7 @@ using Farmacheck.Application.Models.Zones;
 using Farmacheck.Application.Models.CategoriesByQuestionnaires;
 using Farmacheck.Application.Models.Roles;
 using Farmacheck.Application.Models.HierarchyByRoles;
+using Farmacheck.Application.Models.Users;
 
 namespace Farmacheck.Helpers
 {
@@ -122,6 +123,10 @@ namespace Farmacheck.Helpers
             CreateMap<HierarchyByRoleDto, JerarquiaViewModel>().ReverseMap();
             CreateMap<JerarquiaViewModel, HierarchyByRoleRequest>();
             CreateMap<JerarquiaViewModel, UpdateHierarchyByRoleRequest>();
+
+            CreateMap<UserDto, UsuarioViewModel>().ReverseMap();
+            CreateMap<UsuarioViewModel, UserRequest>();
+            CreateMap<UsuarioViewModel, UpdateUserRequest>();
         }
     }
 }
