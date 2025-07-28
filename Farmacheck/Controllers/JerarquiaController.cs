@@ -25,24 +25,14 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetAllAsync();
-            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
-            var models = _mapper.Map<List<JerarquiaViewModel>>(dtos);
-
-            await CompletarNombresRoles(models);
-
+            var models = await ObtenerJerarquiasAsync();
             return View(models);
         }
 
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetAllAsync();
-            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
-            var models = _mapper.Map<List<JerarquiaViewModel>>(dtos);
-
-            await CompletarNombresRoles(models);
-
+            var models = await ObtenerJerarquiasAsync();
             return Json(new { success = true, data = models });
         }
 
@@ -91,6 +81,17 @@ namespace Farmacheck.Controllers
         {
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
+        }
+
+        private async Task<List<JerarquiaViewModel>> ObtenerJerarquiasAsync()
+        {
+            var apiData = await _apiClient.GetAllAsync();
+            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
+            var models = _mapper.Map<List<JerarquiaViewModel>>(dtos);
+
+            await CompletarNombresRoles(models);
+
+            return models;
         }
 
         private async Task CompletarNombresRoles(IEnumerable<JerarquiaViewModel> modelos)
