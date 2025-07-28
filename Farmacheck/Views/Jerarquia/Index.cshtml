@@ -23,6 +23,15 @@
         </thead>
         <tbody></tbody>
     </table>
+    <div class="d-flex justify-content-end">
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
+                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
+                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
@@ -77,9 +86,24 @@
 
 @section Scripts {
     <script>
+        var pagina = @ViewBag.Page ?? 1;
+        var pageSize = 5;
+
         $(document).ready(function () {
-            cargar();
+            cargar(pagina);
             cargarRoles();
+
+            $('#btnPrev').click(function () {
+                if (pagina > 1) {
+                    pagina--;
+                    cargar(pagina);
+                }
+            });
+
+            $('#btnNext').click(function () {
+                pagina++;
+                cargar(pagina);
+            });
 
             $('#btnNuevo').click(function () {
                 limpiar();
@@ -149,7 +173,7 @@
                             if (r.success) {
                                 $('#modalEntidad').modal('hide');
                                 showAlert('Relaciones guardadas', 'success');
-                                cargar();
+                                cargar(pagina);
                             } else {
                                 showAlert(r.error || 'Error al guardar', 'error');
                             }
@@ -173,7 +197,7 @@
                             if (r.success) {
                                 $('#modalEntidad').modal('hide');
                                 showAlert('Relación actualizada', 'success');
-                                cargar();
+                                cargar(pagina);
                             } else {
                                 showAlert(r.error || 'Error al guardar', 'error');
                             }
@@ -183,15 +207,10 @@
             });
         });
 
-        function cargar() {
-            $.get('@Url.Action("Listar", "Jerarquia")', function (r) {
+        function cargar(pagina) {
+            $.get('@Url.Action("Listar", "Jerarquia")', { page: pagina }, function (r) {
                 if (r.success) {
-                    const tabla = $('#tablaDatos');
-                    if ($.fn.DataTable.isDataTable(tabla)) {
-                        tabla.DataTable().destroy();
-                    }
-
-                    const tbody = tabla.find('tbody');
+                    const tbody = $('#tablaDatos tbody');
                     tbody.empty();
                     r.data.forEach(u => {
                         tbody.append(`<tr>
@@ -207,13 +226,9 @@
                         </tr>`);
                     });
 
-                    tabla.DataTable({
-                        pageLength: 5,
-                        lengthMenu: [5, 10, 25, 50, 100],
-                        language: {
-                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-                        }
-                    });
+                    $('#lblPage').text(pagina);
+                    $('#btnPrev').prop('disabled', pagina === 1);
+                    $('#btnNext').prop('disabled', r.data.length < pageSize);
                 }
             });
         }
@@ -266,7 +281,7 @@
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "Jerarquia")', { id }, function (r) {
                     if (r.success) {
-                        cargar();
+                        cargar(pagina);
                     } else {
                         showAlert(r.error || 'Error al eliminar', 'error');
                     }
