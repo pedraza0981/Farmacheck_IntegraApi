@@ -58,11 +58,11 @@ namespace Farmacheck.Controllers
                 if (modelos == null || modelos.Count == 0)
                     return Json(new { success = false, error = "Sin datos" });
 
-                var existentes = await _apiClient.GetAllAsync();
+                //var existentes = await _apiClient.GetAllAsync();
                 foreach (var m in modelos)
                 {
-                    if (existentes.Any(e => e.RolSuperiorId == m.RolSuperiorId && e.RolSubordinadoId == m.RolSubordinadoId))
-                        continue;
+                    //if (existentes.Any(e => e.RolSuperiorId == m.RolSuperiorId && e.RolSubordinadoId == m.RolSubordinadoId))
+                    //    continue;
 
                     var request = _mapper.Map<HierarchyByRoleRequest>(m);
                     await _apiClient.CreateAsync(request);
