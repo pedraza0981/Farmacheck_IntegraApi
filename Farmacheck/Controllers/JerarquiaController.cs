@@ -13,6 +13,7 @@ namespace Farmacheck.Controllers
         private readonly IHierarchyByRoleApiClient _apiClient;
         private readonly IRoleApiClient _roleApi;
         private readonly IMapper _mapper;
+        private const int _itemsPerPage = 5;
 
         public JerarquiaController(IHierarchyByRoleApiClient apiClient,
                                    IRoleApiClient roleApi,
@@ -23,16 +24,18 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var models = await ObtenerJerarquiasAsync();
+            var models = await ObtenerJerarquiasAsync(page, _itemsPerPage);
+            ViewBag.Page = page;
+            ViewBag.HasMore = models.Count == _itemsPerPage;
             return View(models);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar()
+        public async Task<JsonResult> Listar(int page = 1)
         {
-            var models = await ObtenerJerarquiasAsync();
+            var models = await ObtenerJerarquiasAsync(page, _itemsPerPage);
             return Json(new { success = true, data = models });
         }
 
@@ -110,9 +113,9 @@ namespace Farmacheck.Controllers
             return Json(new { success = true });
         }
 
-        private async Task<List<JerarquiaViewModel>> ObtenerJerarquiasAsync()
+        private async Task<List<JerarquiaViewModel>> ObtenerJerarquiasAsync(int page, int items)
         {
-            var apiData = await _apiClient.GetAllAsync();
+            var apiData = await _apiClient.GetByPageAsync(page, items);
             var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
             var models = _mapper.Map<List<JerarquiaViewModel>>(dtos);
 
