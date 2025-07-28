@@ -77,6 +77,33 @@ namespace Farmacheck.Controllers
         }
 
         [HttpPost]
+        public async Task<JsonResult> GuardarUno([FromBody] JerarquiaViewModel model)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(model.Nombre))
+                    return Json(new { success = false, error = "El nombre es obligatorio." });
+
+                if (model.Id == 0)
+                {
+                    var request = _mapper.Map<HierarchyByRoleRequest>(model);
+                    var id = await _apiClient.CreateAsync(request);
+                    return Json(new { success = true, id });
+                }
+                else
+                {
+                    var update = _mapper.Map<UpdateHierarchyByRoleRequest>(model);
+                    var updated = await _apiClient.UpdateAsync(update);
+                    return Json(new { success = updated });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
         public async Task<JsonResult> Eliminar(int id)
         {
             await _apiClient.DeleteAsync(id);
