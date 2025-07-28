@@ -1,4 +1,5 @@
 using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.Common;
 using Farmacheck.Application.Models.HierarchyByRoles;
 using System.Net.Http.Json;
 
@@ -19,11 +20,11 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<HierarchyByRoleResponse>();
         }
 
-        public async Task<List<HierarchyByRoleResponse>> GetByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<HierarchyByRoleResponse>> GetByPageAsync(int page, int items)
         {
             var url = $"api/v1/HierarchyByRole/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<HierarchyByRoleResponse>>(url)
-                   ?? new List<HierarchyByRoleResponse>();
+            return await _http.GetFromJsonAsync<PaginatedResponse<HierarchyByRoleResponse>>(url)
+                   ?? new PaginatedResponse<HierarchyByRoleResponse>(Array.Empty<HierarchyByRoleResponse>(), 0, page, items);
         }
 
         public async Task<HierarchyByRoleResponse?> GetAsync(int id)

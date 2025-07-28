@@ -212,7 +212,7 @@
                 if (r.success) {
                     const tbody = $('#tablaDatos tbody');
                     tbody.empty();
-                    r.data.forEach(u => {
+                    r.data.items.forEach(u => {
                         tbody.append(`<tr>
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
@@ -228,7 +228,7 @@
 
                     $('#lblPage').text(pagina);
                     $('#btnPrev').prop('disabled', pagina === 1);
-                    $('#btnNext').prop('disabled', r.data.length < pageSize);
+                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
                 }
             });
         }
