@@ -32,9 +32,14 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="entidadId" />
                 <div class="mb-3">
                     <label>Nombre</label>
                     <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck">
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
                 </div>
                 <div class="row g-2 align-items-end">
                     <div class="col-md-5">
@@ -77,6 +82,7 @@
 
             $('#btnNuevo').click(function () {
                 limpiar();
+                $('#modalTitulo').text('Nueva relación');
                 $('#modalEntidad').modal('show');
             });
 
@@ -115,35 +121,64 @@
                 });
 
             $('#btnGuardar').click(function () {
-                const datos = [];
-                $('#tablaTemp tbody tr').each(function () {
-                    datos.push({
-                        Nombre: $(this).data('nombre'),
-                        RolSuperiorId: $(this).data('sup'),
-                        RolSubordinadoId: $(this).data('sub')
+                const id = parseInt($('#entidadId').val()) || 0;
+
+                if (id === 0) {
+                    const datos = [];
+                    $('#tablaTemp tbody tr').each(function () {
+                        datos.push({
+                            Nombre: $(this).data('nombre'),
+                            RolSuperiorId: $(this).data('sup'),
+                            RolSubordinadoId: $(this).data('sub'),
+                            Estatus: $('#estatusCheck').prop('checked')
+                        });
                     });
-                });
 
-                if (datos.length === 0) {
-                    showAlert('Agregue al menos una relación.', 'warning');
-                    return;
-                }
-
-                $.ajax({
-                    url: '@Url.Action("Guardar", "Jerarquia")',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(datos),
-                    success: function (r) {
-                        if (r.success) {
-                            $('#modalEntidad').modal('hide');
-                            showAlert('Relaciones guardadas', 'success');
-                            cargar();
-                        } else {
-                            showAlert(r.error || 'Error al guardar', 'error');
-                        }
+                    if (datos.length === 0) {
+                        showAlert('Agregue al menos una relación.', 'warning');
+                        return;
                     }
-                });
+
+                    $.ajax({
+                        url: '@Url.Action("Guardar", "Jerarquia")',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(datos),
+                        success: function (r) {
+                            if (r.success) {
+                                $('#modalEntidad').modal('hide');
+                                showAlert('Relaciones guardadas', 'success');
+                                cargar();
+                            } else {
+                                showAlert(r.error || 'Error al guardar', 'error');
+                            }
+                        }
+                    });
+                } else {
+                    const dato = {
+                        Id: id,
+                        Nombre: $('#nombre').val(),
+                        RolSuperiorId: $('#rolSuperior').val(),
+                        RolSubordinadoId: $('#rolSubordinado').val(),
+                        Estatus: $('#estatusCheck').prop('checked')
+                    };
+
+                    $.ajax({
+                        url: '@Url.Action("GuardarUno", "Jerarquia")',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(dato),
+                        success: function (r) {
+                            if (r.success) {
+                                $('#modalEntidad').modal('hide');
+                                showAlert('Relación actualizada', 'success');
+                                cargar();
+                            } else {
+                                showAlert(r.error || 'Error al guardar', 'error');
+                            }
+                        }
+                    });
+                }
             });
         });
 
@@ -164,6 +199,7 @@
                             <td>${u.rolSuperiorNombre}</td>
                             <td>${u.rolSubordinadoNombre}</td>
                             <td class="text-center">
+                                <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
                                 <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>`);
@@ -203,6 +239,26 @@
             });
         }
 
+        function editar(id) {
+            $.get('@Url.Action("Obtener", "Jerarquia")', { id }, function (r) {
+                if (r.success) {
+                    const u = r.data;
+                    $('#modalTitulo').text('Editar relación');
+                    $('#entidadId').val(u.id);
+                    $('#nombre').val(u.nombre);
+                    $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
+                    $('#tablaTemp').hide();
+                    $('#btnAgregar').hide();
+                    $('#rolSuperior').val(u.rolSuperiorId);
+                    cargarRolesSubordinado(u.rolSuperiorId);
+                    setTimeout(function () { $('#rolSubordinado').val(u.rolSubordinadoId); }, 300);
+                    $('#modalEntidad').modal('show');
+                } else {
+                    showAlert(r.error || 'No se pudo cargar', 'error');
+                }
+            });
+        }
+
         function eliminar(id) {
             confirmAction('¿Deseas eliminar esta relación?').then(function (ok) {
                 if (!ok) return;
@@ -221,6 +277,10 @@
             $('#rolSuperior').val('');
             $('#rolSubordinado').empty();
             $('#nombre').val('');
+            $('#entidadId').val('');
+            $('#estatusCheck').prop('checked', true).prop('disabled', true);
+            $('#tablaTemp').show();
+            $('#btnAgregar').show();
         }
     </script>
 }
