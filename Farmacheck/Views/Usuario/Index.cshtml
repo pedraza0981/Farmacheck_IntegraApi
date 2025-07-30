@@ -138,19 +138,19 @@
                 </div>
                 <div class="mb-2">
                     <label>Marcas</label>
-                    <select id="selectMarcas" class="select2" multiple data-placeholder="-- Selecciona marca --"></select>
+                    <select id="selectMarcas" class="selectpicker" multiple data-live-search="true"></select>
                 </div>
                 <div class="mb-2">
                     <label>Submarcas</label>
-                    <select id="selectSubmarcas" class="select2" multiple data-placeholder="-- Selecciona submarca --"></select>
+                    <select id="selectSubmarcas" class="selectpicker" multiple data-live-search="true"></select>
                 </div>
                 <div class="mb-2">
                     <label>Zonas</label>
-                    <select id="selectZonas" class="select2" multiple data-placeholder="-- Selecciona zona --"></select>
+                    <select id="selectZonas" class="selectpicker" multiple data-live-search="true"></select>
                 </div>
                 <div class="mb-2">
                     <label>Farmacias</label>
-                    <select id="selectFarmacias" class="select2" multiple data-placeholder="-- Selecciona farmacia --"></select>
+                    <select id="selectFarmacias" class="selectpicker" multiple data-live-search="true"></select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -163,9 +163,8 @@
 
 @section Scripts {
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.5.2/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
 
     <script>
         const datasetSubmarcas = [
@@ -178,10 +177,9 @@
             { id: 2, nombre: 'Farmacia 2', submarcaId: 2, zonaId: 1 },
             { id: 3, nombre: 'Farmacia 3', submarcaId: 3, zonaId: 2 }
         ];
-        let unidadActualMarcas = null;
 
         $(document).ready(function () {
-            $('.select2').select2({ theme: 'bootstrap-5', width: '100%' });
+            $('.selectpicker').selectpicker();
             cargar();
 
             $('#btnNuevo').click(function () {
@@ -244,9 +242,9 @@
                 clearSelect($('#selectFarmacias'), 'Farmacia');
             });
 
-            $('#selectMarcas').on('change', actualizarSubmarcas);
-            $('#selectSubmarcas').on('change', actualizarFarmacias);
-            $('#selectZonas').on('change', actualizarFarmacias);
+            $('#selectMarcas').on('changed.bs.select', actualizarSubmarcas);
+            $('#selectSubmarcas').on('changed.bs.select', actualizarFarmacias);
+            $('#selectZonas').on('changed.bs.select', actualizarFarmacias);
 
             $('#btnGuardarGestionRoles').click(function () {
                 alert('Información guardada correctamente');
@@ -370,8 +368,8 @@
         function clearSelect(select, placeholder) {
             select.empty();
             select.append(`<option value="0">-- Selecciona ${placeholder} --</option>`);
-            if (select.hasClass('select2')) {
-                select.val(null).trigger('change');
+            if (select.hasClass('selectpicker')) {
+                select.selectpicker('refresh');
             }
         }
 
@@ -392,8 +390,8 @@
                 const select = $('#selectUnidadNegocio');
                 clearSelect(select, 'unidad de negocio');
                 r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
-                if (select.hasClass('select2')) {
-                    select.trigger('change');
+                if (select.hasClass('selectpicker')) {
+                    select.selectpicker('refresh');
                 }
             });
         }
@@ -408,7 +406,6 @@
 
         function cargarMarcas(unidadId) {
             const select = $('#selectMarcas');
-            unidadActualMarcas = unidadId;
 
             // Limpia por completo el selector y agrega el placeholder una 
             // sola vez antes de realizar la consulta
@@ -416,23 +413,22 @@
 
             // Si no se ha seleccionado una unidad válida, solo refrescamos y salimos
             if (!unidadId || unidadId === '0') {
-                if (select.hasClass('select2')) {
-                    select.trigger('change');
+                if (select.hasClass('selectpicker')) {
+                    select.selectpicker('refresh');
                 }
                 return;
             }
 
             $.get('@Url.Action("ListarMarcas", "Usuario")', { unidadId }, function (r) {
-                if (unidadActualMarcas !== unidadId) return;
                 if (r.success && r.data) {
                     r.data.forEach(m => {
                         select.append(`<option value="${m.id}">${m.nombre}</option>`);
                     });
                 }
 
-                // Refresca visualmente el selector después de actualizar las opciones
-                if (select.hasClass('select2')) {
-                    select.trigger('change');
+                // Refresca visualmente el selectpicker después de actualizar las opciones
+                if (select.hasClass('selectpicker')) {
+                    select.selectpicker('refresh');
                 }
             });
         }
