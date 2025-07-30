@@ -368,7 +368,9 @@
         function clearSelect(select, placeholder) {
             select.empty();
             select.append(`<option value="0">-- Selecciona ${placeholder} --</option>`);
-            select.selectpicker('refresh');
+            if (select.hasClass('selectpicker')) {
+                select.selectpicker('refresh');
+            }
         }
 
         function limpiarGestionRoles() {
@@ -388,7 +390,9 @@
                 const select = $('#selectUnidadNegocio');
                 clearSelect(select, 'unidad de negocio');
                 r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
-                select.selectpicker('refresh');
+                if (select.hasClass('selectpicker')) {
+                    select.selectpicker('refresh');
+                }
             });
         }
 
