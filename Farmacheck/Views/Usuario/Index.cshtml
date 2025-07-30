@@ -405,7 +405,7 @@
         }
 
         function cargarMarcas(unidadId) {
-            $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', { unidadId }, function (r) {
+            $.get('@Url.Action("ListarMarcas", "Usuario")', { unidadId }, function (r) {
                 const select = $('#selectMarcas');
                 clearSelect(select, 'marca');
                 r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
