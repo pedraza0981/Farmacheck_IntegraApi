@@ -404,11 +404,24 @@
             });
         }
 
-        function cargarMarcas(unidadId) {
+                function cargarMarcas(unidadId) {
+            const select = $('#selectMarcas');
+
+            // Elimina TODAS las opciones previas, incluso si ya había múltiples placeholders
+            select.empty();
+
+            // Agrega SOLO una vez la opción de placeholder
+            select.append('<option value="0">-- Selecciona marca --</option>');
+
             $.get('@Url.Action("ListarMarcas", "Usuario")', { unidadId }, function (r) {
-                const select = $('#selectMarcas');
-                clearSelect(select, 'marca');
-                r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+                if (r.success && r.data) {
+                    r.data.forEach(m => {
+                        select.append(`<option value="${m.id}">${m.nombre}</option>`);
+                    });
+
+                    // Refresca visualmente el selectpicker
+                    select.selectpicker('refresh');
+                }
             });
         }
 
