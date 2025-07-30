@@ -88,7 +88,6 @@
                     <div class="col-md-6">
                         <label class="form-label">Seleccionar Rol</label>
                         <select class="form-select" id="selectRol">
-                            <option value="">-- Selecciona un rol --</option>
                         </select>
                     </div>
                 </div>
@@ -238,8 +237,8 @@
                 const unidadId = $(this).val();
                 cargarMarcas(unidadId);
                 cargarZonas();
-                clearSelect($('#selectSubmarcas'), 'Submarca');
-                clearSelect($('#selectFarmacias'), 'Farmacia');
+                clearSelect($('#selectSubmarcas'));
+                clearSelect($('#selectFarmacias'));
             });
 
             $('#selectMarcas').on('changed.bs.select', actualizarSubmarcas);
@@ -255,7 +254,6 @@
                 $.get('@Url.Action("Listar", "Rol")', function (r) {
                     const select = $('#selectRol');
                     select.empty();
-                    select.append('<option value="">-- Selecciona un rol --</option>');
                     r.data.forEach(rol => {
                         select.append(`<option value="${rol.id}">${rol.nombre}</option>`);
                     });
@@ -365,21 +363,20 @@
             }
         }
 
-        function clearSelect(select, placeholder) {
+        function clearSelect(select) {
             select.empty();
-            select.append(`<option value="0">-- Selecciona ${placeholder} --</option>`);
             if (select.hasClass('selectpicker')) {
                 select.selectpicker('refresh');
             }
         }
 
         function limpiarGestionRoles() {
-            clearSelect($('#selectUnidadNegocio'), 'unidad de negocio');
-            clearSelect($('#selectRolNuevo'), 'rol');
-            clearSelect($('#selectMarcas'), 'marca');
-            clearSelect($('#selectSubmarcas'), 'submarca');
-            clearSelect($('#selectZonas'), 'zona');
-            clearSelect($('#selectFarmacias'), 'farmacia');
+            clearSelect($('#selectUnidadNegocio'));
+            clearSelect($('#selectRolNuevo'));
+            clearSelect($('#selectMarcas'));
+            clearSelect($('#selectSubmarcas'));
+            clearSelect($('#selectZonas'));
+            clearSelect($('#selectFarmacias'));
             cargarUnidadesNegocio();
             cargarRolesNuevo();
             cargarZonas();
@@ -388,7 +385,7 @@
         function cargarUnidadesNegocio() {
             $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
                 const select = $('#selectUnidadNegocio');
-                clearSelect(select, 'unidad de negocio');
+                clearSelect(select);
                 r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
                 if (select.hasClass('selectpicker')) {
                     select.selectpicker('refresh');
@@ -399,7 +396,7 @@
         function cargarRolesNuevo() {
             $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
                 const select = $('#selectRolNuevo');
-                clearSelect(select, 'rol');
+                clearSelect(select);
                 r.data.forEach(x => select.append(`<option value="${x.id}">${x.nombre}</option>`));
             });
         }
@@ -407,9 +404,8 @@
         function cargarMarcas(unidadId) {
             const select = $('#selectMarcas');
 
-            // Limpia por completo el selector y agrega el placeholder una 
-            // sola vez antes de realizar la consulta
-            clearSelect(select, 'marca');
+            // Limpia por completo el selector antes de realizar la consulta
+            clearSelect(select);
 
             // Si no se ha seleccionado una unidad válida, solo refrescamos y salimos
             if (!unidadId || unidadId === '0') {
@@ -436,7 +432,7 @@
         function cargarZonas() {
             $.get('@Url.Action("Listar", "Zona")', function (r) {
                 const select = $('#selectZonas');
-                clearSelect(select, 'zona');
+                clearSelect(select);
                 r.data.forEach(z => select.append(`<option value="${z.id}">${z.nombre}</option>`));
             });
         }
@@ -445,7 +441,7 @@
             const marcas = $('#selectMarcas').val() || [];
             const subs = datasetSubmarcas.filter(s => marcas.includes(s.marcaId.toString()));
             const select = $('#selectSubmarcas');
-            clearSelect(select, 'submarca');
+            clearSelect(select);
             subs.forEach(s => select.append(`<option value="${s.id}" data-marca="${s.marcaId}">${s.nombre}</option>`));
             actualizarFarmacias();
         }
@@ -455,7 +451,7 @@
             const zonas = $('#selectZonas').val() || [];
             const farms = datasetFarmacias.filter(f => subs.includes(f.submarcaId.toString()) && zonas.includes(f.zonaId.toString()));
             const select = $('#selectFarmacias');
-            clearSelect(select, 'farmacia');
+            clearSelect(select);
             farms.forEach(f => select.append(`<option value="${f.id}">${f.nombre}</option>`));
         }
     </script>
