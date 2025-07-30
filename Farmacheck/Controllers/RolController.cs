@@ -72,6 +72,15 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
+        public async Task<JsonResult> ListarGestion()
+        {
+            var apiData = await _apiClient.GetRolesAsync();
+            var dtos = _mapper.Map<List<RoleDto>>(apiData);
+            var roles = dtos.Select(r => new { id = r.Id, nombre = r.Nombre });
+            return Json(new { success = true, data = roles });
+        }
+
+        [HttpGet]
         public async Task<JsonResult> Obtener(int id)
         {
             var entidad = await _apiClient.GetRoleAsync((byte)id);
