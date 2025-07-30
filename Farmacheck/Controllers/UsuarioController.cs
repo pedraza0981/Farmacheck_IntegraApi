@@ -13,11 +13,13 @@ namespace Farmacheck.Controllers
     public class UsuarioController : Controller
     {
         private readonly IUserApiClient _apiClient;
+        private readonly IBrandApiClient _brandApi;
         private readonly IMapper _mapper;
 
-        public UsuarioController(IUserApiClient apiClient, IMapper mapper)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper)
         {
             _apiClient = apiClient;
+            _brandApi = brandApi;
             _mapper = mapper;
         }
 
@@ -50,6 +52,16 @@ namespace Farmacheck.Controllers
             var dto = _mapper.Map<UserDto>(entidad);
             var model = _mapper.Map<UsuarioViewModel>(dto);
             return Json(new { success = true, data = model });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarMarcas(int unidadId)
+        {
+            var apiData = await _brandApi.GetBrandsByBusinessUnitAsync(unidadId);
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
+            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
+
+            return Json(new { success = true, data = marcas });
         }
 
         [HttpPost]
