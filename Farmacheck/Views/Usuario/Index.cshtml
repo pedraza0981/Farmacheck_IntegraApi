@@ -25,6 +25,7 @@
     </table>
 </div>
 
+
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -119,10 +120,66 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalGestionarRoles" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title">Gestionar Roles</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label>Unidad de Negocio</label>
+                    <select id="selectUnidadNegocio" class="form-select"></select>
+                </div>
+                <div class="mb-2">
+                    <label>Rol</label>
+                    <select id="selectRolNuevo" class="form-select"></select>
+                </div>
+                <div class="mb-2">
+                    <label>Marcas</label>
+                    <select id="selectMarcas" class="selectpicker" multiple data-live-search="true"></select>
+                </div>
+                <div class="mb-2">
+                    <label>Submarcas</label>
+                    <select id="selectSubmarcas" class="selectpicker" multiple data-live-search="true"></select>
+                </div>
+                <div class="mb-2">
+                    <label>Zonas</label>
+                    <select id="selectZonas" class="selectpicker" multiple data-live-search="true"></select>
+                </div>
+                <div class="mb-2">
+                    <label>Farmacias</label>
+                    <select id="selectFarmacias" class="selectpicker" multiple data-live-search="true"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelarGestionRoles" type="button" class="btn btn-outline-secondary">Cancelar</button>
+                <button id="btnGuardarGestionRoles" type="button" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
+
     <script>
+        const datasetSubmarcas = [
+            { id: 1, marcaId: 1, nombre: 'Submarca A1' },
+            { id: 2, marcaId: 1, nombre: 'Submarca A2' },
+            { id: 3, marcaId: 2, nombre: 'Submarca B1' }
+        ];
+        const datasetFarmacias = [
+            { id: 1, nombre: 'Farmacia 1', submarcaId: 1, zonaId: 1 },
+            { id: 2, nombre: 'Farmacia 2', submarcaId: 2, zonaId: 1 },
+            { id: 3, nombre: 'Farmacia 3', submarcaId: 3, zonaId: 2 }
+        ];
+
         $(document).ready(function () {
+            $('.selectpicker').selectpicker();
             cargar();
 
             $('#btnNuevo').click(function () {
@@ -161,6 +218,36 @@
                         }
                     }
                 });
+            });
+
+            $('#btnGestionarRoles').click(function () {
+                $('#modalEntidad').modal('hide');
+                limpiarGestionRoles();
+                $('#modalGestionarRoles').modal('show');
+            });
+
+            $('#btnCancelarGestionRoles').click(function () {
+                $('#modalGestionarRoles').modal('hide');
+            });
+
+            $('#modalGestionarRoles').on('hidden.bs.modal', function () {
+                $('#modalEntidad').modal('show');
+            });
+
+            $('#selectUnidadNegocio').on('change', function () {
+                const unidadId = $(this).val();
+                cargarMarcas(unidadId);
+                cargarZonas();
+                clearSelect($('#selectSubmarcas'), 'Submarca');
+                clearSelect($('#selectFarmacias'), 'Farmacia');
+            });
+
+            $('#selectMarcas').on('changed.bs.select', actualizarSubmarcas);
+            $('#selectSubmarcas').on('changed.bs.select', actualizarFarmacias);
+            $('#selectZonas').on('changed.bs.select', actualizarFarmacias);
+
+            $('#btnGuardarGestionRoles').click(function () {
+                alert('Información guardada correctamente');
             });
         });
 
@@ -276,6 +363,75 @@
             if ($('#tablaRoles tbody tr').length === 1) {
                 $('#noRolesRow').show();
             }
+        }
+
+        function clearSelect(select, placeholder) {
+            select.empty();
+            select.append(`<option value="0">-- Selecciona ${placeholder} --</option>`);
+            select.selectpicker('refresh');
+        }
+
+        function limpiarGestionRoles() {
+            clearSelect($('#selectUnidadNegocio'), 'unidad de negocio');
+            clearSelect($('#selectRolNuevo'), 'rol');
+            clearSelect($('#selectMarcas'), 'marca');
+            clearSelect($('#selectSubmarcas'), 'submarca');
+            clearSelect($('#selectZonas'), 'zona');
+            clearSelect($('#selectFarmacias'), 'farmacia');
+            cargarUnidadesNegocio();
+            cargarRolesNuevo();
+            cargarZonas();
+        }
+
+        function cargarUnidadesNegocio() {
+            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+                const select = $('#selectUnidadNegocio');
+                clearSelect(select, 'unidad de negocio');
+                r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                select.selectpicker('refresh');
+            });
+        }
+
+        function cargarRolesNuevo() {
+            $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
+                const select = $('#selectRolNuevo');
+                clearSelect(select, 'rol');
+                r.data.forEach(x => select.append(`<option value="${x.id}">${x.nombre}</option>`));
+            });
+        }
+
+        function cargarMarcas(unidadId) {
+            $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', { unidadId }, function (r) {
+                const select = $('#selectMarcas');
+                clearSelect(select, 'marca');
+                r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+            });
+        }
+
+        function cargarZonas() {
+            $.get('@Url.Action("Listar", "Zona")', function (r) {
+                const select = $('#selectZonas');
+                clearSelect(select, 'zona');
+                r.data.forEach(z => select.append(`<option value="${z.id}">${z.nombre}</option>`));
+            });
+        }
+
+        function actualizarSubmarcas() {
+            const marcas = $('#selectMarcas').val() || [];
+            const subs = datasetSubmarcas.filter(s => marcas.includes(s.marcaId.toString()));
+            const select = $('#selectSubmarcas');
+            clearSelect(select, 'submarca');
+            subs.forEach(s => select.append(`<option value="${s.id}" data-marca="${s.marcaId}">${s.nombre}</option>`));
+            actualizarFarmacias();
+        }
+
+        function actualizarFarmacias() {
+            const subs = $('#selectSubmarcas').val() || [];
+            const zonas = $('#selectZonas').val() || [];
+            const farms = datasetFarmacias.filter(f => subs.includes(f.submarcaId.toString()) && zonas.includes(f.zonaId.toString()));
+            const select = $('#selectFarmacias');
+            clearSelect(select, 'farmacia');
+            farms.forEach(f => select.append(`<option value="${f.id}">${f.nombre}</option>`));
         }
     </script>
 }
