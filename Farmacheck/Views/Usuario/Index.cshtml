@@ -142,8 +142,7 @@
 
             // Si ya hay unidad seleccionada, cargar sus marcas
             if (unidadId) {
-                const marcasPreseleccionadas = [1]; // estos IDs deben coincidir con los que vienen del backend
-                    cargarMarcas(unidadId, marcasPreseleccionadas);
+                cargarMarcas(unidadId);
             }
         });
 
@@ -153,8 +152,7 @@
             document.getElementById("unidadDeNegocioSelect").addEventListener("change", function () {
                 const unidadId = this.value;
                 if (unidadId) {
-                    const marcasPreseleccionadas = [1]; // estos IDs deben coincidir con los que vienen del backend
-                    cargarMarcas(unidadId, marcasPreseleccionadas);
+                    cargarMarcas(unidadId);
                 } else {
          
                     const marcasSelect = document.getElementById("marcasSelect");
@@ -236,44 +234,7 @@
         }
 
 
-        // async function cargarMarcas(unidadId) {
-        //     try {
-        //         const url = '@Url.Action("ListarMarcas", "Usuario")' + `?unidadId=${unidadId}`;
-        //         const response = await fetch(url);
-        //         const result = await response.json();
-
-        //         const select = document.getElementById("marcasSelect");
-
-        //         // Si ya hay una instancia de Choices, destruirla y limpiar el select
-        //         if (choicesMarcas) {
-        //             choicesMarcas.destroy();
-        //             choicesMarcas = null;
-        //         }
-
-        //         select.innerHTML = ''; // Limpiar opciones anteriores
-
-        //         if (result.success) {
-        //             result.data.forEach(marca => {
-        //                 const option = document.createElement("option");
-        //                 option.value = marca.id;
-        //                 option.text = marca.nombre;
-        //                 select.appendChild(option);
-        //             });
-        //         }
-
-        //         // Crear nueva instancia con los datos nuevos
-        //         choicesMarcas = new Choices(select, {
-        //             removeItemButton: true,
-        //             placeholderValue: 'Selecciona marcas...',
-        //             searchPlaceholderValue: 'Buscar...',
-        //         });
-
-        //     } catch (error) {
-        //         console.error("Error cargando marcas:", error);
-        //     }
-        // }
-
-                async function cargarMarcas(unidadId, seleccionadas = []) {
+        async function cargarMarcas(unidadId) {
             try {
                 const url = '@Url.Action("ListarMarcas", "Usuario")' + `?unidadId=${unidadId}`;
                 const response = await fetch(url);
@@ -281,6 +242,7 @@
 
                 const select = document.getElementById("marcasSelect");
 
+                // Si ya hay una instancia de Choices, destruirla y limpiar el select
                 if (choicesMarcas) {
                     choicesMarcas.destroy();
                     choicesMarcas = null;
@@ -293,15 +255,11 @@
                         const option = document.createElement("option");
                         option.value = marca.id;
                         option.text = marca.nombre;
-
-                        if (seleccionadas.includes(parseInt(marca.id))) {
-                            option.selected = true;
-                        }
-
                         select.appendChild(option);
                     });
                 }
 
+                // Crear nueva instancia con los datos nuevos
                 choicesMarcas = new Choices(select, {
                     removeItemButton: true,
                     placeholderValue: 'Selecciona marcas...',
@@ -312,6 +270,7 @@
                 console.error("Error cargando marcas:", error);
             }
         }
+
 
 
 
