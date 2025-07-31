@@ -2,10 +2,6 @@
 @{
     ViewData["Title"] = "Usuarios";
 }
-<head>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-</head>
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -86,7 +82,7 @@
 
                         <select id="unidadDeNegocioSelect" class="form-select"></select>
 
-                        <select id="marcasSelect" class="choices-dropdown" multiple></select>
+                        
 
                         
                     </div>
@@ -131,39 +127,9 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     
-
     <script>
-        let choicesMarcas;
-
-                $('#modalEntidad').on('shown.bs.modal', function () {
-            const unidadId = $('#unidadDeNegocioSelect').val();
-
-            // Si ya hay unidad seleccionada, cargar sus marcas
-            if (unidadId) {
-                cargarMarcas(unidadId);
-            }
-        });
-
-         document.addEventListener('DOMContentLoaded', function () {         
-
-            cargarUnidadesNegocio();         
-            document.getElementById("unidadDeNegocioSelect").addEventListener("change", function () {
-                const unidadId = this.value;
-                if (unidadId) {
-                    cargarMarcas(unidadId);
-                } else {
-         
-                    const marcasSelect = document.getElementById("marcasSelect");
-                    marcasSelect.innerHTML = '';
-                }
-            });
-
-        });
-
-
-
+       
         $(document).ready(function () {
             cargar();
             cargarUnidadesNegocio();            
@@ -230,44 +196,6 @@
 
             } catch (error) {
                 console.error("Error cargando unidades de negocio:", error);
-            }
-        }
-
-
-        async function cargarMarcas(unidadId) {
-            try {
-                const url = '@Url.Action("ListarMarcas", "Usuario")' + `?unidadId=${unidadId}`;
-                const response = await fetch(url);
-                const result = await response.json();
-
-                const select = document.getElementById("marcasSelect");
-
-                // Si ya hay una instancia de Choices, destruirla y limpiar el select
-                if (choicesMarcas) {
-                    choicesMarcas.destroy();
-                    choicesMarcas = null;
-                }
-
-                select.innerHTML = ''; // Limpiar opciones anteriores
-
-                if (result.success) {
-                    result.data.forEach(marca => {
-                        const option = document.createElement("option");
-                        option.value = marca.id;
-                        option.text = marca.nombre;
-                        select.appendChild(option);
-                    });
-                }
-
-                // Crear nueva instancia con los datos nuevos
-                choicesMarcas = new Choices(select, {
-                    removeItemButton: true,
-                    placeholderValue: 'Selecciona marcas...',
-                    searchPlaceholderValue: 'Buscar...',
-                });
-
-            } catch (error) {
-                console.error("Error cargando marcas:", error);
             }
         }
 
@@ -366,19 +294,7 @@
             $('#selectRol').val('');
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
 
-            const marcasSelect = document.getElementById("marcasSelect");
-            marcasSelect.innerHTML = '';
-
-            if (choicesMarcas) {
-                choicesMarcas.destroy();
-                choicesMarcas = null;
-            }
-
-            choicesMarcas = new Choices(marcasSelect, {
-                removeItemButton: true,
-                placeholderValue: 'Selecciona marcas...',
-                searchPlaceholderValue: 'Buscar...',
-            });
+            
         }
         function agregarRolARelacion(rol, farmacia, unidadNegocio) {
             $('#noRolesRow').hide();
