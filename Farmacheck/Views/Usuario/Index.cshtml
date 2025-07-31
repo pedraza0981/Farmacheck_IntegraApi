@@ -92,6 +92,11 @@
                             <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                         </div>
 
+                        <div class="mt-3">
+                            <label class="form-label">Zonas</label>
+                            <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                        </div>
+
 
                     </div>
                 </div>
@@ -141,6 +146,7 @@
         $(document).ready(function () {
             cargar();
             cargarUnidadesNegocio();
+            cargarZonas();
             $('#unidadDeNegocioSelect').change(function () {
                 cargarMarcas($(this).val());
             });
@@ -267,6 +273,23 @@
             });
         }
 
+        function cargarZonas() {
+            const contenedor = $('#contenedorZonas');
+            contenedor.empty();
+            $.get('@Url.Action("ListarZonas", "Usuario")', function (r) {
+                if (r.success) {
+                    r.data.forEach(z => {
+                        contenedor.append(`
+                            <div class="form-check">
+                                <input class="form-check-input zona-check" type="checkbox" value="${z.id}" id="zona_${z.id}">
+                                <label class="form-check-label" for="zona_${z.id}">${z.nombre}</label>
+                            </div>
+                        `);
+                    });
+                }
+            });
+        }
+
 
         function cargarSelectorRoles() {
                 $.get('@Url.Action("Listar", "Rol")', function (r) {
@@ -359,6 +382,8 @@
             $('#estatus').val('true');
             $('#selectRol').val('');
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
+
+            $('#contenedorZonas .zona-check').prop('checked', false);
 
             
         }
