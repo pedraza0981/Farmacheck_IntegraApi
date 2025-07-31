@@ -7,7 +7,7 @@ namespace Farmacheck.Application.Interfaces
     {
         Task<List<SubbrandResponse>> GetSubbrandsAsync();
         Task<List<SubbrandResponse>> GetSubbrandsByPageAsync(int page, int items);
-        Task<List<SubbrandResponse>> GetSubbrandsByBrandAsync(int brandId);
+        Task<List<SubbrandResponse>> GetSubbrandsByBrandsAsync(List<int> brands);
         Task<SubbrandResponse?> GetSubbrandAsync(int id);
         Task<int> CreateAsync(SubbrandRequest request);
         Task<bool> UpdateAsync(UpdateSubbrandRequest request);
