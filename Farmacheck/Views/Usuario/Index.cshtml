@@ -87,6 +87,11 @@
                             <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                         </div>
 
+                        <div class="mt-3">
+                            <label class="form-label">Submarcas</label>
+                            <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                        </div>
+
 
                     </div>
                 </div>
@@ -138,6 +143,14 @@
             cargarUnidadesNegocio();
             $('#unidadDeNegocioSelect').change(function () {
                 cargarMarcas($(this).val());
+            });
+
+            $('#contenedorMarcas').on('change', '.marca-check', function () {
+                const seleccionadas = $('#contenedorMarcas .marca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+
+                cargarSubMarcas(seleccionadas);
             });
             $('#btnNuevo').click(function () {
                 limpiar();
@@ -208,7 +221,9 @@
 
         function cargarMarcas(unidadId) {
             const contenedor = $('#contenedorMarcas');
+            const contenedorSub = $('#contenedorSubMarcas');
             contenedor.empty();
+            contenedorSub.empty();
             if (!unidadId) {
                 return;
             }
@@ -222,6 +237,32 @@
                             </div>
                         `);
                     });
+                }
+            });
+        }
+
+        function cargarSubMarcas(marcaIds) {
+            const contenedor = $('#contenedorSubMarcas');
+            contenedor.empty();
+            if (!marcaIds || marcaIds.length === 0) {
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("ListarPorMarca", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { marcaId: marcaIds },
+                success: function (r) {
+                    if (r.success) {
+                        r.data.forEach(s => {
+                            contenedor.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input submarca-check" type="checkbox" value="${s.id}" id="submarca_${s.id}">
+                                    <label class="form-check-label" for="submarca_${s.id}">${s.nombre}</label>
+                                </div>
+                            `);
+                        });
+                    }
                 }
             });
         }
