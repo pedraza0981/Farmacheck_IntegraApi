@@ -15,12 +15,14 @@ namespace Farmacheck.Controllers
         private readonly IUserApiClient _apiClient;
         private readonly IBrandApiClient _brandApi;
         private readonly IMapper _mapper;
+        private readonly IBusinessUnitApiClient _businessUnitApi;
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
             _mapper = mapper;
+            _businessUnitApi = businessUnitApi;
         }
 
         public async Task<IActionResult> Index()
@@ -63,6 +65,18 @@ namespace Farmacheck.Controllers
 
             return Json(new { success = true, data = marcas });
         }
+
+
+        [HttpGet]
+        public async Task<JsonResult> ListarUnidadesNegocio()
+        {
+            var apiData = await _businessUnitApi.GetBusinessUnitsAsync();
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
+            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+
+            return Json(new { success = true, data = unidades });
+        }
+
 
         [HttpPost]
         public async Task<JsonResult> Guardar([FromBody] UsuarioViewModel model)

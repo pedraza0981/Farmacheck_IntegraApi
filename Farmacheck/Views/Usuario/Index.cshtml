@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Usuarios";
 }
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+</head>
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -65,29 +69,36 @@
                     </div>
                 </div>
 
-                
+
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <button id="btnResetPassword" type="button" class="btn w-100" style="background-color: #00ab8e; color: white;">
                             <i class="bi bi-arrow-counterclockwise"></i> Reestablecer Password
                         </button>
                     </div>
-                    
+
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <button id="btnGestionarRoles" type="button" class="btn w-100" style="background-color: #79b828; color: white;">
                             <i class="bi bi-gear"></i> Gestionar Roles
                         </button>
+
+                        <select id="unidadDeNegocioSelect" class="form-select"></select>
+
+                        <select id="marcasSelect" class="choices-dropdown" multiple></select>
+
+                        
                     </div>
                 </div>
 
-                
+
                 <div class="row mb-3">
-                    
+
                     <div class="col-md-6">
                         <label class="form-label">Seleccionar Rol</label>
                         <select class="form-select" id="selectRol">
+                            <option value="">-- Selecciona un rol --</option>
                         </select>
                     </div>
                 </div>
@@ -119,73 +130,52 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalGestionarRoles" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary_form text-white">
-                <h5 class="modal-title">Gestionar Roles</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-2">
-                    <label>Unidad de Negocio</label>
-                    <select id="selectUnidadNegocio" class="form-select"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Rol</label>
-                    <select id="selectRolNuevo" class="form-select"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Marcas</label>
-                    <select id="selectMarcas" class="selectpicker" multiple data-live-search="true"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Submarcas</label>
-                    <select id="selectSubmarcas" class="selectpicker" multiple data-live-search="true"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Zonas</label>
-                    <select id="selectZonas" class="selectpicker" multiple data-live-search="true"></select>
-                </div>
-                <div class="mb-2">
-                    <label>Farmacias</label>
-                    <select id="selectFarmacias" class="selectpicker" multiple data-live-search="true"></select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="btnCancelarGestionRoles" type="button" class="btn btn-outline-secondary">Cancelar</button>
-                <button id="btnGuardarGestionRoles" type="button" class="btn btn-primary">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    
 
     <script>
-        const datasetSubmarcas = [
-            { id: 1, marcaId: 1, nombre: 'Submarca A1' },
-            { id: 2, marcaId: 1, nombre: 'Submarca A2' },
-            { id: 3, marcaId: 2, nombre: 'Submarca B1' }
-        ];
-        const datasetFarmacias = [
-            { id: 1, nombre: 'Farmacia 1', submarcaId: 1, zonaId: 1 },
-            { id: 2, nombre: 'Farmacia 2', submarcaId: 2, zonaId: 1 },
-            { id: 3, nombre: 'Farmacia 3', submarcaId: 3, zonaId: 2 }
-        ];
+        let choicesMarcas;
+
+                $('#modalEntidad').on('shown.bs.modal', function () {
+            const unidadId = $('#unidadDeNegocioSelect').val();
+
+            // Si ya hay unidad seleccionada, cargar sus marcas
+            if (unidadId) {
+                const marcasPreseleccionadas = [1]; // estos IDs deben coincidir con los que vienen del backend
+                    cargarMarcas(unidadId, marcasPreseleccionadas);
+            }
+        });
+
+         document.addEventListener('DOMContentLoaded', function () {         
+
+            cargarUnidadesNegocio();         
+            document.getElementById("unidadDeNegocioSelect").addEventListener("change", function () {
+                const unidadId = this.value;
+                if (unidadId) {
+                    const marcasPreseleccionadas = [1]; // estos IDs deben coincidir con los que vienen del backend
+                    cargarMarcas(unidadId, marcasPreseleccionadas);
+                } else {
+         
+                    const marcasSelect = document.getElementById("marcasSelect");
+                    marcasSelect.innerHTML = '';
+                }
+            });
+
+        });
+
+
 
         $(document).ready(function () {
-            $('.selectpicker').selectpicker();
             cargar();
-
+            cargarUnidadesNegocio();            
             $('#btnNuevo').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nuevo usuario');
                 $('#modalEntidad').modal('show');
             });
+
+
 
             $('#btnGuardar').click(function () {
                 const id = $('#entidadId').val() || 0;
@@ -218,42 +208,118 @@
                     }
                 });
             });
-
-            $('#btnGestionarRoles').click(function () {
-                $('#modalEntidad').modal('hide');
-                limpiarGestionRoles();
-                $('#modalGestionarRoles').modal('show');
-            });
-
-            $('#btnCancelarGestionRoles').click(function () {
-                $('#modalGestionarRoles').modal('hide');
-            });
-
-            $('#modalGestionarRoles').on('hidden.bs.modal', function () {
-                $('#modalEntidad').modal('show');
-            });
-
-            $('#selectUnidadNegocio').on('change', function () {
-                const unidadId = $(this).val();
-                cargarMarcas(unidadId);
-                cargarZonas();
-                clearSelect($('#selectSubmarcas'));
-                clearSelect($('#selectFarmacias'));
-            });
-
-            $('#selectMarcas').on('changed.bs.select', actualizarSubmarcas);
-            $('#selectSubmarcas').on('changed.bs.select', actualizarFarmacias);
-            $('#selectZonas').on('changed.bs.select', actualizarFarmacias);
-
-            $('#btnGuardarGestionRoles').click(function () {
-                alert('Información guardada correctamente');
-            });
         });
+
+        async function cargarUnidadesNegocio() {
+            try {
+                const url = '@Url.Action("ListarUnidadesNegocio", "Usuario")';
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    const select = document.getElementById("unidadDeNegocioSelect");
+                    select.innerHTML = '<option value="">-- Selecciona una unidad --</option>';
+
+                    result.data.forEach(unidad => {
+                        const option = document.createElement("option");
+                        option.value = unidad.id;
+                        option.text = unidad.nombre;
+                        select.appendChild(option);
+                    });
+                } else {
+                    console.error("No se pudieron obtener las unidades de negocio.");
+                }
+
+            } catch (error) {
+                console.error("Error cargando unidades de negocio:", error);
+            }
+        }
+
+
+        // async function cargarMarcas(unidadId) {
+        //     try {
+        //         const url = '@Url.Action("ListarMarcas", "Usuario")' + `?unidadId=${unidadId}`;
+        //         const response = await fetch(url);
+        //         const result = await response.json();
+
+        //         const select = document.getElementById("marcasSelect");
+
+        //         // Si ya hay una instancia de Choices, destruirla y limpiar el select
+        //         if (choicesMarcas) {
+        //             choicesMarcas.destroy();
+        //             choicesMarcas = null;
+        //         }
+
+        //         select.innerHTML = ''; // Limpiar opciones anteriores
+
+        //         if (result.success) {
+        //             result.data.forEach(marca => {
+        //                 const option = document.createElement("option");
+        //                 option.value = marca.id;
+        //                 option.text = marca.nombre;
+        //                 select.appendChild(option);
+        //             });
+        //         }
+
+        //         // Crear nueva instancia con los datos nuevos
+        //         choicesMarcas = new Choices(select, {
+        //             removeItemButton: true,
+        //             placeholderValue: 'Selecciona marcas...',
+        //             searchPlaceholderValue: 'Buscar...',
+        //         });
+
+        //     } catch (error) {
+        //         console.error("Error cargando marcas:", error);
+        //     }
+        // }
+
+                async function cargarMarcas(unidadId, seleccionadas = []) {
+            try {
+                const url = '@Url.Action("ListarMarcas", "Usuario")' + `?unidadId=${unidadId}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                const select = document.getElementById("marcasSelect");
+
+                if (choicesMarcas) {
+                    choicesMarcas.destroy();
+                    choicesMarcas = null;
+                }
+
+                select.innerHTML = ''; // Limpiar opciones anteriores
+
+                if (result.success) {
+                    result.data.forEach(marca => {
+                        const option = document.createElement("option");
+                        option.value = marca.id;
+                        option.text = marca.nombre;
+
+                        if (seleccionadas.includes(parseInt(marca.id))) {
+                            option.selected = true;
+                        }
+
+                        select.appendChild(option);
+                    });
+                }
+
+                choicesMarcas = new Choices(select, {
+                    removeItemButton: true,
+                    placeholderValue: 'Selecciona marcas...',
+                    searchPlaceholderValue: 'Buscar...',
+                });
+
+            } catch (error) {
+                console.error("Error cargando marcas:", error);
+            }
+        }
+
+
 
         function cargarSelectorRoles() {
                 $.get('@Url.Action("Listar", "Rol")', function (r) {
                     const select = $('#selectRol');
                     select.empty();
+                    select.append('<option value="">-- Selecciona un rol --</option>');
                     r.data.forEach(rol => {
                         select.append(`<option value="${rol.id}">${rol.nombre}</option>`);
                     });
@@ -340,6 +406,20 @@
             $('#estatus').val('true');
             $('#selectRol').val('');
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
+
+            const marcasSelect = document.getElementById("marcasSelect");
+            marcasSelect.innerHTML = '';
+
+            if (choicesMarcas) {
+                choicesMarcas.destroy();
+                choicesMarcas = null;
+            }
+
+            choicesMarcas = new Choices(marcasSelect, {
+                removeItemButton: true,
+                placeholderValue: 'Selecciona marcas...',
+                searchPlaceholderValue: 'Buscar...',
+            });
         }
         function agregarRolARelacion(rol, farmacia, unidadNegocio) {
             $('#noRolesRow').hide();
@@ -361,98 +441,6 @@
             if ($('#tablaRoles tbody tr').length === 1) {
                 $('#noRolesRow').show();
             }
-        }
-
-        function clearSelect(select) {
-            select.empty();
-            if (select.hasClass('selectpicker')) {
-                select.selectpicker('refresh');
-            }
-        }
-
-        function limpiarGestionRoles() {
-            clearSelect($('#selectUnidadNegocio'));
-            clearSelect($('#selectRolNuevo'));
-            clearSelect($('#selectMarcas'));
-            clearSelect($('#selectSubmarcas'));
-            clearSelect($('#selectZonas'));
-            clearSelect($('#selectFarmacias'));
-            cargarUnidadesNegocio();
-            cargarRolesNuevo();
-            cargarZonas();
-        }
-
-        function cargarUnidadesNegocio() {
-            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
-                const select = $('#selectUnidadNegocio');
-                clearSelect(select);
-                r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
-                if (select.hasClass('selectpicker')) {
-                    select.selectpicker('refresh');
-                }
-            });
-        }
-
-        function cargarRolesNuevo() {
-            $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
-                const select = $('#selectRolNuevo');
-                clearSelect(select);
-                r.data.forEach(x => select.append(`<option value="${x.id}">${x.nombre}</option>`));
-            });
-        }
-
-        function cargarMarcas(unidadId) {
-            const select = $('#selectMarcas');
-
-            // Limpia por completo el selector antes de realizar la consulta
-            clearSelect(select);
-
-            // Si no se ha seleccionado una unidad válida, solo refrescamos y salimos
-            if (!unidadId || unidadId === '0') {
-                if (select.hasClass('selectpicker')) {
-                    select.selectpicker('refresh');
-                }
-                return;
-            }
-
-            $.get('@Url.Action("ListarMarcas", "Usuario")', { unidadId }, function (r) {
-                if (r.success && r.data) {
-                    r.data.forEach(m => {
-                        select.append(`<option value="${m.id}">${m.nombre}</option>`);
-                    });
-                }
-
-                // Refresca visualmente el selectpicker después de actualizar las opciones
-                if (select.hasClass('selectpicker')) {
-                    select.selectpicker('refresh');
-                }
-            });
-        }
-
-        function cargarZonas() {
-            $.get('@Url.Action("Listar", "Zona")', function (r) {
-                const select = $('#selectZonas');
-                clearSelect(select);
-                r.data.forEach(z => select.append(`<option value="${z.id}">${z.nombre}</option>`));
-            });
-        }
-
-        function actualizarSubmarcas() {
-            const marcas = $('#selectMarcas').val() || [];
-            const subs = datasetSubmarcas.filter(s => marcas.includes(s.marcaId.toString()));
-            const select = $('#selectSubmarcas');
-            clearSelect(select);
-            subs.forEach(s => select.append(`<option value="${s.id}" data-marca="${s.marcaId}">${s.nombre}</option>`));
-            actualizarFarmacias();
-        }
-
-        function actualizarFarmacias() {
-            const subs = $('#selectSubmarcas').val() || [];
-            const zonas = $('#selectZonas').val() || [];
-            const farms = datasetFarmacias.filter(f => subs.includes(f.submarcaId.toString()) && zonas.includes(f.zonaId.toString()));
-            const select = $('#selectFarmacias');
-            clearSelect(select);
-            farms.forEach(f => select.append(`<option value="${f.id}">${f.nombre}</option>`));
         }
     </script>
 }
