@@ -132,12 +132,10 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
+    
 
     <script>
         let choicesMarcas;
-        // Arreglo de IDs de marcas que deberán aparecer seleccionadas
-        let marcasSeleccionadas = [];
 
                 $('#modalEntidad').on('shown.bs.modal', function () {
             const unidadId = $('#unidadDeNegocioSelect').val();
@@ -257,12 +255,6 @@
                         const option = document.createElement("option");
                         option.value = marca.id;
                         option.text = marca.nombre;
-
-                        // Marcar como seleccionada si la marca está en el arreglo
-                        if (marcasSeleccionadas.includes(marca.id)) {
-                            option.selected = true;
-                        }
-
                         select.appendChild(option);
                     });
                 }
@@ -273,11 +265,6 @@
                     placeholderValue: 'Selecciona marcas...',
                     searchPlaceholderValue: 'Buscar...',
                 });
-
-                // Reflejar las marcas seleccionadas en el componente Choices
-                if (marcasSeleccionadas.length) {
-                    choicesMarcas.setChoiceByValue(marcasSeleccionadas.map(String));
-                }
 
             } catch (error) {
                 console.error("Error cargando marcas:", error);
@@ -378,9 +365,6 @@
             $('#estatus').val('true');
             $('#selectRol').val('');
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
-
-            // Limpiar arreglo de marcas seleccionadas
-            marcasSeleccionadas = [];
 
             const marcasSelect = document.getElementById("marcasSelect");
             marcasSelect.innerHTML = '';
