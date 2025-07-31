@@ -16,13 +16,15 @@ namespace Farmacheck.Controllers
         private readonly IBrandApiClient _brandApi;
         private readonly IMapper _mapper;
         private readonly IBusinessUnitApiClient _businessUnitApi;
+        private readonly ISubbrandApiClient _subbrandApi;
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
             _mapper = mapper;
             _businessUnitApi = businessUnitApi;
+            _subbrandApi = subbrandApi;
         }
 
         public async Task<IActionResult> Index()
@@ -56,16 +58,7 @@ namespace Farmacheck.Controllers
             return Json(new { success = true, data = model });
         }
 
-        [HttpGet]
-        public async Task<JsonResult> ListarMarcas(int unidadId)
-        {
-            var apiData = await _brandApi.GetBrandsByBusinessUnitAsync(unidadId);
-            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
-            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
-
-            return Json(new { success = true, data = marcas });
-        }
-
+        
 
         [HttpGet]
         public async Task<JsonResult> ListarUnidadesNegocio()
@@ -76,7 +69,24 @@ namespace Farmacheck.Controllers
 
             return Json(new { success = true, data = unidades });
         }
+        [HttpGet]
+        public async Task<JsonResult> ListarMarcas(int unidadId)
+        {
+            var apiData = await _brandApi.GetBrandsByBusinessUnitAsync(unidadId);
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
+            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
 
+            return Json(new { success = true, data = marcas });
+        }
+        [HttpGet]
+        public async Task<JsonResult> ListarPorMarca(int marcaId)
+        {
+            var apiData = await _subbrandApi.GetSubbrandsByBrandsAsync(new List<int> { marcaId });
+            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
+            var submarcas = _mapper.Map<List<SubMarca>>(dtos);
+
+            return Json(new { success = true, data = submarcas });
+        }
 
         [HttpPost]
         public async Task<JsonResult> Guardar([FromBody] UsuarioViewModel model)
