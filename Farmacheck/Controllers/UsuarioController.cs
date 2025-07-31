@@ -17,14 +17,16 @@ namespace Farmacheck.Controllers
         private readonly IMapper _mapper;
         private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly ISubbrandApiClient _subbrandApi;
+        private readonly IZoneApiClient _zoneApi;
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
             _mapper = mapper;
             _businessUnitApi = businessUnitApi;
             _subbrandApi = subbrandApi;
+            _zoneApi = zoneApi;
         }
 
         public async Task<IActionResult> Index()
@@ -86,6 +88,16 @@ namespace Farmacheck.Controllers
             var submarcas = _mapper.Map<List<SubMarca>>(dtos);
 
             return Json(new { success = true, data = submarcas });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarZonas()
+        {
+            var apiData = await _zoneApi.GetZonesAsync();
+            var dtos = _mapper.Map<List<ZonaDto>>(apiData);
+            var zonas = _mapper.Map<List<ZonaViewModel>>(dtos);
+
+            return Json(new { success = true, data = zonas });
         }
 
         [HttpPost]
