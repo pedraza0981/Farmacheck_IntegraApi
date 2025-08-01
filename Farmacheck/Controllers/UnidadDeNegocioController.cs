@@ -9,6 +9,7 @@ using AutoMapper;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.BusinessUnits;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Controllers
 {
@@ -16,6 +17,7 @@ namespace Farmacheck.Controllers
     {
         private readonly IBusinessUnitApiClient _apiClient;
         private readonly IMapper _mapper;
+        private const int _itemsPerPage = 5;
 
         public UnidadDeNegocioController(IBusinessUnitApiClient apiClient, IMapper mapper)
         {
@@ -23,21 +25,19 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var apiData = await _apiClient.GetBusinessUnitsAsync();
-            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
-            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
-            return View(unidades);
+            var result = await ObtenerUnidadesAsync(page, _itemsPerPage);
+            ViewBag.Page = page;
+            ViewBag.HasMore = result.HasNextPage;
+            return View(result.Items.ToList());
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar()
+        public async Task<JsonResult> Listar(int page = 1)
         {
-            var apiData = await _apiClient.GetBusinessUnitsAsync();
-            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
-            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
-            return Json(new { success = true, data = unidades });
+            var result = await ObtenerUnidadesAsync(page, _itemsPerPage);
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
@@ -66,9 +66,6 @@ namespace Farmacheck.Controllers
                     await LogotipoArchivo.CopyToAsync(ms);
                     model.Logotipo = Convert.ToBase64String(ms.ToArray());
                     model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
-                    model.Estatus = true;
-
-
                 }
 
                 var request = _mapper.Map<BusinessUnitRequest>(model);
@@ -99,6 +96,14 @@ namespace Farmacheck.Controllers
         {
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
+        }
+
+        private async Task<PaginatedResponse<UnidadDeNegocio>> ObtenerUnidadesAsync(int page, int items)
+        {
+            var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, items);
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
+            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+            return new PaginatedResponse<UnidadDeNegocio>(unidades, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
         }
     }
 }
