@@ -29,6 +29,15 @@
         </thead>
         <tbody></tbody>
     </table>
+    <div class="d-flex justify-content-end">
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
+                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
+                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
@@ -52,6 +61,10 @@
                     <label>Dirección</label>
                     <input type="text" class="form-control" id="direccion" placeholder="Dirección" />
                 </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck" checked disabled>
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                </div>
                 <div class="mb-2">
                     <label>Logotipo</label>
                     <input type="file" class="form-control" id="logotipoArchivo" accept="image/*" />
@@ -68,12 +81,28 @@
 
 @section Scripts {
     <script>
+        var pagina = @ViewBag.Page ?? 1;
+        var pageSize = 5;
+
         $(document).ready(function () {
-            cargar();
-            
+            cargar(pagina);
+
+            $('#btnPrev').click(function () {
+                if (pagina > 1) {
+                    pagina--;
+                    cargar(pagina);
+                }
+            });
+
+            $('#btnNext').click(function () {
+                pagina++;
+                cargar(pagina);
+            });
+
             $('#btnNueva').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nueva unidad');
+                $('#estatusCheck').prop('checked', true).prop('disabled', true);
                 $('#modalEntidad').modal('show');
             });
 
@@ -83,43 +112,44 @@
             });
 
             $('#btnGuardar').click(function () {
-            const id = parseInt($('#entidadId').val()) || 0;
-            const formData = new FormData();
-            formData.append('Id', id);
-            formData.append('Nombre', $('#nombre').val());
-            formData.append('Rfc', $('#rfc').val());
-            formData.append('Direccion', $('#direccion').val());
+                const id = parseInt($('#entidadId').val()) || 0;
+                const formData = new FormData();
+                formData.append('Id', id);
+                formData.append('Nombre', $('#nombre').val());
+                formData.append('Rfc', $('#rfc').val());
+                formData.append('Direccion', $('#direccion').val());
+                formData.append('Estatus', $('#estatusCheck').prop('checked'));
 
-            const file = $('#logotipoArchivo')[0].files[0];
-            if (file) {
-                formData.append('LogotipoArchivo', file);
-            }
-
-            $.ajax({
-                url: '@Url.Action("Guardar", "UnidadDeNegocio")',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (r) {
-                    if (r.success) {
-                        $('#modalEntidad').modal('hide');
-                        const mensaje = (id === 0)
-                            ? 'Unidad insertada correctamente'
-                            : 'Unidad actualizada correctamente';
-                        showAlert(mensaje, 'success');
-                        cargar();
-                    } else {
-                        showAlert(r.error || 'Error al guardar', 'error');
-                    }
+                const file = $('#logotipoArchivo')[0].files[0];
+                if (file) {
+                    formData.append('LogotipoArchivo', file);
                 }
+
+                $.ajax({
+                    url: '@Url.Action("Guardar", "UnidadDeNegocio")',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (r) {
+                        if (r.success) {
+                            $('#modalEntidad').modal('hide');
+                            const mensaje = (id === 0)
+                                ? 'Unidad insertada correctamente'
+                                : 'Unidad actualizada correctamente';
+                            showAlert(mensaje, 'success');
+                            cargar(pagina);
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
+                    }
+                });
             });
-        });
 
         });
 
-        function cargar() {
-            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+        function cargar(pagina) {
+            $.get('@Url.Action("Listar", "UnidadDeNegocio")', { page: pagina }, function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
                     if ($.fn.DataTable.isDataTable(tabla)) {
@@ -128,7 +158,7 @@
 
                     const tbody = tabla.find('tbody');
                     tbody.empty();
-                    r.data.forEach(u => {
+                    r.data.items.forEach(u => {
                         tbody.append(`<tr>
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
@@ -143,12 +173,18 @@
                     });
 
                     tabla.DataTable({
-                        pageLength: 5,
-                        lengthMenu: [5, 10, 25, 50, 100],
+                        paging: false,
+                        searching: true,
+                        ordering: true,
+                        info: false,
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
                     });
+
+                    $('#lblPage').text(pagina);
+                    $('#btnPrev').prop('disabled', pagina === 1);
+                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
                 }
             });
         }
@@ -163,10 +199,10 @@
                     $('#rfc').val(u.rfc);
                     $('#direccion').val(u.direccion);
                     $('#logotipo').val(u.logotipoNombreArchivo);
-                    
+                    $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
 
                     $('#logotipoArchivo').val('');
-                    
+
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -179,7 +215,7 @@
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "UnidadDeNegocio")', { id }, function (r) {
                     if (r.success) {
-                        cargar();
+                        cargar(pagina);
                     } else {
                         showAlert(r.error || 'Error al eliminar', 'error');
                     }
@@ -194,6 +230,7 @@
             $('#direccion').val('');
             $('#logotipo').val('');
             $('#logotipoArchivo').val('');
+            $('#estatusCheck').prop('checked', true).prop('disabled', true);
         }
     </script>
 }
