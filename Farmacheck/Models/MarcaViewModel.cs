@@ -9,6 +9,7 @@ namespace Farmacheck.Models
         public string Nombre { get; set; }
         public string Logotipo { get; set; }
         public string LogotipoNombreArchivo { get; set; }
+        public bool? Estatus { get; set; }
 
 
     }

@@ -14,7 +14,7 @@
         public decimal? LatitudGPS { get; set; }
         public decimal? LongitudGPS { get; set; }
         public DateTime? ModificadoEl { get; set; }
-        public int Estatus { get; set; }
+        public bool Estatus { get; set; }
         public int? RadioGPS { get; set; }
         public int TipoDeClienteId { get; set; }
         

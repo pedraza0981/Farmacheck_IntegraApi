@@ -1,8 +1,14 @@
+
 @model List<Farmacheck.Models.SubMarca>
 @{
     ViewData["Title"] = "SubMarcas";
 }
-
+<style>
+    #tablaDatos thead th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="text-dark">Submarcas</h4>
@@ -14,8 +20,9 @@
         <thead>
             <tr>
                 <th style="width:20%;">Id</th>
-                <th style="width:40%;">Nombre</th>
+                <th style="width:30%;">Nombre</th>
                 <th style="width:20%;">Marca</th>
+                <th style="width:10%;">Estatus</th>
                 <th style="width:20%;" class="text-center"></th>
             </tr>
         </thead>
@@ -112,6 +119,7 @@
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
                             <td>${u.marcaNombre ?? ''}</td>
+                            <td>${u.estatus ? 'Activo' : 'Inactivo'}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
                                 <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${u.id})"><i class="bi bi-trash"></i></button>

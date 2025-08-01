@@ -15,32 +15,32 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<List<CategoryByQuestionnaireResponse>> GetCategoriesAsync()
         {
-            return await _http.GetFromJsonAsync<List<CategoryByQuestionnaireResponse>>("api/v1/CategoriesByQuestionnaires")
+            return await _http.GetFromJsonAsync<List<CategoryByQuestionnaireResponse>>("api/v1/CategoriesByChecklists")
                    ?? new List<CategoryByQuestionnaireResponse>();
         }
 
         public async Task<List<CategoryByQuestionnaireResponse>> GetCategoriesByPageAsync(int page, int items)
         {
-            var url = $"api/v1/CategoriesByQuestionnaires/pages?page={page}&items={items}";
+            var url = $"api/v1/CategoriesByChecklists/pages?page={page}&items={items}";
             return await _http.GetFromJsonAsync<List<CategoryByQuestionnaireResponse>>(url)
                    ?? new List<CategoryByQuestionnaireResponse>();
         }
 
         public async Task<CategoryByQuestionnaireResponse?> GetCategoryAsync(byte id)
         {
-            return await _http.GetFromJsonAsync<CategoryByQuestionnaireResponse>($"api/v1/CategoriesByQuestionnaires/{id}");
+            return await _http.GetFromJsonAsync<CategoryByQuestionnaireResponse>($"api/v1/CategoriesByChecklists/{id}");
         }
 
         public async Task<byte> CreateAsync(CategoryByQuestionnaireRequest request)
         {
-            var response = await _http.PostAsJsonAsync("api/v1/CategoriesByQuestionnaires", request);
+            var response = await _http.PostAsJsonAsync("api/v1/CategoriesByChecklists", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<byte>();
         }
 
         public async Task<bool> UpdateAsync(UpdateCategoryByQuestionnaireRequest request)
         {
-            var response = await _http.PutAsJsonAsync("api/v1/CategoriesByQuestionnaires", request);
+            var response = await _http.PutAsJsonAsync("api/v1/CategoriesByChecklists", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
@@ -49,7 +49,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             try
             {
-                var response = await _http.DeleteAsync($"api/v1/CategoriesByQuestionnaires/{id}");
+                var response = await _http.DeleteAsync($"api/v1/CategoriesByChecklists/{id}");
                 response.EnsureSuccessStatusCode();
             }
             

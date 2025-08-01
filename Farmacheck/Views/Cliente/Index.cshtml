@@ -2,6 +2,12 @@
 @{
     ViewData["Title"] = "Farmacias";
 }
+<style>
+    #tablaDatos thead th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="text-dark">Farmacias</h4>
@@ -13,8 +19,9 @@
         <thead>
             <tr>
                 <th style="width:25%;">Nombre</th>
-                <th style="width:25%;">Centro de costo</th>
+                <th style="width:15%;">Centro de costo</th>
                 <th style="width:30%;">Dirección</th>
+                <th style="width:10%;">Estatus</th>
                 <th style="width:20%;" class="text-center"></th>
             </tr>
         </thead>
@@ -282,6 +289,7 @@
                             <td>${c.nombre}</td>
                             <td>${c.centroDeCosto}</td>
                             <td>${c.direccion}</td>
+                            <td>${c.estatus ? 'Activo' : 'Inactivo'}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${c.clienteId})"><i class="bi bi-pencil"></i></button>
                                 <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${c.clienteId})"><i class="bi bi-trash"></i></button>

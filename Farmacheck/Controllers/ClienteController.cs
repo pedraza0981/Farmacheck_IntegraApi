@@ -36,7 +36,7 @@ namespace Farmacheck.Controllers
             _ibrand = ibrand;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index()    
         {
             var apiData = await _apiClient.GetCustomersAsync();
             var dtos = _mapper.Map<List<CustomerDto>>(apiData);

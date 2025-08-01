@@ -69,7 +69,7 @@ namespace Farmacheck.Helpers
 
             CreateMap<ClienteEstructuraViewModel, UpdateCustomerRequest>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId))
-                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == 1))
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == true))
                 .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))
                 .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
                 .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)));
@@ -82,7 +82,7 @@ namespace Farmacheck.Helpers
 
             CreateMap<ClienteEstructuraViewModel, UpdateBusinessStructureRequest>()
                 .IncludeBase<ClienteEstructuraViewModel, BusinessStructureRequest>()
-                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == 1));
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == true));
 
 
             CreateMap<UnidadDeNegocio, BusinessUnitRequest>()
