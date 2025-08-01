@@ -11,5 +11,6 @@ namespace Farmacheck.Application.Models.Brands
         public int UnidadDeNegocioId { get; set; }
         public string Nombre { get; set; } = null!;
         public string Logotipo { get; set; } = null!;
+        public bool Estatus { get; set; }
     }
 }
