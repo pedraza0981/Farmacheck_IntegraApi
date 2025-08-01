@@ -27,6 +27,15 @@
         </thead>
         <tbody></tbody>
     </table>
+    <div class="d-flex justify-content-end">
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
+                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
+                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
@@ -46,6 +55,10 @@
                     <label>Unidad de negocio</label>
                     <select class="form-select" id="unidadNegocio"></select>
                 </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck">
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                </div>
                 <div class="mb-2">
                     <label>Logotipo</label>
                     <input type="file" class="form-control" id="logotipoArchivo" accept="image/*" />
@@ -64,14 +77,29 @@
 @section Scripts {
     <script>
         const unidadId = @ViewBag.UnidadId;
+        var pagina = @ViewBag.Page ?? 1;
+        var pageSize = 5;
 
         $(document).ready(function () {
-            cargar();
-            cargarUnidades();            
+            cargar(pagina);
+            cargarUnidades();
+
+            $('#btnPrev').click(function () {
+                if (pagina > 1) {
+                    pagina--;
+                    cargar(pagina);
+                }
+            });
+
+            $('#btnNext').click(function () {
+                pagina++;
+                cargar(pagina);
+            });
 
             $('#btnNueva').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nueva marca');
+                $('#estatusCheck').prop('checked', true).prop('disabled', true);
                 $('#modalEntidad').modal('show');
             });
 
@@ -81,39 +109,40 @@
             });
 
             $('#btnGuardar').click(function () {
-            const id = parseInt($('#entidadId').val()) || 0;
-            const formData = new FormData();
+                const id = parseInt($('#entidadId').val()) || 0;
+                const formData = new FormData();
 
-            formData.append('Id', id);
-            formData.append('Nombre', $('#nombre').val());
-            formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
-            formData.append('Logotipo', $('#logotipoBase64').val());
+                formData.append('Id', id);
+                formData.append('Nombre', $('#nombre').val());
+                formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
+                formData.append('Logotipo', $('#logotipoBase64').val());
+                formData.append('Estatus', $('#estatusCheck').prop('checked'));
 
-            const file = $('#logotipoArchivo')[0].files[0];
-            if (file) {
-                formData.append('LogotipoArchivo', file);
-            }
-
-            $.ajax({
-                url: '@Url.Action("Guardar", "Marca")',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (r) {
-                    if (r.success) {
-                        $('#modalEntidad').modal('hide');
-                        const mensaje = id === 0
-                            ? 'Marca registrada correctamente'
-                            : 'Marca actualizada correctamente';
-                        showAlert(mensaje, 'success');
-                        cargar();
-                    } else {
-                        showAlert(r.error || 'Error al guardar', 'error');
-                    }
+                const file = $('#logotipoArchivo')[0].files[0];
+                if (file) {
+                    formData.append('LogotipoArchivo', file);
                 }
+
+                $.ajax({
+                    url: '@Url.Action("Guardar", "Marca")',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (r) {
+                        if (r.success) {
+                            $('#modalEntidad').modal('hide');
+                            const mensaje = id === 0
+                                ? 'Marca registrada correctamente'
+                                : 'Marca actualizada correctamente';
+                            showAlert(mensaje, 'success');
+                            cargar(pagina);
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
+                    }
+                });
             });
-        });
 
         });
 
@@ -130,17 +159,13 @@
             });
         }
 
-        function cargar() {
-            $.get('@Url.Action("Listar", "Marca")', { unidadId }, function (r) {
+        function cargar(pag) {
+            $.get('@Url.Action("Listar", "Marca")', { page: pag }, function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
-                    if ($.fn.DataTable.isDataTable(tabla)) {
-                        tabla.DataTable().destroy();
-                    }
-
                     const tbody = tabla.find('tbody');
                     tbody.empty();
-                    r.data.forEach(u => {
+                    r.data.items.forEach(u => {
                         tbody.append(`<tr>
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
@@ -152,13 +177,22 @@
                         </tr>`);
                     });
 
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                        tabla.DataTable().destroy();
+                    }
                     tabla.DataTable({
-                        pageLength: 5,
-                        lengthMenu: [5, 10, 25, 50, 100],
+                        paging: false,
+                        searching: true,
+                        ordering: true,
+                        info: false,
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
                     });
+
+                    $('#lblPage').text(pag);
+                    $('#btnPrev').prop('disabled', pag === 1);
+                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
                 }
             });
         }
@@ -174,6 +208,7 @@
                     $('#logotipoBase64').val(u.logotipo);
                     $('#logotipoNombre').val(u.logotipo);
                     $('#logotipoArchivo').val('');
+                    $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -186,7 +221,7 @@
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "Marca")', { id }, function (r) {
                     if (r.success) {
-                        cargar();
+                        cargar(pagina);
                     } else {
                         showAlert(r.error || 'Error al eliminar', 'error');
                     }
@@ -201,6 +236,7 @@
             $('#logotipoBase64').val('');
             $('#logotipoNombre').val('');
             $('#logotipoArchivo').val('');
+            $('#estatusCheck').prop('checked', true).prop('disabled', true);
         }
     </script>
 }
