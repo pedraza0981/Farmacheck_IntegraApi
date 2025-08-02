@@ -64,34 +64,36 @@
                         </select>
                     </div>
                 </div>
+                <div class="row mb-3">
+                    <div class="mb-2 col-md-6">
+                        <button class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
 
-
+                    </div>
+                    <div class="mb-2 col-md-6">
+                        <button id="btnGuardar" class="btn btn-primary w-100">Guardar</button>
+                    </div>
+                </div>
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <button id="btnResetPassword" type="button" class="btn w-100" style="background-color: #00ab8e; color: white;">
                             <i class="bi bi-arrow-counterclockwise"></i> Reestablecer Password
                         </button>
                     </div>
-
                 </div>
-                <div class="row mb-3">
+                <div class="row mb-3 align-items-end">
                     <div class="col-md-6">
-                        <button id="btnGestionarRoles" type="button" class="btn w-100" style="background-color: #79b828; color: white;">
+                        <label class="form-label"></label>
+                        <button id="btnGestionarRoles" type="button" class="btn w-100" style="background-color: #79b828; color: white;" data-bs-toggle="modal" data-bs-target="#modalGestionRol">
                             <i class="bi bi-gear"></i> Nuevo rol por Usuario
                         </button>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Seleccionar Rol</label>
-                        <select class="form-select" id="selectRol">
+                        <select class="form-select w-100" id="selectRol">
                             <option value="">-- Selecciona un rol --</option>
                         </select>
                     </div>
-                    
                 </div>
-
-
-             
-
                 <!-- Tabla -->
                 <table class="table table-bordered" id="tablaRoles">
                     <thead>
@@ -109,46 +111,54 @@
                     </tbody>
                 </table>
             </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-12">
-
-
-                    <select id="unidadDeNegocioSelect" class="form-select"></select>
-
-                    <div class="mt-3">
-                        <label class="form-label">Marcas</label>
-                        <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                    </div>
-
-                    <div class="mt-3">
-                        <label class="form-label">Submarcas</label>
-                        <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                    </div>
-
-                    <div class="mt-3">
-                        <label class="form-label">Zonas</label>
-                        <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                    </div>
-
-
-                </div>
-            </div>
-
-
             <div class="modal-footer">
-                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
+<div class="modal fade" id="modalGestionRol" tabindex="-1" aria-labelledby="modalTituloRol" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalTituloRol">Gestión de rol por usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <select id="unidadDeNegocioSelect" class="form-select"></select>
+
+                        <div class="mt-3">
+                            <label class="form-label">Marcas</label>
+                            <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Submarcas</label>
+                            <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Zonas</label>
+                            <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
-    
+
     <script>
-       
+
         $(document).ready(function () {
             cargar();
             cargarUnidadesNegocio();
@@ -391,7 +401,7 @@
 
             $('#contenedorZonas .zona-check').prop('checked', false);
 
-            
+
         }
         function agregarRolARelacion(rol, farmacia, unidadNegocio) {
             $('#noRolesRow').hide();
