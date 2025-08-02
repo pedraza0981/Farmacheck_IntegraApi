@@ -25,7 +25,6 @@
     </table>
 </div>
 
-
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -35,87 +34,114 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="entidadId" />
-                <div class="row">
-                    <div class="mb-2 col-md-6">
+
+                <!-- Sección: Datos Personales -->
+                <h6 class="text-muted mb-3">Datos Personales</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
                         <label>Nombre</label>
-                        <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
+                        <input type="text" class="form-control rounded-3" id="nombre" placeholder="Nombre" />
                     </div>
-                    <div class="mb-2 col-md-6">
+                    <div class="col-md-4">
                         <label>Apellido paterno</label>
-                        <input type="text" class="form-control" id="apellidoPaterno" placeholder="Apellido paterno" />
+                        <input type="text" class="form-control rounded-3" id="apellidoPaterno" placeholder="Apellido paterno" />
                     </div>
-                    <div class="mb-2 col-md-6">
+                    <div class="col-md-4">
                         <label>Apellido materno</label>
-                        <input type="text" class="form-control" id="apellidoMaterno" placeholder="Apellido materno" />
+                        <input type="text" class="form-control rounded-3" id="apellidoMaterno" placeholder="Apellido materno" />
                     </div>
-                    <div class="mb-2 col-md-6">
+                    <div class="col-md-6">
                         <label>Email</label>
-                        <input type="email" class="form-control" id="email" placeholder="correo@dominio.com" />
+                        <input type="email" class="form-control rounded-3" id="email" placeholder="correo@dominio.com" />
                     </div>
-                    <div class="mb-2 col-md-6">
-                        <label>Número de teléfono</label>
-                        <input type="text" class="form-control" id="telefono" placeholder="Teléfono" />
+                    <div class="col-md-3">
+                        <label>Teléfono</label>
+                        <input type="text" class="form-control rounded-3" id="telefono" placeholder="Teléfono" />
                     </div>
-                    <div class="mb-2 col-md-6">
+                    <div class="col-md-3">
                         <label>Estatus</label>
-                        <select class="form-select" id="estatus">
+                        <select class="form-select rounded-3" id="estatus">
                             <option value="true">Activo</option>
                             <option value="false">Inactivo</option>
                         </select>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="mb-2 col-md-6">
-                        <button class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
 
+                <!-- Botones de acción -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-secondary w-100 rounded-3" data-bs-dismiss="modal">Cancelar</button>
                     </div>
-                    <div class="mb-2 col-md-6">
-                        <button id="btnGuardar" class="btn btn-primary w-100">Guardar</button>
+                    <div class="col-md-6">
+                        <button id="btnGuardar" class="btn btn-primary w-100 rounded-3">Guardar</button>
                     </div>
                 </div>
-                <div class="row mb-3">
+
+                <!-- Reestablecer Password -->
+                <div class="row mt-3">
                     <div class="col-md-12">
-                        <button id="btnResetPassword" type="button" class="btn w-100" style="background-color: #00ab8e; color: white;">
+                        <button id="btnResetPassword" type="button" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3" style="background-color: #00ab8e; color: white;">
                             <i class="bi bi-arrow-counterclockwise"></i> Reestablecer Password
                         </button>
                     </div>
                 </div>
-                <div class="row mb-3 align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label"></label>
-                        <button id="btnGestionarRoles" type="button" class="btn w-100" style="background-color: #79b828; color: white;" data-bs-toggle="modal" data-bs-target="#modalGestionRol">
-                            <i class="bi bi-gear"></i> Nuevo rol por Usuario
-                        </button>
+
+                <!-- Gestión de Roles (con group box visual usando card) -->
+                
+                <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                    <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseRoles" aria-expanded="true" aria-controls="collapseRoles">
+                        <strong style="color: white;">
+                            <i class="bi bi-shield-lock"></i> Gestión de Roles
+                        </strong>
+                        <i class="bi bi-chevron-down text-white"></i>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Seleccionar Rol</label>
-                        <select class="form-select w-100" id="selectRol">
-                            <option value="">-- Selecciona un rol --</option>
-                        </select>
+                    <div id="collapseRoles" class="collapse show">
+                        <div class="card-body">
+                            <div class="row align-items-end mb-3">
+                                <div class="col-md-6">
+                                    <button id="btnGestionarRoles" type="button" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3"
+                                            style="background-color: #79b828; color: white;" data-bs-toggle="modal" data-bs-target="#modalGestionRol">
+                                        <i class="bi bi-gear"></i> Nuevo rol por Usuario
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Seleccionar Rol</label>
+                                    <select class="form-select w-100 rounded-3" id="selectRol">
+                                        <option value="">-- Selecciona un rol --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover" id="tablaRoles">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Rol</th>
+                                            <th>Farmacia</th>
+                                            <th>Unidad de Negocio</th>
+                                            <th class="text-center" style="width: 40px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-center text-muted" id="noRolesRow">
+                                            <td colspan="4">No hay roles encontrados</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Tabla -->
-                <table class="table table-bordered" id="tablaRoles">
-                    <thead>
-                        <tr>
-                            <th>Rol</th>
-                            <th>Farmacia</th>
-                            <th>Unidad de Negocio</th>
-                            <th style="width:40px;" class="text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="text-center text-muted" id="noRolesRow">
-                            <td colspan="4">No hay roles encontrados</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+
+
             </div>
-            <div class="modal-footer">
-            </div>
+            <div class="modal-footer"></div>
         </div>
     </div>
 </div>
+
+
 
 <div class="modal fade" id="modalGestionRol" tabindex="-1" aria-labelledby="modalTituloRol" aria-hidden="true">
     <div class="modal-dialog modal-lg">
