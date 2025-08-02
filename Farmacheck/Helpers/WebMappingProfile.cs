@@ -12,6 +12,7 @@ using Farmacheck.Application.Models.CategoriesByQuestionnaires;
 using Farmacheck.Application.Models.Roles;
 using Farmacheck.Application.Models.HierarchyByRoles;
 using Farmacheck.Application.Models.Users;
+using System.Linq;
 
 namespace Farmacheck.Helpers
 {
@@ -51,10 +52,10 @@ namespace Farmacheck.Helpers
 
             CreateMap<CustomerDto, ClienteEstructuraViewModel>()
                 .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.BusinessStructure.UnidadDeNegocioId))
-                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.BusinessStructure.MarcaId))
-                .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.BusinessStructure.SubmarcaId))
-                .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.BusinessStructure.ZonaId))
+                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.UnidadDeNegocioId))
+                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.MarcaId))
+                .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.SubmarcaId))
+                .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.ZonaId))
                 .ForMember(dest => dest.LatitudGPS, opt => opt.MapFrom(src => (int?)src.LatitudGps))
                 .ForMember(dest => dest.LongitudGPS, opt => opt.MapFrom(src => (int?)src.LongitudGps))
                 .ForMember(dest => dest.ModificadoEl, opt => opt.MapFrom(src => src.ModificadoEl))

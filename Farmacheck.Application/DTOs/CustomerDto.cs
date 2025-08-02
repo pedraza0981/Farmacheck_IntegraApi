@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Farmacheck.Application.DTOs
 {
@@ -16,6 +17,6 @@ namespace Farmacheck.Application.DTOs
         public bool Estatus { get; set; }
         public short RadioGps { get; set; }
         public short TipoDeClienteId { get; set; }
-        public BusinessStructureDto BusinessStructure { get; set; } = null!;
+        public IEnumerable<BusinessStructureDto> BusinessStructure { get; set; } = null!;
     }
 }

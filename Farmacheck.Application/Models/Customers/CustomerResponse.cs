@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Farmacheck.Application.Models.Customers
 {
     public class CustomerResponse
@@ -14,6 +16,6 @@ namespace Farmacheck.Application.Models.Customers
         public bool Estatus { get; set; }
         public short RadioGps { get; set; }
         public short TipoDeClienteId { get; set; }
-        public BusinessStructureResponse BusinessStructure { get; set; } = null!;
+        public IEnumerable<BusinessStructureResponse> BusinessStructure { get; set; } = null!;
     }
 }
