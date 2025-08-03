@@ -18,8 +18,9 @@ namespace Farmacheck.Controllers
         private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly ISubbrandApiClient _subbrandApi;
         private readonly IZoneApiClient _zoneApi;
+        private readonly ICustomersApiClient _customersApiClient;
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi, ICustomersApiClient customersApiClient)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -27,6 +28,7 @@ namespace Farmacheck.Controllers
             _businessUnitApi = businessUnitApi;
             _subbrandApi = subbrandApi;
             _zoneApi = zoneApi;
+            _customersApiClient = customersApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -136,6 +138,16 @@ namespace Farmacheck.Controllers
         {
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarRolesPorUsuario(int usuarioId)
+        {
+            var apiData = await _customersApiClient.GetRolesByUserAsync(usuarioId);
+            var dtos = _mapper.Map<List<UserDto>>(apiData);
+            var usuarios = _mapper.Map<List<UsuarioViewModel>>(dtos);
+
+            return Json(new { success = true, data = usuarios });
         }
     }
 }

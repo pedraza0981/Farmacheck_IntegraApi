@@ -334,7 +334,9 @@
 
 
         function cargarSelectorRoles() {
-                $.get('@Url.Action("Listar", "Rol")', function (r) {
+                const usuarioId = $('#entidadId').val() || 0;
+
+                $.get('@Url.Action("ListarRolesPorUsuario", "Usuario")',{ usuarioId: usuarioId }, function (r) {
                     const select = $('#selectRol');
                     select.empty();
                     select.append('<option value="">-- Selecciona un rol --</option>');
