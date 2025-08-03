@@ -69,6 +69,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["UsersApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IAssignedClientsByUserRoleApiClient, AssignedClientsByUserRoleApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["AssignedClientsByUserRoleApi:BaseUrl"]!);
+        });
+
         return services;
     }
 }
