@@ -51,16 +51,16 @@ namespace Farmacheck.Helpers
             //.ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.MapFrom(src => src.LogotipoNombreArchivo));
 
             CreateMap<CustomerDto, ClienteEstructuraViewModel>()
-                .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.UnidadDeNegocioId))
-                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.MarcaId))
-                .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.SubmarcaId))
-                .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.BusinessStructure.FirstOrDefault()?.ZonaId))
-                .ForMember(dest => dest.LatitudGPS, opt => opt.MapFrom(src => (int?)src.LatitudGps))
-                .ForMember(dest => dest.LongitudGPS, opt => opt.MapFrom(src => (int?)src.LongitudGps))
-                .ForMember(dest => dest.ModificadoEl, opt => opt.MapFrom(src => src.ModificadoEl))
-                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus ? 1 : 0))
-                .ForMember(dest => dest.RadioGPS, opt => opt.MapFrom(src => (int?)src.RadioGps));
+             .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
+             .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.BusinessStructure != null && src.BusinessStructure.Any() ? src.BusinessStructure.First().UnidadDeNegocioId : (int?)null))
+             .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.BusinessStructure != null && src.BusinessStructure.Any() ? src.BusinessStructure.First().MarcaId : (int?)null))
+             .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.BusinessStructure != null && src.BusinessStructure.Any() ? src.BusinessStructure.First().SubmarcaId : (int?)null))
+             .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.BusinessStructure != null && src.BusinessStructure.Any() ? src.BusinessStructure.First().ZonaId : (int?)null))
+             .ForMember(dest => dest.LatitudGPS, opt => opt.MapFrom(src => (int?)src.LatitudGps))
+             .ForMember(dest => dest.LongitudGPS, opt => opt.MapFrom(src => (int?)src.LongitudGps))
+             .ForMember(dest => dest.ModificadoEl, opt => opt.MapFrom(src => src.ModificadoEl))
+             .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus ? 1 : 0))
+             .ForMember(dest => dest.RadioGPS, opt => opt.MapFrom(src => (int?)src.RadioGps));
 
             CreateMap<ClienteEstructuraViewModel, CustomerRequest>()
                 .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))

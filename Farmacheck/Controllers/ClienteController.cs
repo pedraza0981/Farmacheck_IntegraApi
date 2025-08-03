@@ -75,7 +75,7 @@ namespace Farmacheck.Controllers
                     if(marca!= null)
                         bsDto.UnidadDeNegocioId = marca.UnidadDeNegocio;
 
-                    dto.BusinessStructure = bsDto;
+                    dto.BusinessStructure = new List<BusinessStructureDto> { bsDto }; ;
                 }
 
                 var model = _mapper.Map<ClienteEstructuraViewModel>(dto);
