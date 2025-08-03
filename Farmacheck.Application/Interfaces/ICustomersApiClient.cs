@@ -1,4 +1,5 @@
 using Farmacheck.Application.Models.Customers;
+using Farmacheck.Application.Models.BusinessUnits;
 
 namespace Farmacheck.Application.Interfaces
 {
@@ -7,6 +8,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<CustomerResponse>> GetCustomersAsync();
         Task<List<CustomerResponse>> GetCustomersByPageAsync(int page, int items);
         Task<List<CustomerResponse>> GetCustomersByFiltersAsync(IEnumerable<int> subbrand, IEnumerable<int> zone);
+        Task<List<BusinessUnitResponse>> GetRolesByUserAsync(int rolByUser);
         Task<CustomerResponse?> GetCustomerAsync(int id);
         Task<int> CreateAsync(CustomerRequest request);
         Task<bool> UpdateAsync(UpdateCustomerRequest request);
