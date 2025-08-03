@@ -9,6 +9,7 @@ namespace Farmacheck.Application.Mappings
         public UserProfile()
         {
             CreateMap<UserResponse, UserDto>().ReverseMap();
+            CreateMap<UserByRoleResponse, UserByRoleDto>().ReverseMap();
         }
     }
 }

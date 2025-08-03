@@ -1,6 +1,5 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Customers;
-using Farmacheck.Application.Models.BusinessUnits;
 using System.Net.Http.Json;
 using System.Linq;
 
@@ -48,12 +47,6 @@ namespace Farmacheck.Infrastructure.Services
 
             return await _http.GetFromJsonAsync<List<CustomerResponse>>(url)
                    ?? new List<CustomerResponse>();
-        }
-
-        public async Task<List<BusinessUnitResponse>> GetRolesByUserAsync(int rolByUser)
-        {
-            return await _http.GetFromJsonAsync<List<BusinessUnitResponse>>($"api/v1/Customers/rolesPorUsuario/{rolByUser}")
-                   ?? new List<BusinessUnitResponse>();
         }
 
         public async Task<CustomerResponse?> GetCustomerAsync(int id)
