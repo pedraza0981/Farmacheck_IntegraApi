@@ -164,20 +164,36 @@
                 <div class="row">
                     <div class="col-md-4">
                         <label class="form-label">Marcas</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkAllMarcas">
+                            <label class="form-check-label" for="checkAllMarcas">All</label>
+                        </div>
                         <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Submarcas</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkAllSubMarcas">
+                            <label class="form-check-label" for="checkAllSubMarcas">All</label>
+                        </div>
                         <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Zonas</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkAllZonas">
+                            <label class="form-check-label" for="checkAllZonas">All</label>
+                        </div>
                         <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
                         <label class="form-label">Clientes</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkAllClientes">
+                            <label class="form-check-label" for="checkAllClientes">All</label>
+                        </div>
                         <div id="contenedorClientes" class="border rounded p-2 row row-cols-1 row-cols-md-3 g-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                 </div>
@@ -208,6 +224,10 @@
             });
 
             $('#contenedorMarcas').on('change', '.marca-check', function () {
+                const total = $('#contenedorMarcas .marca-check').length;
+                const checked = $('#contenedorMarcas .marca-check:checked').length;
+                $('#checkAllMarcas').prop('checked', total > 0 && total === checked);
+
                 const seleccionadas = $('#contenedorMarcas .marca-check:checked').map(function () {
                     return parseInt(this.value);
                 }).get();
@@ -216,12 +236,51 @@
                 cargarClientes();
             });
 
+            $('#checkAllMarcas').change(function () {
+                const checked = this.checked;
+                $('#contenedorMarcas .marca-check').prop('checked', checked);
+                const seleccionadas = checked ? $('#contenedorMarcas .marca-check').map(function () {
+                    return parseInt(this.value);
+                }).get() : [];
+                cargarSubMarcas(seleccionadas);
+                cargarClientes();
+            });
+
             $('#contenedorSubMarcas').on('change', '.submarca-check', function () {
+                const total = $('#contenedorSubMarcas .submarca-check').length;
+                const checked = $('#contenedorSubMarcas .submarca-check:checked').length;
+                $('#checkAllSubMarcas').prop('checked', total > 0 && total === checked);
+                cargarClientes();
+            });
+
+            $('#checkAllSubMarcas').change(function () {
+                const checked = this.checked;
+                $('#contenedorSubMarcas .submarca-check').prop('checked', checked);
                 cargarClientes();
             });
 
             $('#contenedorZonas').on('change', '.zona-check', function () {
+                const total = $('#contenedorZonas .zona-check').length;
+                const checked = $('#contenedorZonas .zona-check:checked').length;
+                $('#checkAllZonas').prop('checked', total > 0 && total === checked);
                 cargarClientes();
+            });
+
+            $('#checkAllZonas').change(function () {
+                const checked = this.checked;
+                $('#contenedorZonas .zona-check').prop('checked', checked);
+                cargarClientes();
+            });
+
+            $('#contenedorClientes').on('change', '.cliente-check', function () {
+                const total = $('#contenedorClientes .cliente-check').length;
+                const checked = $('#contenedorClientes .cliente-check:checked').length;
+                $('#checkAllClientes').prop('checked', total > 0 && total === checked);
+            });
+
+            $('#checkAllClientes').change(function () {
+                const checked = this.checked;
+                $('#contenedorClientes .cliente-check').prop('checked', checked);
             });
 
             $('#selectRol').change(function () {
@@ -346,6 +405,8 @@
             const contenedorSub = $('#contenedorSubMarcas');
             contenedor.empty();
             contenedorSub.empty();
+            $('#checkAllMarcas').prop('checked', false);
+            $('#checkAllSubMarcas').prop('checked', false);
             if (!unidadId) {
                 return;
             }
@@ -366,6 +427,7 @@
         function cargarSubMarcas(marcaIds) {
             const contenedor = $('#contenedorSubMarcas');
             contenedor.empty();
+            $('#checkAllSubMarcas').prop('checked', false);
             if (!marcaIds || marcaIds.length === 0) {
                 return;
             }
@@ -392,6 +454,7 @@
         function cargarZonas() {
             const contenedor = $('#contenedorZonas');
             contenedor.empty();
+            $('#checkAllZonas').prop('checked', false);
             $.get('@Url.Action("ListarZonas", "Usuario")', function (r) {
                 if (r.success) {
                     r.data.forEach(z => {
@@ -417,6 +480,7 @@
 
             const contenedor = $('#contenedorClientes');
             contenedor.empty();
+            $('#checkAllClientes').prop('checked', false);
 
             if (subbrands.length === 0 && zones.length === 0) {
                 return;
@@ -553,6 +617,10 @@
             $('#contenedorMarcas').empty();
             $('#contenedorSubMarcas').empty();
             $('#contenedorClientes').empty();
+            $('#checkAllZonas').prop('checked', false);
+            $('#checkAllMarcas').prop('checked', false);
+            $('#checkAllSubMarcas').prop('checked', false);
+            $('#checkAllClientes').prop('checked', false);
 
             // Reset selectores de rol y unidad de negocio
             $('#rolSelectModal').val('');
