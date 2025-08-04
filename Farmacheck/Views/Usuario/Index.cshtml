@@ -152,34 +152,39 @@
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
+                        <label class="form-label">Rol</label>
+                        <select id="rolSelectModal" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Unidad de negocio</label>
                         <select id="unidadDeNegocioSelect" class="form-select"></select>
-
-                        <div class="mt-3">
-                            <label class="form-label">Marcas</label>
-                            <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                        </div>
-
-                        <div class="mt-3">
-                            <label class="form-label">Submarcas</label>
-                            <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                        </div>
-
-                        <div class="mt-3">
-                            <label class="form-label">Zonas</label>
-                            <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                        </div>
-
-                        <div class="mt-3">
-                            <label class="form-label">Clientes</label>
-                            <div id="contenedorClientes" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
-                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Marcas</label>
+                        <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Submarcas</label>
+                        <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Zonas</label>
+                        <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label class="form-label">Clientes</label>
+                        <div id="contenedorClientes" class="border rounded p-2 row row-cols-1 row-cols-md-3 g-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button class="btn btn-primary">Guardar Cambios</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardarRol" class="btn btn-primary">Guardar Cambios</button>
             </div>
         </div>
     </div>
@@ -192,10 +197,14 @@
 
         $(document).ready(function () {
             cargar();
+            cargarRolesModal();
             cargarUnidadesNegocio();
             cargarZonas();
             $('#unidadDeNegocioSelect').change(function () {
                 cargarMarcas($(this).val());
+            });
+            $('#modalGestionRol').on('show.bs.modal', function () {
+                cargarRolesModal();
             });
 
             $('#contenedorMarcas').on('change', '.marca-check', function () {
@@ -319,6 +328,18 @@
             }
         }
 
+        function cargarRolesModal() {
+            const select = $('#rolSelectModal');
+            select.empty();
+            select.append('<option value="">-- Selecciona un rol --</option>');
+            $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
+                if (r.success) {
+                    r.data.forEach(rol => {
+                        select.append(`<option value="${rol.id}">${rol.nombre}</option>`);
+                    });
+                }
+            });
+        }
 
         function cargarMarcas(unidadId) {
             const contenedor = $('#contenedorMarcas');
@@ -410,9 +431,11 @@
                     if (r.success) {
                         r.data.forEach(c => {
                             contenedor.append(`
-                                <div class="form-check">
-                                    <input class="form-check-input cliente-check" type="checkbox" value="${c.clienteId}" id="cliente_${c.clienteId}">
-                                    <label class="form-check-label" for="cliente_${c.clienteId}">${c.nombre}</label>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input cliente-check" type="checkbox" value="${c.clienteId}" id="cliente_${c.clienteId}">
+                                        <label class="form-check-label" for="cliente_${c.clienteId}">${c.nombre}</label>
+                                    </div>
                                 </div>
                             `);
                         });
@@ -531,7 +554,8 @@
             $('#contenedorSubMarcas').empty();
             $('#contenedorClientes').empty();
 
-            // Reset unidad de negocio
+            // Reset selectores de rol y unidad de negocio
+            $('#rolSelectModal').val('');
             $('#unidadDeNegocioSelect').val('');
 
             // // Volver a cargar opciones dinámicas si es necesario
