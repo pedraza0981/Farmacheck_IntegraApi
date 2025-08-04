@@ -9,5 +9,7 @@ namespace Farmacheck.Models
         public DateTime AsignadoEl { get; set; }
         public int AsignadoPor { get; set; }
         public bool Estatus { get; set; }
+        public int UnidadDeNegocioId { get; set; }
+        public List<long> ClienteIds { get; set; } = new();
     }
 }
