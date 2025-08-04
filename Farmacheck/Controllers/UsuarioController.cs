@@ -18,9 +18,10 @@ namespace Farmacheck.Controllers
         private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly ISubbrandApiClient _subbrandApi;
         private readonly IZoneApiClient _zoneApi;
-        private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient; 
+        private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient;
+        private readonly ICustomersApiClient _customersApi;
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient) 
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient, ICustomersApiClient customersApi)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -29,6 +30,7 @@ namespace Farmacheck.Controllers
             _subbrandApi = subbrandApi;
             _zoneApi = zoneApi;
             _clientesAsignadosArolPorUsuariosApiClient = clientesAsignadosArolPorUsuariosApiClient;
+            _customersApi = customersApi;
         }
 
         public async Task<IActionResult> Index()
@@ -100,6 +102,16 @@ namespace Farmacheck.Controllers
             var zonas = _mapper.Map<List<ZonaViewModel>>(dtos);
 
             return Json(new { success = true, data = zonas });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarClientesPorFiltros(List<int> subbrandIds, List<int> zoneIds)
+        {
+            var apiData = await _customersApi.GetCustomersByFiltersAsync(subbrandIds, zoneIds);
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
+            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
+
+            return Json(new { success = true, data = clientes });
         }
 
         [HttpPost]

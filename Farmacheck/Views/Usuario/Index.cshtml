@@ -169,6 +169,11 @@
                             <label class="form-label">Zonas</label>
                             <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                         </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Clientes</label>
+                            <div id="contenedorClientes" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,6 +204,15 @@
                 }).get();
 
                 cargarSubMarcas(seleccionadas);
+                cargarClientes();
+            });
+
+            $('#contenedorSubMarcas').on('change', '.submarca-check', function () {
+                cargarClientes();
+            });
+
+            $('#contenedorZonas').on('change', '.zona-check', function () {
+                cargarClientes();
             });
 
             $('#selectRol').change(function () {
@@ -371,6 +385,42 @@
             });
         }
 
+        function cargarClientes() {
+            const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                return parseInt(this.value);
+            }).get();
+
+            const zones = $('#contenedorZonas .zona-check:checked').map(function () {
+                return parseInt(this.value);
+            }).get();
+
+            const contenedor = $('#contenedorClientes');
+            contenedor.empty();
+
+            if (subbrands.length === 0 && zones.length === 0) {
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("ListarClientesPorFiltros", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { subbrandIds: subbrands, zoneIds: zones },
+                success: function (r) {
+                    if (r.success) {
+                        r.data.forEach(c => {
+                            contenedor.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input cliente-check" type="checkbox" value="${c.clienteId}" id="cliente_${c.clienteId}">
+                                    <label class="form-check-label" for="cliente_${c.clienteId}">${c.nombre}</label>
+                                </div>
+                            `);
+                        });
+                    }
+                }
+            });
+        }
+
 
         function cargarSelectorRoles() {
                 const usuarioId = $('#entidadId').val() || 0;
@@ -475,10 +525,11 @@
             // Limpiar tabla de roles
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
 
-            // Limpiar zona, marca y submarca
+            // Limpiar zona, marca, submarca y clientes
             $('#contenedorZonas').empty();
             $('#contenedorMarcas').empty();
             $('#contenedorSubMarcas').empty();
+            $('#contenedorClientes').empty();
 
             // Reset unidad de negocio
             $('#unidadDeNegocioSelect').val('');
