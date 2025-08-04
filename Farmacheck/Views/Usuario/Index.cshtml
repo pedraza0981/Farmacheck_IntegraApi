@@ -360,6 +360,51 @@
                     }
                 });
             });
+
+            $('#btnGuardarRol').click(function () {
+                const usuarioId = $('#entidadId').val();
+                const rolId = $('#rolSelectModal').val();
+                const unidadId = $('#unidadDeNegocioSelect').val();
+                const clienteIds = $('#contenedorClientes .cliente-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+
+                if (!rolId) {
+                    showAlert('Selecciona un rol', 'warning');
+                    return;
+                }
+                if (!unidadId) {
+                    showAlert('Selecciona una unidad de negocio', 'warning');
+                    return;
+                }
+                if (clienteIds.length === 0) {
+                    showAlert('Selecciona al menos un cliente', 'warning');
+                    return;
+                }
+
+                const datos = {
+                    UsuarioId: parseInt(usuarioId),
+                    RolId: parseInt(rolId),
+                    UnidadDeNegocioId: parseInt(unidadId),
+                    AsignadoPor: 1,
+                    ClienteIds: clienteIds
+                };
+
+                $.ajax({
+                    url: '@Url.Action("GuardarRolPorUsuario", "Usuario")',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(datos),
+                    success: function (r) {
+                        if (r.success) {
+                            showAlert('El registro de clientes asignados a rol por usuario se realizó correctamente', 'success');
+                            $('#modalGestionRol').modal('hide');
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
+                    }
+                });
+            });
         });
 
         async function cargarUnidadesNegocio() {
