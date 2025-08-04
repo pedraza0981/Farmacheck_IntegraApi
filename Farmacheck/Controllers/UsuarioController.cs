@@ -150,6 +150,16 @@ namespace Farmacheck.Controllers
             return Json(new { success = true, data = roles });
         }
 
+        [HttpGet]
+        public async Task<JsonResult> ListarRolPorUsuarioCount(List<int> rolPorUsuarioIds, int usuarioId)
+        {
+            var apiData = await _clientesAsignadosArolPorUsuariosApiClient.GetCountByRolPorUsuarioAsync(rolPorUsuarioIds, usuarioId);
+            var dtos = _mapper.Map<List<RolPorUsuarioClientesAsignadosDto>>(apiData);
+            var counts = _mapper.Map<List<RolPorUsuarioClientesAsignadosViewModel>>(dtos);
+
+            return Json(new { success = true, data = counts });
+        }
+
         
     }
 }
