@@ -20,8 +20,9 @@ namespace Farmacheck.Controllers
         private readonly IZoneApiClient _zoneApi;
         private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient;
         private readonly ICustomersApiClient _customersApi;
+        private readonly IUserByRoleApiClient _userByRoleApiClient;
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient, ICustomersApiClient customersApi)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient, ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -31,6 +32,7 @@ namespace Farmacheck.Controllers
             _zoneApi = zoneApi;
             _clientesAsignadosArolPorUsuariosApiClient = clientesAsignadosArolPorUsuariosApiClient;
             _customersApi = customersApi;
+            _userByRoleApiClient = userByRoleApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -112,6 +114,21 @@ namespace Farmacheck.Controllers
             var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 
             return Json(new { success = true, data = clientes });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GuardarRolPorUsuario([FromBody] UsuarioRolViewModel model)
+        {
+            try
+            {
+                var request = _mapper.Map<UserByRoleRequest>(model);
+                var id = await _userByRoleApiClient.CreateAsync(request);
+                return Json(new { success = true, id });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+            }
         }
 
         [HttpPost]
