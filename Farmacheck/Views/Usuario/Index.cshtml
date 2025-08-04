@@ -200,6 +200,24 @@
 
                 cargarSubMarcas(seleccionadas);
             });
+
+            $('#selectRol').change(function () {
+                const rolPorUsuarioId = $(this).val();
+                const usuarioId = $('#entidadId').val() || 0;
+                if (rolPorUsuarioId) {
+                    $.ajax({
+                        url: '@Url.Action("ListarRolPorUsuarioCount", "Usuario")',
+                        method: 'GET',
+                        traditional: true,
+                        data: { rolPorUsuarioIds: [rolPorUsuarioId], usuarioId: usuarioId },
+                        success: function (r) {
+                            if (r.success) {
+                                console.log(r.data);
+                            }
+                        }
+                    });
+                }
+            });
             $('#btnNuevo').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nuevo usuario');
