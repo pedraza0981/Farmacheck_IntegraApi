@@ -212,7 +212,28 @@
                         data: { rolPorUsuarioIds: [rolPorUsuarioId], usuarioId: usuarioId },
                         success: function (r) {
                             if (r.success) {
-                                console.log(r.data);
+                                const tbody = $('#tablaRoles tbody');
+                                tbody.empty();
+
+                                if (r.data.length === 0) {
+                                    tbody.append('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
+                                } else {
+                                    r.data.forEach(item => {
+                                        tbody.append(`
+                                            <tr>
+                                                <td>${item.roleNombre}</td>
+                                                <td>${item.totalClientesAsignados}</td>
+                                                <td>${item.unidadDeNegocioNombre}</td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarRol(${item.rolPorUsuarioId})"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminarRol(${item.rolPorUsuarioId})"><i class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        `);
+                                    });
+                                }
+                            } else {
+                                showAlert(r.error || 'Error al listar roles', 'error');
                             }
                         }
                     });
@@ -487,6 +508,17 @@
             if ($('#tablaRoles tbody tr').length === 1) {
                 $('#noRolesRow').show();
             }
+        }
+
+        function editarRol(id) {
+            console.log('Editar rol por usuario', id);
+        }
+
+        function eliminarRol(id) {
+            confirmAction('¿Deseas eliminar este rol?').then(function (ok) {
+                if (!ok) return;
+                console.log('Eliminar rol por usuario', id);
+            });
         }
     </script>
 }
