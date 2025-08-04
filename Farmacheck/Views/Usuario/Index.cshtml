@@ -25,7 +25,7 @@
     </table>
 </div>
 
-<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary_form text-white">
@@ -87,7 +87,7 @@
                 </div>
 
                 <!-- Gestión de Roles (con group box visual usando card) -->
-                
+
                 <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
                     <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseRoles" aria-expanded="true" aria-controls="collapseRoles">
                         <strong style="color: white;">
@@ -341,7 +341,7 @@
                     select.empty();
                     select.append('<option value="">-- Selecciona un rol --</option>');
                     r.data.forEach(rol => {
-                        select.append(`<option value="${rol.id}">${rol.nombre}</option>`);
+                        select.append(`<option value="${rol.id}">${rol.rolNombre}</option>`);
                     });
                 });
             }
@@ -393,13 +393,16 @@
                     $('#email').val(u.email);
                     $('#telefono').val(u.numeroDeTelefono);
                     $('#estatus').val(u.estatus ? 'true' : 'false');
+
+                    cargarSelectorRoles();
+
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
                 }
             });
 
-            cargarSelectorRoles();
+
         }
 
         function eliminar(id) {
@@ -415,8 +418,8 @@
             });
         }
 
-        function limpiar() {
-            cargarSelectorRoles();
+              function limpiar() {
+            // Reset campos de formulario
             $('#entidadId').val('');
             $('#nombre').val('');
             $('#apellidoPaterno').val('');
@@ -424,13 +427,28 @@
             $('#email').val('');
             $('#telefono').val('');
             $('#estatus').val('true');
-            $('#selectRol').val('');
+
+            // Limpiar select de rol
+            const selectRol = $('#selectRol');
+            selectRol.empty();
+            selectRol.append('<option value="">-- Selecciona un rol --</option>');
+
+            // Limpiar tabla de roles
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
 
-            $('#contenedorZonas .zona-check').prop('checked', false);
+            // Limpiar zona, marca y submarca
+            $('#contenedorZonas').empty();
+            $('#contenedorMarcas').empty();
+            $('#contenedorSubMarcas').empty();
 
+            // Reset unidad de negocio
+            $('#unidadDeNegocioSelect').val('');
 
+            // // Volver a cargar opciones dinámicas si es necesario
+            // cargarUnidadesNegocio();
+            // cargarZonas();
         }
+
         function agregarRolARelacion(rol, farmacia, unidadNegocio) {
             $('#noRolesRow').hide();
             $('#tablaRoles tbody').append(`

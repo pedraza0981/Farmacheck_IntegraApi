@@ -18,8 +18,9 @@ namespace Farmacheck.Controllers
         private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly ISubbrandApiClient _subbrandApi;
         private readonly IZoneApiClient _zoneApi;
+        private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient; 
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient) 
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -27,6 +28,7 @@ namespace Farmacheck.Controllers
             _businessUnitApi = businessUnitApi;
             _subbrandApi = subbrandApi;
             _zoneApi = zoneApi;
+            _clientesAsignadosArolPorUsuariosApiClient = clientesAsignadosArolPorUsuariosApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -147,5 +149,7 @@ namespace Farmacheck.Controllers
 
             return Json(new { success = true, data = roles });
         }
+
+        
     }
 }
