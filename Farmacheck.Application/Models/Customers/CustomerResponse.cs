@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Farmacheck.Application.Models.Customers
 {
@@ -16,6 +17,7 @@ namespace Farmacheck.Application.Models.Customers
         public bool Estatus { get; set; }
         public short RadioGps { get; set; }
         public short TipoDeClienteId { get; set; }
+        [JsonPropertyName("businessStructure")]
         public IEnumerable<BusinessStructureResponse> BusinessStructure { get; set; } = null!;
     }
 }
