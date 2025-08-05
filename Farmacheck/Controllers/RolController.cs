@@ -107,6 +107,7 @@ namespace Farmacheck.Controllers
             model.UnidadDeNegocioNombre = unidad?.Nombre;
 
             var permisosAsignados = await _permissionByRoleApi.GetByRolAsync(id);
+            ViewBag.PermisosAsignados = permisosAsignados;
             model.Permisos = permisosAsignados?.Select(p => p.PermisoId).ToList() ?? new List<int>();
             _permisosPorRol[id] = model.Permisos;
 
