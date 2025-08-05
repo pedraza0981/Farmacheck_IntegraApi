@@ -4,6 +4,7 @@ using Farmacheck.Application.Models.BusinessUnits;
 using System.Net.Http.Json;
 using System.Linq;
 using Farmacheck.Application.Models.BusinessUnits;
+using System.Text.Json;
 
 namespace Farmacheck.Infrastructure.Services
 {
@@ -57,8 +58,20 @@ namespace Farmacheck.Infrastructure.Services
         }
         public async Task<CustomerResponse?> GetCustomerAsync(int id)
         {
-            return await _http.GetFromJsonAsync<CustomerResponse>($"api/v1/Customers/{id}");
+            try
+            {
+                return await _http.GetFromJsonAsync<CustomerResponse>($"api/v1/Customers/{id}");
+            }
+            
+            catch (Exception ex)
+            {
+                // Catch-all for any other exceptions
+                Console.Error.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
+
+            return null;
         }
+
 
         public async Task<int> CreateAsync(CustomerRequest request)
         {

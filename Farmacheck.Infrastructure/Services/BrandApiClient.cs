@@ -32,7 +32,7 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<BrandResponse>();
         }
 
-        public async Task<BrandResponse?> GetBrandAsync(int id)
+        public async Task<BrandResponse?> GetBrandAsync(int? id)
         {
             return await _http.GetFromJsonAsync<BrandResponse>($"api/v1/Brands/{id}");
         }
