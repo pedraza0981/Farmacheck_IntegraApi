@@ -49,6 +49,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["PermissionsApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IPermissionByRoleApiClient, PermissionByRolesApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["PermissionByRolesApi:BaseUrl"]!);
+        });
+
         services.AddHttpClient<IBusinessStructureApiClient, BusinessStructureApiClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["BusinessStructureApi:BaseUrl"]!);
