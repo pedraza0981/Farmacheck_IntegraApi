@@ -180,15 +180,12 @@ namespace Farmacheck.Controllers
                         var idsAsignadosOriginal = permisosAsignadosOriginal.Select(p => p.PermisoId).ToList();
                         var idsActuales = model.Permisos;
 
-                        // ? Detectar nuevos permisos a insertar
-                        var nuevosIds = idsActuales.Except(idsAsignadosOriginal).ToList();
+                        var nuevosIds2 = idsActuales.Except(idsAsignadosOriginal).ToList();
 
-                        // ? Detectar permisos eliminados
                         var idsEliminados = idsAsignadosOriginal.Except(idsActuales).ToList();
 
-                        // Obtener los objetos Permission completos (para insertar los nuevos)
                         var seleccionados = permisos
-                            .Where(p => nuevosIds.Contains(p.Id))
+                            .Where(p => nuevosIds2.Contains(p.Id))
                             .ToList();
 
                         if (seleccionados.Any())
@@ -202,7 +199,6 @@ namespace Farmacheck.Controllers
                             await _permissionByRoleApi.CreateAsync(permisoRolRequest);
                         }
 
-                        // Eliminar permisos que ya no están
                         if (idsEliminados.Any())
                         {
                             foreach (var permisoId in idsEliminados)
