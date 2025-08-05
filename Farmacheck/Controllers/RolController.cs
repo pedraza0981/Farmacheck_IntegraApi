@@ -81,6 +81,14 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
+        public async Task<JsonResult> ListarUnidades()
+        {
+            var unidades = await _businessUnitApi.GetBusinessUnitsAsync();
+            var data = unidades.Select(u => new { id = u.Id, nombre = u.Nombre });
+            return Json(new { success = true, data });
+        }
+
+        [HttpGet]
         public async Task<JsonResult> Obtener(int id)
         {
             var entidad = await _apiClient.GetRoleAsync((byte)id);
