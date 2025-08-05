@@ -107,7 +107,7 @@ namespace Farmacheck.Controllers
             model.UnidadDeNegocioNombre = unidad?.Nombre;
 
             var permisosAsignados = await _permissionByRoleApi.GetByRolAsync(id);
-            ViewBag.PermisosAsignados = permisosAsignados;
+            
             model.Permisos = permisosAsignados?.Select(p => p.PermisoId).ToList() ?? new List<int>();
             _permisosPorRol[id] = model.Permisos;
 
@@ -168,17 +168,41 @@ namespace Farmacheck.Controllers
                     if (model.Permisos != null && model.Permisos.Any())
                     {
                         var permisos = await _permissionApi.GetPermissionsAsync();
+                        var permisosAsignadosOriginal = await _permissionByRoleApi.GetByRolAsync(model.Id);
+
+                        var idsAsignadosOriginal = permisosAsignadosOriginal.Select(p => p.PermisoId).ToList();
+                        var idsActuales = model.Permisos;
+
+                        // ? Detectar nuevos permisos a insertar
+                        var nuevosIds = idsActuales.Except(idsAsignadosOriginal).ToList();
+
+                        // ? Detectar permisos eliminados
+                        var idsEliminados = idsAsignadosOriginal.Except(idsActuales).ToList();
+
+                        // Obtener los objetos Permission completos (para insertar los nuevos)
                         var seleccionados = permisos
-                            .Where(p => model.Permisos.Contains(p.Id))
+                            .Where(p => nuevosIds.Contains(p.Id))
                             .ToList();
 
-                        var permisoRolRequest = new PermissionByRoleRequest
+                        if (seleccionados.Any())
                         {
-                            RolId = model.Id,
-                            Permisos = seleccionados
-                        };
+                            var permisoRolRequest = new PermissionByRoleRequest
+                            {
+                                RolId = model.Id,
+                                Permisos = seleccionados
+                            };
 
-                        await _permissionByRoleApi.CreateAsync(permisoRolRequest);
+                            await _permissionByRoleApi.CreateAsync(permisoRolRequest);
+                        }
+
+                        // Eliminar permisos que ya no están
+                        if (idsEliminados.Any())
+                        {
+                            foreach (var permisoId in idsEliminados)
+                            {
+                                await _permissionByRoleApi.DeleteAsync(permisoId);
+                            }
+                        }
                     }
 
                     return Json(new { success = true, id = model.Id });

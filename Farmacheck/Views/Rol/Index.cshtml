@@ -184,6 +184,7 @@
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "Rol")', { id }, function (r) {
                     if (r.success) {
+                        showAlert('Rol deshabilitado correctamente', 'success');
                         cargar();
                     } else {
                         showAlert(r.error || 'Error al eliminar', 'error');
