@@ -101,7 +101,7 @@
                         <label>Estatus</label>
                         <select class="form-select" id="estatus">
                             <option value="1">Activo</option>
-                            <option value="2">Inactivo</option>
+                            <option value="0">Inactivo</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-2">
@@ -170,7 +170,7 @@
                     NumeroDeTelefono: $('#numeroTelefono').val(),
                     LatitudGPS: $('#latitudGPS').val(),
                     LongitudGPS: $('#longitudGPS').val(),
-                    Estatus: $('#estatus').val(),
+                    Estatus: $('#estatus').val() === '1',
                     RadioGPS: $('#radioGPS').val(),
                     TipoDeClienteId: $('#tipoClienteSelect').val(),
                     MarcaId: $('#marcaSelect').val(),
@@ -316,14 +316,14 @@
                     $('#clienteId').val(c.clienteId);
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
                     $('#centroCosto').val(c.centroDeCosto);
-                    $('#idCliente').val(parseInt(c.centroDeCosto, 10)).prop('disabled', true); // 🚨 Aquí
+                    $('#idCliente').val(parseInt(c.centroDeCosto, 10)).prop('disabled', true);
                     $('#nombre').val(c.nombre);
                     $('#direccion').val(c.direccion);
                     $('#estado').val(c.estado);
                     $('#numeroTelefono').val(c.numeroDeTelefono);
                     $('#latitudGPS').val(c.latitudGPS);
                     $('#longitudGPS').val(c.longitudGPS);
-                    $('#estatus').val(c.estatus);
+                    $('#estatus').val(c.estatus ? '1' : '0');
                     $('#radioGPS').val(c.radioGPS);
                     $('#tipoClienteSelect').val(c.tipoDeClienteId);
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
@@ -359,7 +359,7 @@
             $('#clienteId').val('');
             $('#unidadNegocioSelect').val('0');
             $('#centroCosto').val('');
-            $('#idCliente').val('').prop('disabled', false); // 🚨 Aquí
+            $('#idCliente').val('').prop('disabled', false);
             $('#nombre').val('');
             $('#direccion').val('');
             $('#estado').val('');
