@@ -106,21 +106,21 @@ namespace Farmacheck.Controllers
             var unidad = await _businessUnitApi.GetBusinessUnitAsync(model.UnidadDeNegocioId);
             model.UnidadDeNegocioNombre = unidad?.Nombre;
 
+            var permisosAsignados = await _permissionByRoleApi.GetByRolAsync(id);
+            model.Permisos = permisosAsignados?.Select(p => p.PermisoId).ToList() ?? new List<int>();
+            _permisosPorRol[id] = model.Permisos;
+
             return Json(new { success = true, data = model });
         }
 
         [HttpGet]
         public async Task<JsonResult> ListarPermisos(int id)
         {
-            _permisosPorRol.TryGetValue(id, out var asignados);
-            asignados ??= new List<int>();
-
             var permisos = await _permissionApi.GetPermissionsAsync();
             var data = permisos.Select(p => new
             {
                 p.Id,
-                p.Nombre,
-                Asignado = asignados.Contains(p.Id)
+                p.Nombre
             });
 
             return Json(new { success = true, data });

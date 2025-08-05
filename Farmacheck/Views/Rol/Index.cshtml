@@ -146,12 +146,12 @@
             });
         }
 
-        function cargarPermisos(id = 0) {
+        function cargarPermisos(id = 0, asignados = []) {
             $.get('@Url.Action("ListarPermisos", "Rol")', { id }, function (r) {
                 const contenedor = $('#contenedorPermisos');
                 contenedor.empty();
                 r.data.forEach(p => {
-                    const checked = p.asignado ? 'checked' : '';
+                    const checked = asignados.includes(p.id) ? 'checked' : '';
                     contenedor.append(`
                         <div class="form-check">
                             <input class="form-check-input permiso-check" type="checkbox" value="${p.id}" id="permiso_${p.id}" ${checked}>
@@ -171,7 +171,7 @@
                     $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
                     cargarUnidades(u.unidadDeNegocioId).then(function () {
                         $('#modalEntidad').modal('show');
-                        cargarPermisos(u.id);
+                        cargarPermisos(u.id, u.permisos || []);
                     });
                 } else {
                     showAlert(r.error || 'Error al cargar', 'error');
