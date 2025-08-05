@@ -68,14 +68,15 @@
 
         $(document).ready(function () {
             cargar();
-            cargarUnidades();
 
             $('#btnNuevo').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nuevo Rol');
                 $('#estatusCheck').prop('checked', true).prop('disabled', true);
-                $('#modalEntidad').modal('show');
-                cargarPermisos();
+                cargarUnidades(unidadId).then(function () {
+                    $('#modalEntidad').modal('show');
+                    cargarPermisos();
+                });
             });
 
             $('#btnGuardar').click(function () {
@@ -132,15 +133,15 @@
             });
         }
 
-        function cargarUnidades() {
-            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+        function cargarUnidades(selectedId = null) {
+            return $.get('@Url.Action("ListarUnidades", "Rol")', function (r) {
                 const select = $('#unidadNegocio');
                 select.empty();
                 r.data.forEach(u => {
                     select.append(`<option value="${u.id}">${u.nombre}</option>`);
                 });
-                if (unidadId) {
-                    select.val(unidadId);
+                if (selectedId) {
+                    select.val(selectedId);
                 }
             });
         }
@@ -167,10 +168,11 @@
                     $('#modalTitulo').text('Editar Rol');
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
-                    $('#unidadNegocio').val(u.unidadDeNegocioId);
                     $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
-                    $('#modalEntidad').modal('show');
-                    cargarPermisos(u.id);
+                    cargarUnidades(u.unidadDeNegocioId).then(function () {
+                        $('#modalEntidad').modal('show');
+                        cargarPermisos(u.id);
+                    });
                 } else {
                     showAlert(r.error || 'Error al cargar', 'error');
                 }
@@ -193,7 +195,7 @@
         function limpiar() {
             $('#entidadId').val('');
             $('#nombre').val('');
-            $('#unidadNegocio').val(unidadId || '');
+            $('#unidadNegocio').empty();
             $('#estatusCheck').prop('checked', true).prop('disabled', true);
             $('#contenedorPermisos').empty();
         }
