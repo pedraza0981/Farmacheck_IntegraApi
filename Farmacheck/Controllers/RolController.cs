@@ -4,6 +4,8 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Roles;
 using AutoMapper;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Application.Models.PermissionsByRoles;
+using Farmacheck.Application.Models.Permissions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +17,7 @@ namespace Farmacheck.Controllers
         private readonly IRoleApiClient _apiClient;
         private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly IPermissionApiClient _permissionApi;
+        private readonly IPermissionByRoleApiClient _permissionByRoleApi;
         private readonly IMapper _mapper;
 
         private static readonly Dictionary<int, List<int>> _permisosPorRol = new();
@@ -22,11 +25,13 @@ namespace Farmacheck.Controllers
         public RolController(IRoleApiClient apiClient,
                              IBusinessUnitApiClient businessUnitApi,
                              IPermissionApiClient permissionApi,
+                             IPermissionByRoleApiClient permissionByRoleApi,
                              IMapper mapper)
         {
             _apiClient = apiClient;
             _businessUnitApi = businessUnitApi;
             _permissionApi = permissionApi;
+            _permissionByRoleApi = permissionByRoleApi;
             _mapper = mapper;
         }
 
@@ -132,6 +137,23 @@ namespace Farmacheck.Controllers
                 var request = _mapper.Map<RoleRequest>(model);
                 var id = await _apiClient.CreateAsync(request);
                 _permisosPorRol[id] = model.Permisos ?? new List<int>();
+
+                if (model.Permisos != null && model.Permisos.Any())
+                {
+                    var permisos = await _permissionApi.GetPermissionsAsync();
+                    var seleccionados = permisos
+                        .Where(p => model.Permisos.Contains(p.Id))
+                        .ToList();
+
+                    var permisoRolRequest = new PermissionByRoleRequest
+                    {
+                        RolId = id,
+                        Permisos = seleccionados
+                    };
+
+                    await _permissionByRoleApi.CreateAsync(permisoRolRequest);
+                }
+
                 return Json(new { success = true, id });
             }
             else
@@ -141,6 +163,23 @@ namespace Farmacheck.Controllers
                 if (updated)
                 {
                     _permisosPorRol[model.Id] = model.Permisos ?? new List<int>();
+
+                    if (model.Permisos != null && model.Permisos.Any())
+                    {
+                        var permisos = await _permissionApi.GetPermissionsAsync();
+                        var seleccionados = permisos
+                            .Where(p => model.Permisos.Contains(p.Id))
+                            .ToList();
+
+                        var permisoRolRequest = new PermissionByRoleRequest
+                        {
+                            RolId = model.Id,
+                            Permisos = seleccionados
+                        };
+
+                        await _permissionByRoleApi.CreateAsync(permisoRolRequest);
+                    }
+
                     return Json(new { success = true, id = model.Id });
                 }
 
