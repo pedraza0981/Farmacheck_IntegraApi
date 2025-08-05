@@ -163,13 +163,20 @@ namespace Farmacheck.Controllers
                 var updated = await _apiClient.UpdateAsync(updateRequest);
                 if (updated)
                 {
-                    _permisosPorRol[model.Id] = model.Permisos ?? new List<int>();
+                    var permisosAsignados = ViewBag.PermisosAsignados as List<PermissionByRoleResponse>
+                                            ?? await _permissionByRoleApi.GetByRolAsync(model.Id);
 
-                    if (model.Permisos != null && model.Permisos.Any())
+                    var asignadosIds = permisosAsignados.Select(p => p.PermisoId).ToList();
+                    var seleccionadosIds = model.Permisos ?? new List<int>();
+
+                    var nuevosIds = seleccionadosIds.Except(asignadosIds).ToList();
+                    var removidosIds = asignadosIds.Except(seleccionadosIds).ToList();
+
+                    if (nuevosIds.Any())
                     {
                         var permisos = await _permissionApi.GetPermissionsAsync();
                         var seleccionados = permisos
-                            .Where(p => model.Permisos.Contains(p.Id))
+                            .Where(p => nuevosIds.Contains(p.Id))
                             .ToList();
 
                         var permisoRolRequest = new PermissionByRoleRequest
@@ -181,7 +188,14 @@ namespace Farmacheck.Controllers
                         await _permissionByRoleApi.CreateAsync(permisoRolRequest);
                     }
 
-                    return Json(new { success = true, id = model.Id });
+                    foreach (var idPermiso in removidosIds)
+                    {
+                        await _permissionApi.DeleteAsync(idPermiso);
+                    }
+
+                    _permisosPorRol[model.Id] = seleccionadosIds;
+
+                    return Json(new { success = true, message = "Actualización realizada correctamente", id = model.Id });
                 }
 
                 return Json(new { success = false, error = "No se pudo actualizar" });
