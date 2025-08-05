@@ -11,10 +11,10 @@ namespace Farmacheck.Application.Mappings
             CreateMap<BusinessStructureResponse, BusinessStructureDto>();
 
             CreateMap<BusinessStructureDto, BusinessStructureRequest>()
-                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.MarcaId))
+                .ForMember(dest => dest.MarcaId, opt => opt.MapFrom(src => src.MarcaId ?? 0))
                 .ForMember(dest => dest.SubmarcaId, opt => opt.MapFrom(src => src.SubmarcaId))
                 .ForMember(dest => dest.ZonaId, opt => opt.MapFrom(src => src.ZonaId))
-                .ForMember(dest => dest.ClienteId, opt => opt.Ignore());
+                .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => (int)(src.ClienteId ?? 0)));
 
             CreateMap<BusinessStructureDto, UpdateBusinessStructureRequest>()
                 .IncludeBase<BusinessStructureDto, BusinessStructureRequest>();
