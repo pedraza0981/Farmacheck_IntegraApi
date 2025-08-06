@@ -128,7 +128,7 @@ namespace Farmacheck.Helpers
             CreateMap<UserDto, UsuarioViewModel>().ReverseMap();
             CreateMap<UsuarioViewModel, UserRequest>();
             CreateMap<UsuarioViewModel, UpdateUserRequest>();
-            CreateMap<UserByRoleDto, UsuarioRolViewModel>().ReverseMap();
+            CreateMap<RelUserByRoleDto, UsuarioRolViewModel>().ReverseMap();
             CreateMap<UsuarioRolViewModel, UserByRoleRequest>();
             CreateMap<UsuarioRolViewModel, UpdateUserByRoleRequest>();
             CreateMap<RolPorUsuarioClientesAsignadosDto, RolPorUsuarioClientesAsignadosViewModel>().ReverseMap();
