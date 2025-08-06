@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Application.Models.CustomersRolesUsers;
 
 namespace Farmacheck.Controllers
 {
@@ -21,8 +22,11 @@ namespace Farmacheck.Controllers
         private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient;
         private readonly ICustomersApiClient _customersApi;
         private readonly IUserByRoleApiClient _userByRoleApiClient;
+        private readonly ICustomersRolesUsersApiClient _customersRolesUsersApiClient;  
 
-        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient, ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient)
+        public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, 
+                                 ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient, 
+                                 ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient, ICustomersRolesUsersApiClient customersRolesUsersApiClient)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -33,6 +37,7 @@ namespace Farmacheck.Controllers
             _clientesAsignadosArolPorUsuariosApiClient = clientesAsignadosArolPorUsuariosApiClient;
             _customersApi = customersApi;
             _userByRoleApiClient = userByRoleApiClient;
+            _customersRolesUsersApiClient = customersRolesUsersApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -119,17 +124,42 @@ namespace Farmacheck.Controllers
         [HttpPost]
         public async Task<JsonResult> GuardarRolPorUsuario([FromBody] UsuarioRolViewModel model)
         {
+            int userRoleId = 0;
+
             try
             {
+                
                 var request = _mapper.Map<UserByRoleRequest>(model);
-                var id = await _userByRoleApiClient.CreateAsync(request);
-                return Json(new { success = true, id });
+                userRoleId = await _userByRoleApiClient.CreateAsync(request);
+
+                if (userRoleId <= 0)
+                {
+                    return Json(new { success = false, error = "No se pudo crear el rol del usuario." });
+                }
+                                
+                var customerRolUserRequest = new CustomerRolUserRequest
+                {
+                    RolPorUsuarioId = userRoleId,
+                    Clientes = model.ClienteIds ?? new List<long>(),
+                    GeolocalizacionActiva = true
+                };
+
+                var result = await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
+
+
+                if (userRoleId <= 0)
+                {                    
+                    return Json(new { success = false, error = "No se pudo asociar clientes al rol del usuario." });
+                }
+
+                return Json(new { success = true, id = userRoleId });
             }
             catch (Exception ex)
-            {
+            {                
                 return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
             }
         }
+
 
         [HttpPost]
         public async Task<JsonResult> Guardar([FromBody] UsuarioViewModel model)

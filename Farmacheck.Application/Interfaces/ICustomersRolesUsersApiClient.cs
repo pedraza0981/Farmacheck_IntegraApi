@@ -10,7 +10,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<CustomerRolUserResponse>> GetPagesAsync(int page, int items);
         Task<List<CustomerRolUserResponse>> GetPagesByCustomerAsync(int page, int items, long customer);
         Task<CustomerRolUserResponse?> GetByIdAsync(int id);
-        Task<int> CreateAsync(CustomerRolUserRequest request);
+        Task<string> CreateAsync(CustomerRolUserRequest request);
         Task<bool> UpdateAsync(UpdateCustomerRolUserRequest request);
         Task<bool> DeleteAsync(int id);
         Task<bool> RemoveByCustomerAsync(List<int> ids, int customer);

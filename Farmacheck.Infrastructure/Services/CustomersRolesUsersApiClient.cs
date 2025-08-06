@@ -46,11 +46,11 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<CustomerRolUserResponse>($"api/v1/Customers_RolesUsers/{id}");
         }
 
-        public async Task<int> CreateAsync(CustomerRolUserRequest request)
+        public async Task<string> CreateAsync(CustomerRolUserRequest request)
         {
             var response = await _http.PostAsJsonAsync("api/v1/Customers_RolesUsers", request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<int>();
+            return await response.Content.ReadAsStringAsync();
         }
 
         public async Task<bool> UpdateAsync(UpdateCustomerRolUserRequest request)
