@@ -31,10 +31,10 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<UserByRoleResponse>($"api/v1/UsersByRoles/{id}");
         }
 
-        public async Task<List<UserByRoleResponse>> GetByUserAsync(int usuarioId)
+        public async Task<List<RelUserByRoleResponse>> GetByUserAsync(int usuarioId)
         {
-            return await _http.GetFromJsonAsync<List<UserByRoleResponse>>($"api/v1/UsersByRoles/user/{usuarioId}")
-                   ?? new List<UserByRoleResponse>();
+            return await _http.GetFromJsonAsync<List<RelUserByRoleResponse>>($"api/v1/UsersByRoles/user/{usuarioId}")
+                   ?? new List<RelUserByRoleResponse>();
         }
 
         public async Task<int> CreateAsync(UserByRoleRequest request)
