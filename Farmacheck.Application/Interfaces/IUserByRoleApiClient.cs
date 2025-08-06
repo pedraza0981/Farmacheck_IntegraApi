@@ -7,7 +7,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<UserByRoleResponse>> GetUsersByRolesAsync();
         Task<List<UserByRoleResponse>> GetUsersByRolesByPageAsync(int page, int items);
         Task<UserByRoleResponse?> GetUserByRoleAsync(int id);
-        Task<List<UserByRoleResponse>> GetByUserAsync(int usuarioId);
+        Task<List<RelUserByRoleResponse>> GetByUserAsync(int usuarioId);
         Task<int> CreateAsync(UserByRoleRequest request);
         Task<bool> UpdateAsync(UpdateUserByRoleRequest request);
         Task<bool> DeleteAsync(int id);

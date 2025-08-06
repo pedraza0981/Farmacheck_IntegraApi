@@ -203,7 +203,7 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> ListarRolesPorUsuario(int usuarioId)
         {
             var apiData = await _userByRoleApiClient.GetByUserAsync(usuarioId);
-            var dtos = _mapper.Map<List<UserByRoleDto>>(apiData);
+            var dtos = _mapper.Map<List<RelUserByRoleDto>>(apiData);
             var roles = _mapper.Map<List<UsuarioRolViewModel>>(dtos);
 
             return Json(new { success = true, data = roles });
