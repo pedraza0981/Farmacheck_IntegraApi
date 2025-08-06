@@ -19,6 +19,7 @@ namespace Farmacheck.Controllers
         private readonly IBusinessStructureApiClient _businessStructureApi;
         private readonly IMapper _mapper;
         private readonly IBrandApiClient _ibrand;
+        private readonly IBusinessUnitApiClient _businessUnitApiClient;
 
         public ClienteController(
             ICustomersApiClient apiClient,
@@ -26,7 +27,8 @@ namespace Farmacheck.Controllers
             IZoneApiClient zoneApi,
             IBusinessStructureApiClient businessStructureApi,
             IMapper mapper,
-            IBrandApiClient ibrand)
+            IBrandApiClient ibrand,
+            IBusinessUnitApiClient businessUnitApiClient)
         {
             _apiClient = apiClient;
             _customerTypesApi = customerTypesApi;
@@ -34,6 +36,7 @@ namespace Farmacheck.Controllers
             _businessStructureApi = businessStructureApi;
             _mapper = mapper;
             _ibrand = ibrand;
+            _businessUnitApiClient = businessUnitApiClient;
         }
 
         public async Task<IActionResult> Index()    
@@ -66,11 +69,11 @@ namespace Farmacheck.Controllers
 
                 var businessStructure = await _businessStructureApi.GetBusinessStructureByCustomerAsync(id);
 
-                var marca = await _ibrand.GetBrandAsync(businessStructure.MarcaId);
+                var marca = await _ibrand.GetBrandAsync(businessStructure.FirstOrDefault().MarcaId);
 
                 if (businessStructure != null)
                 {
-                    var bsDto = _mapper.Map<BusinessStructureDto>(businessStructure);
+                    var bsDto = _mapper.Map<BusinessStructureDto>(businessStructure.FirstOrDefault());
 
                     if(marca!= null)
                         bsDto.UnidadDeNegocioId = marca.UnidadDeNegocio;
@@ -153,6 +156,13 @@ namespace Farmacheck.Controllers
             var dtos = _mapper.Map<List<ZonaDto>>(apiData);
             var items = _mapper.Map<List<SelectListItem>>(dtos);
             return Json(new { success = true, data = items });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarUnidadesNegocio()
+        {
+            var result = await _businessUnitApiClient.GetBusinessUnitsAsync();
+            return Json(new { success = true, data = result });
         }
     }
 }

@@ -154,6 +154,7 @@
                 limpiar();
                 $('#modalTitulo').text('Nueva farmacia');
                 $('#modalEntidad').modal('show');
+                cargarCatalogos();
             });
 
             $('#btnGuardar').click(function () {
@@ -250,27 +251,28 @@
                     r.data.forEach(z => select.append(`<option value="${z.value}">${z.text}</option>`));
                 }
             });
-            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+            $.get('@Url.Action("ListarUnidadesNegocio", "Cliente")', function (r) {
                 if (r.success) {
                     const select = $('#unidadNegocioSelect');
                     select.empty().append('<option value="0">Seleccionar</option>');
                     r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
                 }
             });
-            $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', function (r) {
-                if (r.success) {
-                    const select = $('#marcaSelect');
-                    select.empty().append('<option value="0">Seleccionar</option>');
-                    r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
-                }
-            });
-            $.get('@Url.Action("ListarPorMarca", "SubMarca")', function (r) {
-                if (r.success) {
-                    const select = $('#submarcaSelect');
-                    select.empty().append('<option value="0">Seleccionar</option>');
-                    r.data.forEach(s => select.append(`<option value="${s.id}">${s.nombre}</option>`));
-                }
-            });
+
+            // $.get('@Url.Action("ListarPorUnidadNegocio", "Marca")', function (r) {
+            //     if (r.success) {
+            //         const select = $('#marcaSelect');
+            //         select.empty().append('<option value="0">Seleccionar</option>');
+            //         r.data.forEach(m => select.append(`<option value="${m.id}">${m.nombre}</option>`));
+            //     }
+            // });
+            // $.get('@Url.Action("ListarPorMarca", "SubMarca")', function (r) {
+            //     if (r.success) {
+            //         const select = $('#submarcaSelect');
+            //         select.empty().append('<option value="0">Seleccionar</option>');
+            //         r.data.forEach(s => select.append(`<option value="${s.id}">${s.nombre}</option>`));
+            //     }
+            // });
         }
 
         function cargar() {

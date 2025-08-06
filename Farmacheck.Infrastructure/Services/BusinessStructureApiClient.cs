@@ -31,15 +31,16 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<BusinessStructureResponse>($"api/v1/BusinessStructure/{id}");
         }
 
-        public async Task<BusinessStructureResponse?> GetBusinessStructureByCustomerAsync(int customerId)
+        public async Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(int customerId)
         {
             try
             {
                 var url = $"api/v1/BusinessStructure/customer/{customerId}";
-                return await _http.GetFromJsonAsync<BusinessStructureResponse>(url);
+                return await _http.GetFromJsonAsync<IEnumerable<BusinessStructureResponse>>(url);
             }
             catch (Exception ex)
             {
+                // Puedes loguear ex.Message si necesitas rastrear el error
                 return null;
             }
         }
