@@ -130,11 +130,50 @@ namespace Farmacheck.Controllers
         [HttpPost]
         public async Task<JsonResult> GuardarRolPorUsuario([FromBody] UsuarioRolViewModel model)
         {
-            int userRoleId = 0;
-
             try
             {
-                
+                if (model.Id > 0)
+                {
+                    try
+                    {
+                        var customers = await _customersRolesUsersApiClient.GetsByUserRolAsync(model.Id);
+                        var existentes = customers.Select(c => c.ClienteId).ToList();
+                        var seleccionados = model.ClienteIds ?? new List<long>();
+
+                        var nuevos = seleccionados.Except(existentes).ToList();
+                        var remover = customers.Where(c => !seleccionados.Contains(c.ClienteId)).ToList();
+
+                        if (nuevos.Any())
+                        {
+                            var addRequest = new CustomerRolUserRequest
+                            {
+                                RolPorUsuarioId = model.Id,
+                                Clientes = nuevos,
+                                GeolocalizacionActiva = true
+                            };
+                            await _customersRolesUsersApiClient.CreateAsync(addRequest);
+                        }
+
+                        foreach (var item in remover)
+                        {
+                            await _customersRolesUsersApiClient.DeleteAsync(item.Id);
+                        }
+
+                        if (!seleccionados.Any())
+                        {
+                            await _userByRoleApiClient.DeleteAsync(model.Id);
+                        }
+
+                        return Json(new { success = true, id = model.Id });
+                    }
+                    catch (Exception ex)
+                    {
+                        return Json(new { success = false, error = "Error al actualizar el rol del usuario: " + ex.Message });
+                    }
+                }
+
+                int userRoleId = 0;
+
                 var request = _mapper.Map<UserByRoleRequest>(model);
                 userRoleId = await _userByRoleApiClient.CreateAsync(request);
 
@@ -142,7 +181,7 @@ namespace Farmacheck.Controllers
                 {
                     return Json(new { success = false, error = "No se pudo crear el rol del usuario." });
                 }
-                                
+
                 var customerRolUserRequest = new CustomerRolUserRequest
                 {
                     RolPorUsuarioId = userRoleId,
@@ -150,18 +189,12 @@ namespace Farmacheck.Controllers
                     GeolocalizacionActiva = true
                 };
 
-                var result = await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
-
-
-                if (userRoleId <= 0)
-                {                    
-                    return Json(new { success = false, error = "No se pudo asociar clientes al rol del usuario." });
-                }
+                await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
 
                 return Json(new { success = true, id = userRoleId });
             }
             catch (Exception ex)
-            {                
+            {
                 return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
             }
         }
