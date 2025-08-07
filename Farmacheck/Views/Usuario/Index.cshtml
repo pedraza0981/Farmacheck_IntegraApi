@@ -512,20 +512,27 @@
             });
         }
 
-        function cargarZonas() {
+        function cargarZonas(zonasSeleccionadas = []) {
             const contenedor = $('#contenedorZonas');
             contenedor.empty();
             $('#checkAllZonas').prop('checked', false);
             $.get('@Url.Action("ListarZonas", "Usuario")', function (r) {
                 if (r.success) {
                     r.data.forEach(z => {
+                        const checked = zonasSeleccionadas.includes(z.id) ? 'checked' : '';
                         contenedor.append(`
                             <div class="form-check">
-                                <input class="form-check-input zona-check" type="checkbox" value="${z.id}" id="zona_${z.id}">
+                                <input class="form-check-input zona-check" type="checkbox" value="${z.id}" id="zona_${z.id}" ${checked}>
                                 <label class="form-check-label" for="zona_${z.id}">${z.nombre}</label>
                             </div>
                         `);
                     });
+                    const total = $('#contenedorZonas .zona-check').length;
+                    const checkedCount = $('#contenedorZonas .zona-check:checked').length;
+                    $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
+                    if (zonasSeleccionadas.length > 0) {
+                        cargarClientes();
+                    }
                 }
             });
         }
@@ -728,6 +735,7 @@
                     clientesSeleccionados = r.data.clienteIds || [];
                     $('#rolSelectModal').val(r.data.rolId);
                     $('#unidadDeNegocioSelect').val(r.data.unidadDeNegocioId);
+                    cargarZonas(r.data.zonaIds || []);
                     cargarMarcas(r.data.unidadDeNegocioId, r.data.marcaIds || [], r.data.submarcaIds || []);
                 } else {
                     showAlert(r.error || 'Error al obtener datos', 'error');
