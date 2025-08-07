@@ -355,7 +355,10 @@
                     data: JSON.stringify(datos),
                     success: function (r) {
                         if (r.success) {
-                            $('#modalEntidad').modal('hide');
+                            if (parseInt(id) === 0) {
+                                $('#entidadId').val(r.id);
+                                cargarZonas();
+                            }
                             const mensaje = parseInt(id) === 0
                                 ? 'Usuario registrado correctamente'
                                 : 'Usuario actualizado correctamente';
