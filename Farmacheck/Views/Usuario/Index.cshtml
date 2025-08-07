@@ -391,7 +391,7 @@
                             data: JSON.stringify(datosUpdate),
                             success: function (r) {
                                 if (r.success) {
-                                    showAlert('Actualización realizada correctamente', 'success');
+                                    showAlert('Gestión de Clientes/Rol por usuario realizada correctamente', 'success');
                                     $('#modalGestionRol').modal('hide');
                                 } else {
                                     showAlert(r.error || 'Error al actualizar', 'error');
