@@ -7,7 +7,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<BusinessStructureResponse>> GetBusinessStructuresAsync();
         Task<List<BusinessStructureResponse>> GetBusinessStructuresByPageAsync(int page, int items);
         Task<BusinessStructureResponse?> GetBusinessStructureAsync(int id);
-        Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(int customerId);
+        Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(long customerId);
         Task<int> CreateAsync(BusinessStructureRequest request);
         Task<bool> UpdateAsync(UpdateBusinessStructureRequest request);
         Task DeleteAsync(int id);

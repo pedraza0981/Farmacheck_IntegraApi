@@ -31,7 +31,7 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<BusinessStructureResponse>($"api/v1/BusinessStructure/{id}");
         }
 
-        public async Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(int customerId)
+        public async Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(long customerId)
         {
             try
             {

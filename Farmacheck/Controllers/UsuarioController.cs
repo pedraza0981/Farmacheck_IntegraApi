@@ -216,22 +216,30 @@ namespace Farmacheck.Controllers
             var customers = await _customersRolesUsersApiClient.GetsByUserRolAsync(id);
 
             var marcaIds = new List<int>();
+            var submarcaIds = new List<int>();
             foreach (var c in customers)
             {
-                var structure = await _businessStructureApiClient.GetBusinessStructureAsync((int)c.ClienteId);
-                if (structure?.MarcaId != null)
+                var structure = await _businessStructureApiClient.GetBusinessStructureByCustomerAsync((long)c.ClienteId);
+                if (structure.FirstOrDefault()?.MarcaId != null)
                 {
-                    marcaIds.Add(structure.MarcaId.Value);
+                    marcaIds.Add(structure.FirstOrDefault().MarcaId.Value);
+                }
+
+                if (structure.FirstOrDefault()?.SubmarcaId != null)
+                {
+                    submarcaIds.Add(structure.FirstOrDefault().SubmarcaId.Value);
                 }
             }
             marcaIds = marcaIds.Distinct().ToList();
+            submarcaIds = submarcaIds.Distinct().ToList();
 
             var data = new
             {
                 RolId = userByRole.RolId,
                 UnidadDeNegocioId = role?.UnidadDeNegocioId,
                 ClienteIds = customers.Select(c => c.ClienteId).ToList(),
-                MarcaIds = marcaIds
+                MarcaIds = marcaIds,
+                SubmarcaIds = submarcaIds
             };
 
             return Json(new { success = true, data });
