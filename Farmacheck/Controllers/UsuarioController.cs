@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.CustomersRolesUsers;
-using System.Linq;
 
 namespace Farmacheck.Controllers
 {
@@ -23,13 +22,11 @@ namespace Farmacheck.Controllers
         private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient;
         private readonly ICustomersApiClient _customersApi;
         private readonly IUserByRoleApiClient _userByRoleApiClient;
-        private readonly ICustomersRolesUsersApiClient _customersRolesUsersApiClient;
-        private readonly IRoleApiClient _roleApiClient;
+        private readonly ICustomersRolesUsersApiClient _customersRolesUsersApiClient;  
 
         public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, 
-                                 ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient,
-                                 ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient, ICustomersRolesUsersApiClient customersRolesUsersApiClient,
-                                 IRoleApiClient roleApiClient)
+                                 ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient, 
+                                 ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient, ICustomersRolesUsersApiClient customersRolesUsersApiClient)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -41,7 +38,6 @@ namespace Farmacheck.Controllers
             _customersApi = customersApi;
             _userByRoleApiClient = userByRoleApiClient;
             _customersRolesUsersApiClient = customersRolesUsersApiClient;
-            _roleApiClient = roleApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -201,26 +197,6 @@ namespace Farmacheck.Controllers
         {
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> ObtenerClientesPorRolPorUsuario(int id)
-        {
-            var userByRole = await _userByRoleApiClient.GetUserByRoleAsync(id);
-            if (userByRole == null)
-                return Json(new { success = false, error = "No encontrado" });
-
-            var role = await _roleApiClient.GetRoleAsync((byte)userByRole.RolId);
-            var customers = await _customersRolesUsersApiClient.GetsByUserRolAsync(id);
-
-            var data = new
-            {
-                RolId = userByRole.RolId,
-                UnidadDeNegocioId = role?.UnidadDeNegocioId,
-                ClienteIds = customers.Select(c => c.ClienteId).ToList()
-            };
-
-            return Json(new { success = true, data });
         }
 
         [HttpGet]

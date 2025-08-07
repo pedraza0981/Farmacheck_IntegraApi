@@ -21,13 +21,6 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<CustomerRolUserResponse>();
         }
 
-        public async Task<List<CustomerRolUserResponse>> GetsByUserRolAsync(int rolPorUsuarioId)
-        {
-            var url = $"api/v1/Customers_RolesUsers/rolPorUsuario?rolPorUsuario={rolPorUsuarioId}";
-            return await _http.GetFromJsonAsync<List<CustomerRolUserResponse>>(url)
-                   ?? new List<CustomerRolUserResponse>();
-        }
-
         public async Task<List<CustomerRolUserResponse>> GetAsync()
         {
             return await _http.GetFromJsonAsync<List<CustomerRolUserResponse>>("api/v1/Customers_RolesUsers")
