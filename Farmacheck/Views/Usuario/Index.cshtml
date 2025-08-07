@@ -195,6 +195,7 @@
                             <input class="form-check-input" type="checkbox" id="checkAllClientes">
                             <label class="form-check-label" for="checkAllClientes">All</label>
                         </div>
+                        <input type="text" id="buscarCliente" class="form-control mb-2" placeholder="Buscar cliente...">
                         <div id="contenedorClientes" class="border rounded p-2 row row-cols-1 row-cols-md-3 g-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                 </div>
@@ -289,6 +290,8 @@
                 const checked = this.checked;
                 $('#contenedorClientes .cliente-check').prop('checked', checked);
             });
+
+            $('#buscarCliente').on('input', filtrarClientes);
 
             $('#selectRol').change(function () {
                 const rolPorUsuarioId = $(this).val();
@@ -629,8 +632,17 @@
                         const total = $('#contenedorClientes .cliente-check').length;
                         const checked = $('#contenedorClientes .cliente-check:checked').length;
                         $('#checkAllClientes').prop('checked', total > 0 && total === checked);
+                        filtrarClientes();
                     }
                 }
+            });
+        }
+
+        function filtrarClientes() {
+            const filtro = $('#buscarCliente').val().toLowerCase();
+            $('#contenedorClientes .col').each(function () {
+                const nombre = $(this).text().toLowerCase();
+                $(this).toggle(nombre.includes(filtro));
             });
         }
 
