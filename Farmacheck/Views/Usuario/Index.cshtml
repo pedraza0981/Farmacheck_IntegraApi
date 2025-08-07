@@ -210,6 +210,7 @@
 @section Scripts {
 
     <script>
+        let clientesSeleccionados = [];
 
         $(document).ready(function () {
             cargar();
@@ -220,6 +221,7 @@
                 cargarMarcas($(this).val());
             });
             $('#modalGestionRol').on('show.bs.modal', function () {
+                clientesSeleccionados = [];
                 cargarRolesModal();
             });
 
@@ -307,7 +309,7 @@
                                                 <td>${item.totalClientesAsignados}</td>
                                                 <td>${item.unidadDeNegocioNombre}</td>
                                                 <td class="text-center">
-                                                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarRol(${item.rolPorUsuarioId})"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarClientesPorRolPorUsuario(${item.rolPorUsuarioId})"><i class="bi bi-pencil"></i></button>
                                                     <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminarRol(${item.rolPorUsuarioId})"><i class="bi bi-trash"></i></button>
                                                 </td>
                                             </tr>
@@ -548,6 +550,13 @@
                                 </div>
                             `);
                         });
+
+                        clientesSeleccionados.forEach(id => {
+                            $(`#cliente_${id}`).prop('checked', true);
+                        });
+                        const total = $('#contenedorClientes .cliente-check').length;
+                        const checked = $('#contenedorClientes .cliente-check:checked').length;
+                        $('#checkAllClientes').prop('checked', total > 0 && total === checked);
                     }
                 }
             });
@@ -698,8 +707,17 @@
             }
         }
 
-        function editarRol(id) {
-            console.log('Editar rol por usuario', id);
+        function editarClientesPorRolPorUsuario(id) {
+            $('#modalGestionRol').modal('show');
+            $.get('@Url.Action("ObtenerClientesPorRolPorUsuario", "Usuario")', { id }, function (r) {
+                if (r.success) {
+                    clientesSeleccionados = r.data.clienteIds || [];
+                    $('#rolSelectModal').val(r.data.rolId);
+                    $('#unidadDeNegocioSelect').val(r.data.unidadDeNegocioId).change();
+                } else {
+                    showAlert(r.error || 'Error al obtener datos', 'error');
+                }
+            });
         }
 
         function eliminarRol(id) {
