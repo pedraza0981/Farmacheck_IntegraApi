@@ -6,6 +6,7 @@ namespace Farmacheck.Application.Interfaces
     public interface ICustomersRolesUsersApiClient
     {
         Task<List<CustomerRolUserResponse>> GetByCustomerAsync(long client);
+        Task<List<CustomerRolUserResponse>> GetsByUserRolAsync(int rolPorUsuarioId);
         Task<List<CustomerRolUserResponse>> GetAsync();
         Task<List<CustomerRolUserResponse>> GetPagesAsync(int page, int items);
         Task<List<CustomerRolUserResponse>> GetPagesByCustomerAsync(int page, int items, long customer);
