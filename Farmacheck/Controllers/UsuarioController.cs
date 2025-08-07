@@ -25,11 +25,12 @@ namespace Farmacheck.Controllers
         private readonly IUserByRoleApiClient _userByRoleApiClient;
         private readonly ICustomersRolesUsersApiClient _customersRolesUsersApiClient;
         private readonly IRoleApiClient _roleApiClient;
+        private readonly IBusinessStructureApiClient _businessStructureApiClient;
 
         public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, 
                                  ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient,
                                  ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient, ICustomersRolesUsersApiClient customersRolesUsersApiClient,
-                                 IRoleApiClient roleApiClient)
+                                 IRoleApiClient roleApiClient, IBusinessStructureApiClient businessStructureApiClient)
         {
             _apiClient = apiClient;
             _brandApi = brandApi;
@@ -42,6 +43,7 @@ namespace Farmacheck.Controllers
             _userByRoleApiClient = userByRoleApiClient;
             _customersRolesUsersApiClient = customersRolesUsersApiClient;
             _roleApiClient = roleApiClient;
+            _businessStructureApiClient = businessStructureApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -213,11 +215,23 @@ namespace Farmacheck.Controllers
             var role = await _roleApiClient.GetRoleAsync((byte)userByRole.RolId);
             var customers = await _customersRolesUsersApiClient.GetsByUserRolAsync(id);
 
+            var marcaIds = new List<int>();
+            foreach (var c in customers)
+            {
+                var structure = await _businessStructureApiClient.GetBusinessStructureAsync((int)c.ClienteId);
+                if (structure?.MarcaId != null)
+                {
+                    marcaIds.Add(structure.MarcaId.Value);
+                }
+            }
+            marcaIds = marcaIds.Distinct().ToList();
+
             var data = new
             {
                 RolId = userByRole.RolId,
                 UnidadDeNegocioId = role?.UnidadDeNegocioId,
-                ClienteIds = customers.Select(c => c.ClienteId).ToList()
+                ClienteIds = customers.Select(c => c.ClienteId).ToList(),
+                MarcaIds = marcaIds
             };
 
             return Json(new { success = true, data });
