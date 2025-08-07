@@ -217,6 +217,7 @@ namespace Farmacheck.Controllers
 
             var marcaIds = new List<int>();
             var submarcaIds = new List<int>();
+            var zonaIds = new List<int>();
             foreach (var c in customers)
             {
                 var structure = await _businessStructureApiClient.GetBusinessStructureByCustomerAsync((long)c.ClienteId);
@@ -229,9 +230,15 @@ namespace Farmacheck.Controllers
                 {
                     submarcaIds.Add(structure.FirstOrDefault().SubmarcaId.Value);
                 }
+
+                if (structure.FirstOrDefault()?.ZonaId != null)
+                {
+                    zonaIds.Add(structure.FirstOrDefault().ZonaId);
+                }
             }
             marcaIds = marcaIds.Distinct().ToList();
             submarcaIds = submarcaIds.Distinct().ToList();
+            zonaIds = zonaIds.Distinct().ToList();
 
             var data = new
             {
@@ -239,7 +246,8 @@ namespace Farmacheck.Controllers
                 UnidadDeNegocioId = role?.UnidadDeNegocioId,
                 ClienteIds = customers.Select(c => c.ClienteId).ToList(),
                 MarcaIds = marcaIds,
-                SubmarcaIds = submarcaIds
+                SubmarcaIds = submarcaIds,
+                ZonaIds = zonaIds
             };
 
             return Json(new { success = true, data });
