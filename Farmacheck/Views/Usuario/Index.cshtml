@@ -615,8 +615,11 @@
                 data: { subbrandIds: subbrands, zoneIds: zones },
                 success: function (r) {
                     if (r.success) {
+                        const ids = new Set();
                         r.data.forEach(c => {
-                            contenedor.append(`
+                            if (!ids.has(c.clienteId)) {
+                                ids.add(c.clienteId);
+                                contenedor.append(`
                                 <div class="col">
                                     <div class="form-check">
                                         <input class="form-check-input cliente-check" type="checkbox" value="${c.clienteId}" id="cliente_${c.clienteId}">
@@ -624,8 +627,10 @@
                                     </div>
                                 </div>
                             `);
+                            }
                         });
 
+                        clientesSeleccionados = [...new Set(clientesSeleccionados)];
                         clientesSeleccionados.forEach(id => {
                             $(`#cliente_${id}`).prop('checked', true);
                         });
