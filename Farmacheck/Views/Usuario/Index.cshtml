@@ -151,6 +151,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="idRolPorUsuario" />
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Rol</label>
@@ -223,6 +224,10 @@
             $('#modalGestionRol').on('show.bs.modal', function () {
                 clientesSeleccionados = [];
                 cargarRolesModal();
+            });
+
+            $('#btnGestionarRoles').click(function () {
+                $('#idRolPorUsuario').val('');
             });
 
             $('#contenedorMarcas').on('change', '.marca-check', function () {
@@ -367,9 +372,44 @@
                 const usuarioId = $('#entidadId').val();
                 const rolId = $('#rolSelectModal').val();
                 const unidadId = $('#unidadDeNegocioSelect').val();
+                const idRolPorUsuario = $('#idRolPorUsuario').val();
                 const clienteIds = $('#contenedorClientes .cliente-check:checked').map(function () {
                     return parseInt(this.value);
                 }).get();
+
+                if (idRolPorUsuario) {
+                    const datosUpdate = {
+                        Id: parseInt(idRolPorUsuario),
+                        ClienteIds: clienteIds
+                    };
+
+                    const ejecutar = function () {
+                        $.ajax({
+                            url: '@Url.Action("GuardarRolPorUsuario", "Usuario")',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(datosUpdate),
+                            success: function (r) {
+                                if (r.success) {
+                                    showAlert('Actualización realizada correctamente', 'success');
+                                    $('#modalGestionRol').modal('hide');
+                                } else {
+                                    showAlert(r.error || 'Error al actualizar', 'error');
+                                }
+                            }
+                        });
+                    };
+
+                    if (clienteIds.length === 0) {
+                        confirmAction('No hay clientes seleccionados, se eliminará la asignación. ¿Deseas continuar?').then(function (ok) {
+                            if (ok) ejecutar();
+                        });
+                    } else {
+                        ejecutar();
+                    }
+
+                    return;
+                }
 
                 if (!rolId) {
                     showAlert('Selecciona un rol', 'warning');
@@ -729,6 +769,7 @@
         }
 
         function editarClientesPorRolPorUsuario(id) {
+            $('#idRolPorUsuario').val(id);
             $('#modalGestionRol').modal('show');
             $.get('@Url.Action("ObtenerClientesPorRolPorUsuario", "Usuario")', { id }, function (r) {
                 if (r.success) {
