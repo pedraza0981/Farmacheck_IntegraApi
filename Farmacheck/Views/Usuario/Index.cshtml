@@ -398,6 +398,7 @@
                             success: function (r) {
                                 if (r.success) {
                                     showAlert('Gestión de Clientes/Rol por usuario realizada correctamente', 'success');
+                                    limpiarModalGestionRol();
                                     $('#modalGestionRol').modal('hide');
                                     $('#modalEntidad').modal('show');
                                     cargarSelectorRoles();
@@ -450,6 +451,7 @@
                     success: function (r) {
                         if (r.success) {
                             showAlert('El registro de clientes asignados a rol por usuario se realizó correctamente', 'success');
+                            limpiarModalGestionRol();
                             $('#modalGestionRol').modal('hide');
                             $('#modalEntidad').modal('show');
                             cargarSelectorRoles();
@@ -737,7 +739,7 @@
             });
         }
 
-              function limpiar() {
+        function limpiar() {
             // Reset campos de formulario
             $('#entidadId').val('');
             $('#nombre').val('');
@@ -772,6 +774,22 @@
             // // Volver a cargar opciones dinámicas si es necesario
             // cargarUnidadesNegocio();
             // cargarZonas();
+        }
+
+        function limpiarModalGestionRol() {
+            $('#idRolPorUsuario').val('');
+            $('#rolSelectModal').val('');
+            $('#unidadDeNegocioSelect').val('');
+            $('#checkAllMarcas').prop('checked', false);
+            $('#checkAllSubMarcas').prop('checked', false);
+            $('#checkAllZonas').prop('checked', false);
+            $('#checkAllClientes').prop('checked', false);
+            $('#buscarCliente').val('');
+            $('#contenedorMarcas').empty();
+            $('#contenedorSubMarcas').empty();
+            $('#contenedorClientes').empty();
+            clientesSeleccionados = [];
+            cargarZonas();
         }
 
         function agregarRolARelacion(rol, farmacia, unidadNegocio) {
