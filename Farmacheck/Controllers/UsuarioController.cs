@@ -9,6 +9,7 @@ using System;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.CustomersRolesUsers;
 using System.Linq;
+using System.Collections;
 
 namespace Farmacheck.Controllers
 {
@@ -141,7 +142,7 @@ namespace Farmacheck.Controllers
                         var seleccionados = model.ClienteIds ?? new List<long>();
 
                         var nuevos = seleccionados.Except(existentes).ToList();
-                        var remover = customers.Where(c => !seleccionados.Contains(c.ClienteId)).ToList();
+                        var remover = customers.Where(c => !seleccionados.Contains(c.ClienteId)).Select(c => c.Id).ToList();
 
                         if (nuevos.Any())
                         {
@@ -153,12 +154,9 @@ namespace Farmacheck.Controllers
                             };
                             await _customersRolesUsersApiClient.CreateAsync(addRequest);
                         }
-
-                        foreach (var item in remover)
-                        {
-                            await _customersRolesUsersApiClient.DeleteAsync(item.Id);
-                        }
-
+                                                
+                        await _customersRolesUsersApiClient.RemoveByCustomerAsync(remover, model.UsuarioId);
+                        
                         if (!seleccionados.Any())
                         {
                             await _userByRoleApiClient.DeleteAsync(model.Id);
@@ -189,7 +187,8 @@ namespace Farmacheck.Controllers
                     GeolocalizacionActiva = true
                 };
 
-                await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
+                string result = await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
+
 
                 return Json(new { success = true, id = userRoleId });
             }

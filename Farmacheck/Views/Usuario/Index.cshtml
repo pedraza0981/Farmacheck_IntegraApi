@@ -396,6 +396,10 @@
                                 if (r.success) {
                                     showAlert('Gestión de Clientes/Rol por usuario realizada correctamente', 'success');
                                     $('#modalGestionRol').modal('hide');
+                                    $('#modalEntidad').modal('show');
+                                    cargarSelectorRoles();
+                                    $('#selectRol').val('');
+                                    $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
                                 } else {
                                     showAlert(r.error || 'Error al actualizar', 'error');
                                 }
@@ -444,6 +448,10 @@
                         if (r.success) {
                             showAlert('El registro de clientes asignados a rol por usuario se realizó correctamente', 'success');
                             $('#modalGestionRol').modal('hide');
+                            $('#modalEntidad').modal('show');
+                            cargarSelectorRoles();
+                            $('#selectRol').val('');
+                            $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
                         } else {
                             showAlert(r.error || 'Error al guardar', 'error');
                         }

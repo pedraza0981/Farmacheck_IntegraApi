@@ -68,6 +68,7 @@ namespace Farmacheck.Infrastructure.Services
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
+        
         public async Task<bool> DeleteAsync(int id)
         {
             var response = await _http.DeleteAsync($"api/v1/Customers_RolesUsers/{id}");
