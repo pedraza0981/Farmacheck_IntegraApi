@@ -4,5 +4,6 @@ namespace Farmacheck.Application.Models.CategoriesByQuestionnaires
     {
         public string Nombre { get; set; } = null!;
         public string? NombreDelArchivoConIcono { get; set; }
+        public bool Activa { get; set; }
     }
 }

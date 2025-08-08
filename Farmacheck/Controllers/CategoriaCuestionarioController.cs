@@ -69,6 +69,7 @@ namespace Farmacheck.Controllers
                     return Json(new { success = false, error = "El nombre es obligatorio." });
 
                 var request = _mapper.Map<CategoryByQuestionnaireRequest>(model);
+                request.Activa = model.Activa;
 
                 if (model.Id == 0)
                 {
@@ -78,6 +79,7 @@ namespace Farmacheck.Controllers
                 else
                 {
                     var updateRequest = _mapper.Map<UpdateCategoryByQuestionnaireRequest>(model);
+                    updateRequest.Activa = model.Activa;
                     var updated = await _apiClient.UpdateAsync(updateRequest);
                     if (updated)
                         return Json(new { success = true, id = model.Id });
