@@ -14,6 +14,7 @@ namespace Farmacheck.Application.Interfaces
         Task<string> CreateAsync(CustomerRolUserRequest request);
         Task<bool> UpdateAsync(UpdateCustomerRolUserRequest request);
         Task<bool> DeleteAsync(int id);
-        
+        Task<bool> RemoveByCustomerAsync(List<int> ids, long customer);
+
     }
 }

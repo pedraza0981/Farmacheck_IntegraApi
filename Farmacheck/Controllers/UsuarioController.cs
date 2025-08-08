@@ -154,8 +154,11 @@ namespace Farmacheck.Controllers
                             await _customersRolesUsersApiClient.CreateAsync(addRequest);
                         }
 
+                        if (remover.Count > 0) 
+                        {
+                            await _customersRolesUsersApiClient.RemoveByCustomerAsync(remover, 0);
+                        }
                         
-                        await _customersRolesUsersApiClient.RemoveByCustomerAsync(remover,0);
                         
 
                         if (!seleccionados.Any())
@@ -290,6 +293,9 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> ListarRolesPorUsuario(int usuarioId)
         {
             var apiData = await _userByRoleApiClient.GetByUserAsync(usuarioId);
+            apiData = apiData
+            .Where(x => x.Estatus)
+            .ToList();
             var dtos = _mapper.Map<List<RelUserByRoleDto>>(apiData);
             var roles = _mapper.Map<List<UsuarioRolViewModel>>(dtos);
 

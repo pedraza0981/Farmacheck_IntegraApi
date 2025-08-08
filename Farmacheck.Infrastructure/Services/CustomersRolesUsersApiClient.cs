@@ -77,13 +77,36 @@ namespace Farmacheck.Infrastructure.Services
         }
 
 
-        public async Task<bool> RemoveByCustomerAsync(List<int> ids, int customer)
+        public async Task<bool> RemoveByCustomerAsync(List<int> ids, long customer)
         {
-            var query = string.Join("&", ids.Select(id => $"ids={id}"));
-            var url = $"api/v1/Customers_RolesUsers/customer?{query}&customer={customer}";
-            var response = await _http.DeleteAsync(url);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<bool>();
+            try
+            {
+                // Construcción segura de la URL
+                var query = string.Join("&", ids.Select(id => $"ids={id}"));
+                var url = $"api/v1/Customers_RolesUsers/customer?{query}&customer={customer}";
+
+                var response = await _http.DeleteAsync(url);
+
+                // No lances excepción aquí, revisa manualmente el código de estado
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Opcional: log del código y mensaje
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error al eliminar: {response.StatusCode} - {errorMessage}");
+                    return false;
+                }
+
+                // Espera que el backend devuelva un bool puro en JSON
+                var result = await response.Content.ReadFromJsonAsync<bool>();
+                return result;
+            }            
+            catch (Exception ex)
+            {
+                // Cualquier otro error inesperado
+                Console.WriteLine($"Error inesperado: {ex.Message}");
+                return false;
+            }
         }
+
     }
 }
