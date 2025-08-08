@@ -94,16 +94,16 @@ namespace Farmacheck.Controllers
             if (string.IsNullOrWhiteSpace(model.Nombre))
                 return Json(new { success = false, error = "El nombre es obligatorio." });
 
+            model.Estatus ??= true;
+
             if (model.Id == 0)
             {
                 var request = _mapper.Map<SubbrandRequest>(model);
                 var id = await _subbrandApi.CreateAsync(request);
                 model.Id = id;
-                model.Estatus = true;
             }
             else
             {
-                model.Estatus = true;
                 var updateRequest = _mapper.Map<UpdateSubbrandRequest>(model);
                 var updated = await _subbrandApi.UpdateAsync(updateRequest);
                 if (!updated)

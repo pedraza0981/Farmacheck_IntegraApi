@@ -11,5 +11,7 @@ namespace Farmacheck.Application.Models.SubBrands
         public int MarcaId { get; set; }
 
         public string Nombre { get; set; } = null!;
+
+        public bool? Estatus { get; set; }
     }
 }

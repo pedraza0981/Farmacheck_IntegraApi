@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 namespace Farmacheck.Application.Models.SubBrands
 {
     public class UpdateSubbrandRequest : SubbrandRequest
-    {        
+    {
         public int Id { get; set; }
-
-        public bool? Estatus { get; set; }
     }
 }
