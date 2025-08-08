@@ -60,6 +60,8 @@ namespace Farmacheck.Controllers
                 if (string.IsNullOrWhiteSpace(model.Nombre))
                     return Json(new { success = false, error = "El nombre es obligatorio." });
 
+                model.Estatus ??= true;
+
                 var request = _mapper.Map<ZoneRequest>(model);
 
                 if (model.Id == 0)

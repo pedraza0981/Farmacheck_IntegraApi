@@ -47,6 +47,10 @@
                     <label>Marca</label>
                     <select class="form-select" id="marcaSelect"></select>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck">
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -76,7 +80,8 @@
             const datos = {
                 Id: id,
                 Nombre: $('#nombre').val(),
-                MarcaId: $('#marcaSelect').val()
+                MarcaId: $('#marcaSelect').val(),
+                Estatus: $('#estatusCheck').is(':checked')
             };
 
             $.ajax({
@@ -159,6 +164,7 @@
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#marcaSelect').val(u.marcaId);
+                    $('#estatusCheck').prop('checked', u.estatus);
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -187,6 +193,7 @@
             } else {
                 $('#marcaSelect').val($('#marcaSelect option:first').val());
             }
+            $('#estatusCheck').prop('checked', true);
         }
     </script>
 }
