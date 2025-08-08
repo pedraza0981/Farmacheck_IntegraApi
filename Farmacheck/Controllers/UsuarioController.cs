@@ -235,10 +235,17 @@ namespace Farmacheck.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> Eliminar(int id)
+        public async Task<JsonResult> EliminarUsuario(int id)
         {
-            await _apiClient.DeleteAsync(id);
-            return Json(new { success = true });
+            try
+            {
+                await _apiClient.DeleteAsync(id);
+                return Json(new { success = true, message = "Usuario deshabilitado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Error al deshabilitar el usuario: " + ex.Message });
+            }
         }
 
         [HttpPost]
