@@ -67,7 +67,7 @@
 
         $(document).ready(function () {
             cargar();
-            cargarUnidades();            
+            
 
             $('#btnNueva').click(function () {
                 limpiar();
@@ -118,7 +118,7 @@
         });
 
         function cargarUnidades() {
-            $.get('@Url.Action("Listar", "UnidadDeNegocio")', function (r) {
+            $.get('@Url.Action("ListarUnidadesNegocio", "Marca")', function (r) {
                 if (r.success) {
                     const select = $('#unidadNegocio');
                     select.empty();
@@ -179,6 +179,7 @@
                     showAlert(r.error || 'No se pudo cargar', 'error');
                 }
             });
+            cargarUnidades();
         }
 
         function eliminar(id) {

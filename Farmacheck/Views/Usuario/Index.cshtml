@@ -703,6 +703,8 @@
         }
 
         function editar(id) {
+            
+
             $.get('@Url.Action("Obtener", "Usuario")', { id }, function (r) {
                 if (r.success) {
                     const u = r.data;

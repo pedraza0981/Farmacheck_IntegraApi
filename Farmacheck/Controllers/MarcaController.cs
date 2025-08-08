@@ -16,11 +16,13 @@ namespace Farmacheck.Controllers
     {
         private readonly IBrandApiClient _apiClient;
         private readonly IMapper _mapper;
+        private readonly IBusinessUnitApiClient _businessUnitApiClient;
 
-        public MarcaController(IBrandApiClient apiClient, IMapper mapper)
+        public MarcaController(IBrandApiClient apiClient, IMapper mapper, IBusinessUnitApiClient businessUnitApiClient)
         {
             _apiClient = apiClient;
             _mapper = mapper;
+            _businessUnitApiClient = businessUnitApiClient;
         }
 
         public async Task<IActionResult> Index(int unidadId)
@@ -32,6 +34,15 @@ namespace Farmacheck.Controllers
             var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
 
             return View(marcas);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarUnidadesNegocio()
+        {
+            var apiData = await _businessUnitApiClient.GetBusinessUnitsAsync();
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
+            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+            return Json(new { success = true, data = unidades });
         }
 
         [HttpGet]
