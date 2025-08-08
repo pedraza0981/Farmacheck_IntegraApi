@@ -15,5 +15,6 @@ namespace Farmacheck.Application.Models.Customers
         public int MarcaId { get; set; }
         public int? SubmarcaId { get; set; }
         public int ZonaId { get; set; }
+        public bool Estatus { get; set; }
     }
 }

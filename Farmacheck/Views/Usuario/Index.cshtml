@@ -58,12 +58,11 @@
                         <label>Teléfono</label>
                         <input type="text" class="form-control rounded-3" id="telefono" placeholder="Teléfono" />
                     </div>
-                    <div class="col-md-3">
-                        <label>Estatus</label>
-                        <select class="form-select rounded-3" id="estatus">
-                            <option value="true">Activo</option>
-                            <option value="false">Inactivo</option>
-                        </select>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="estatusCheck">
+                            <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                        </div>
                     </div>
                 </div>
 
@@ -348,7 +347,7 @@
                     ApellidoMaterno: $('#apellidoMaterno').val(),
                     Email: $('#email').val(),
                     NumeroDeTelefono: $('#telefono').val(),
-                    Estatus: $('#estatus').val() === 'true'
+                    Estatus: $('#estatusCheck').prop('checked')
                 };
 
                 $.ajax({
@@ -715,7 +714,7 @@
                     $('#apellidoMaterno').val(u.apellidoMaterno);
                     $('#email').val(u.email);
                     $('#telefono').val(u.numeroDeTelefono);
-                    $('#estatus').val(u.estatus ? 'true' : 'false');
+                    $('#estatusCheck').prop('checked', u.estatus);
 
                     cargarSelectorRoles();
 
@@ -750,7 +749,7 @@
             $('#apellidoMaterno').val('');
             $('#email').val('');
             $('#telefono').val('');
-            $('#estatus').val('true');
+            $('#estatusCheck').prop('checked', true);
 
             // Limpiar select de rol
             const selectRol = $('#selectRol');

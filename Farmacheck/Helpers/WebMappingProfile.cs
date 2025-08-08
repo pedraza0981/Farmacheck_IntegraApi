@@ -61,18 +61,19 @@ namespace Farmacheck.Helpers
              .ForMember(dest => dest.LatitudGPS, opt => opt.MapFrom(src => (int?)src.LatitudGps))
              .ForMember(dest => dest.LongitudGPS, opt => opt.MapFrom(src => (int?)src.LongitudGps))
              .ForMember(dest => dest.ModificadoEl, opt => opt.MapFrom(src => src.ModificadoEl))
-             .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus ? 1 : 0))
+             .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus))
              .ForMember(dest => dest.RadioGPS, opt => opt.MapFrom(src => (int?)src.RadioGps));
 
             CreateMap<ClienteEstructuraViewModel, CustomerRequest>()
                 .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))
                 .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
                 .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)))
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId))
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
             CreateMap<ClienteEstructuraViewModel, UpdateCustomerRequest>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClienteId))
-                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == true))
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus))
                 .ForMember(dest => dest.LatitudGps, opt => opt.MapFrom(src => src.LatitudGPS ?? 0))
                 .ForMember(dest => dest.LongitudGps, opt => opt.MapFrom(src => src.LongitudGPS ?? 0))
                 .ForMember(dest => dest.RadioGps, opt => opt.MapFrom(src => (short)(src.RadioGPS ?? 0)));
@@ -85,7 +86,7 @@ namespace Farmacheck.Helpers
 
             CreateMap<ClienteEstructuraViewModel, UpdateBusinessStructureRequest>()
                 .IncludeBase<ClienteEstructuraViewModel, BusinessStructureRequest>()
-                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus == true));
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
 
             CreateMap<UnidadDeNegocio, BusinessUnitRequest>()

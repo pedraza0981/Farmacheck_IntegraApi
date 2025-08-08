@@ -98,11 +98,10 @@
                         <input type="number" class="form-control" id="longitudGPS" />
                     </div>
                     <div class="col-md-6 mb-2">
-                        <label>Estatus</label>
-                        <select class="form-select" id="estatus">
-                            <option value="1">Activo</option>
-                            <option value="0">Inactivo</option>
-                        </select>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="estatusCheck">
+                            <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                        </div>
                     </div>
                     <div class="col-md-6 mb-2">
                         <label>Radio GPS</label>
@@ -171,7 +170,7 @@
                     NumeroDeTelefono: $('#numeroTelefono').val(),
                     LatitudGPS: $('#latitudGPS').val(),
                     LongitudGPS: $('#longitudGPS').val(),
-                    Estatus: $('#estatus').val() === '1',
+                    Estatus: $('#estatusCheck').prop('checked'),
                     RadioGPS: $('#radioGPS').val(),
                     TipoDeClienteId: $('#tipoClienteSelect').val(),
                     MarcaId: $('#marcaSelect').val(),
@@ -325,7 +324,7 @@
                     $('#numeroTelefono').val(c.numeroDeTelefono);
                     $('#latitudGPS').val(c.latitudGPS);
                     $('#longitudGPS').val(c.longitudGPS);
-                    $('#estatus').val(c.estatus ? '1' : '0');
+                    $('#estatusCheck').prop('checked', c.estatus);
                     $('#radioGPS').val(c.radioGPS);
                     $('#tipoClienteSelect').val(c.tipoDeClienteId);
                     $('#unidadNegocioSelect').val(c.unidadDeNegocioId);
@@ -368,7 +367,7 @@
             $('#numeroTelefono').val('');
             $('#latitudGPS').val('');
             $('#longitudGPS').val('');
-            $('#estatus').val('1');
+            $('#estatusCheck').prop('checked', true);
             $('#radioGPS').val('');
             $('#tipoClienteSelect').val($('#tipoClienteSelect option:first').val());
             $('#marcaSelect').val('0');
