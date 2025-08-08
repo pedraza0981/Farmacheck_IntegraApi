@@ -241,6 +241,28 @@ namespace Farmacheck.Controllers
             return Json(new { success = true });
         }
 
+        [HttpPost]
+        public async Task<JsonResult> EliminarRolClienteDirecto(int id)
+        {
+            try
+            {
+                var customers = await _customersRolesUsersApiClient.GetsByUserRolAsync(id);
+                var remover = customers.Select(c => c.Id).ToList();
+
+                if (remover.Count > 0)
+                {
+                    await _customersRolesUsersApiClient.RemoveByCustomerAsync(remover, 0);
+                }
+
+                await _userByRoleApiClient.DeleteAsync(id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Error al eliminar el rol: " + ex.Message });
+            }
+        }
+
         [HttpGet]
         public async Task<JsonResult> ObtenerClientesPorRolPorUsuario(int id)
         {

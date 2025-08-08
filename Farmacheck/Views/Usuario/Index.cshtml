@@ -833,7 +833,21 @@
         function eliminarRol(id) {
             confirmAction('¿Deseas eliminar este rol?').then(function (ok) {
                 if (!ok) return;
-                console.log('Eliminar rol por usuario', id);
+
+                $.ajax({
+                    url: '@Url.Action("EliminarRolClienteDirecto", "Usuario")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r.success) {
+                            showAlert('Rol eliminado correctamente', 'success');
+                            cargarSelectorRoles();
+                            $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
+                        } else {
+                            showAlert(r.error || 'Error al eliminar', 'error');
+                        }
+                    }
+                });
             });
         }
     </script>
