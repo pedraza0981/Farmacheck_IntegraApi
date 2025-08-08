@@ -141,7 +141,7 @@ namespace Farmacheck.Controllers
                         var seleccionados = model.ClienteIds ?? new List<long>();
 
                         var nuevos = seleccionados.Except(existentes).ToList();
-                        var remover = customers.Where(c => !seleccionados.Contains(c.ClienteId)).ToList();
+                        var remover = customers.Where(c => !seleccionados.Contains(c.ClienteId)).Select(c => c.Id).ToList(); ;
 
                         if (nuevos.Any())
                         {
@@ -154,10 +154,9 @@ namespace Farmacheck.Controllers
                             await _customersRolesUsersApiClient.CreateAsync(addRequest);
                         }
 
-                        foreach (var item in remover)
-                        {
-                            await _customersRolesUsersApiClient.DeleteAsync(item.Id);
-                        }
+                        
+                        await _customersRolesUsersApiClient.RemoveByCustomerAsync(remover,0);
+                        
 
                         if (!seleccionados.Any())
                         {
