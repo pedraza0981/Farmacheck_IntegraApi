@@ -46,6 +46,10 @@
                     <label>Unidad de negocio</label>
                     <select class="form-select" id="unidadNegocio"></select>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck">
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                </div>
                 <div class="mb-2">
                     <label>Logotipo</label>
                     <input type="file" class="form-control" id="logotipoArchivo" accept="image/*" />
@@ -72,6 +76,7 @@
             $('#btnNueva').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nueva marca');
+                $('#estatusCheck').prop('checked', true);
                 $('#modalEntidad').modal('show');
             });
 
@@ -88,6 +93,7 @@
             formData.append('Nombre', $('#nombre').val());
             formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
             formData.append('Logotipo', $('#logotipoBase64').val());
+            formData.append('Estatus', $('#estatusCheck').prop('checked'));
 
             const file = $('#logotipoArchivo')[0].files[0];
             if (file) {
@@ -174,6 +180,7 @@
                     $('#logotipoBase64').val(u.logotipo);
                     $('#logotipoNombre').val(u.logotipo);
                     $('#logotipoArchivo').val('');
+                    $('#estatusCheck').prop('checked', u.estatus === true);
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
@@ -202,6 +209,7 @@
             $('#logotipoBase64').val('');
             $('#logotipoNombre').val('');
             $('#logotipoArchivo').val('');
+            $('#estatusCheck').prop('checked', true);
         }
     </script>
 }

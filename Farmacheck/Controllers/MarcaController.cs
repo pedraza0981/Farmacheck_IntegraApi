@@ -93,6 +93,8 @@ namespace Farmacheck.Controllers
                     model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
                 }
 
+                model.Estatus ??= true;
+
                 var request = _mapper.Map<BrandRequest>(model);
 
                 if (model.Id == 0)

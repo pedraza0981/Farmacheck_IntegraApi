@@ -8,7 +8,8 @@ namespace Farmacheck.Application.Mappings
     {
         public BrandProfile()
         {
-            CreateMap<BrandRequest, MarcaRequestDto>();
+            CreateMap<BrandRequest, MarcaRequestDto>()
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
 
             CreateMap<BrandResponse, MarcaDto>()           
@@ -16,7 +17,8 @@ namespace Farmacheck.Application.Mappings
            .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocio));
 
             CreateMap<MarcaDto, BrandRequest>()
-                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId));
+                .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId))
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
 
         }
