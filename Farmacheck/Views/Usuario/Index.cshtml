@@ -727,13 +727,14 @@
         }
 
         function eliminar(id) {
-            confirmAction('¿Deseas eliminar este usuario?').then(function (ok) {
+            confirmAction('¿Deseas deshabilitar este usuario?').then(function (ok) {
                 if (!ok) return;
-                $.post('@Url.Action("Eliminar", "Usuario")', { id }, function (r) {
+                $.post('@Url.Action("EliminarUsuario", "Usuario")', { id }, function (r) {
                     if (r.success) {
+                        showAlert(r.message || 'Usuario deshabilitado correctamente', 'success');
                         cargar();
                     } else {
-                        showAlert(r.error || 'Error al eliminar', 'error');
+                        showAlert(r.error || 'Error al deshabilitar', 'error');
                     }
                 });
             });
