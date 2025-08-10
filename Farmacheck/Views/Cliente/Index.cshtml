@@ -27,6 +27,15 @@
         </thead>
         <tbody></tbody>
     </table>
+    <div class="d-flex justify-content-end">
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
+                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
+                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
@@ -128,8 +137,11 @@
 
 @section Scripts {
     <script>
+        var pagina = @ViewBag.Page ?? 1;
+        var pageSize = 5;
+
         $(document).ready(function () {
-            cargar();
+            cargar(pagina);
             cargarCatalogos();
             // $('#tablaDatos').DataTable();
 
@@ -147,6 +159,18 @@
                 const val = $(this).val();
                 const padded = val ? val.toString().padStart(5, '0') : '';
                 $('#centroCosto').val(padded);
+            });
+
+            $('#btnPrev').click(function () {
+                if (pagina > 1) {
+                    pagina--;
+                    cargar(pagina);
+                }
+            });
+
+            $('#btnNext').click(function () {
+                pagina++;
+                cargar(pagina);
             });
 
             $('#btnNuevo').click(function () {
@@ -201,7 +225,7 @@
                     success: function (r) {
                         if (r.success) {
                             $('#modalEntidad').modal('hide');
-                            cargar();
+                            cargar(pagina);
                             const mensaje = esNuevo ? 'Farmacia agregada correctamente' : 'Farmacia actualizada correctamente';
                             showAlert(mensaje, 'success');
                         } else {
@@ -274,18 +298,17 @@
             // });
         }
 
-        function cargar() {
-            $.get('@Url.Action("Listar", "Cliente")', function (r) {
+        function cargar(pag) {
+            $.get('@Url.Action("Listar", "Cliente")', { page: pag }, function (r) {
                 if (r.success) {
-                    // const tbody = $('#tablaDatos tbody');
                     const tabla = $('#tablaDatos');
                     if ($.fn.DataTable.isDataTable(tabla)) {
-                            tabla.DataTable().destroy();
+                        tabla.DataTable().destroy();
                     }
 
                     const tbody = tabla.find('tbody');
                     tbody.empty();
-                    r.data.forEach(c => {
+                    r.data.items.forEach(c => {
                         tbody.append(`<tr>
                             <td>${c.nombre}</td>
                             <td>${c.centroDeCosto}</td>
@@ -299,12 +322,18 @@
                     });
 
                     tabla.DataTable({
-                        pageLength: 20,
-                        lengthMenu: [5, 10, 25, 50, 100],
+                        paging: false,
+                        searching: true,
+                        ordering: true,
+                        info: false,
                         language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
                     });
+
+                    $('#lblPage').text(pag);
+                    $('#btnPrev').prop('disabled', pag === 1);
+                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
                 }
             });
         }
@@ -348,7 +377,7 @@
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "Cliente")', { id }, function (r) {
                     if (r.success) {
-                        cargar();
+                        cargar(pagina);
                     } else {
                         showAlert(r.error || 'Error al eliminar', 'error');
                     }

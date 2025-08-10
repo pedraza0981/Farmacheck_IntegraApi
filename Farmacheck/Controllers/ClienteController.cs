@@ -3,11 +3,13 @@ using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using AutoMapper;
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Customers;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.BusinessStructures;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Controllers
 {
@@ -20,6 +22,7 @@ namespace Farmacheck.Controllers
         private readonly IMapper _mapper;
         private readonly IBrandApiClient _ibrand;
         private readonly IBusinessUnitApiClient _businessUnitApiClient;
+        private const int _itemsPerPage = 5;
 
         public ClienteController(
             ICustomersApiClient apiClient,
@@ -39,21 +42,19 @@ namespace Farmacheck.Controllers
             _businessUnitApiClient = businessUnitApiClient;
         }
 
-        public async Task<IActionResult> Index()    
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var apiData = await _apiClient.GetCustomersAsync();
-            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
-            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
-            return View(clientes);
+            var result = await ObtenerClientesAsync(page, _itemsPerPage);
+            ViewBag.Page = page;
+            ViewBag.HasMore = result.HasNextPage;
+            return View(result.Items.ToList());
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar()
+        public async Task<JsonResult> Listar(int page = 1)
         {
-            var apiData = await _apiClient.GetCustomersAsync();
-            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
-            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
-            return Json(new { success = true, data = clientes });
+            var result = await ObtenerClientesAsync(page, _itemsPerPage);
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
@@ -138,6 +139,15 @@ namespace Farmacheck.Controllers
             await _apiClient.DeleteAsync(id);
             await _businessStructureApi.DeleteAsync(id);
             return Json(new { success = true });
+        }
+
+
+        private async Task<PaginatedResponse<ClienteEstructuraViewModel>> ObtenerClientesAsync(int page, int items)
+        {
+            var apiData = await _apiClient.GetCustomersByPageAsync(page, items);
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
+            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
+            return new PaginatedResponse<ClienteEstructuraViewModel>(clientes, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
         }
 
 
