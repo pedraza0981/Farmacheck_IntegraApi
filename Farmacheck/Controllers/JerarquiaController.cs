@@ -122,7 +122,7 @@ namespace Farmacheck.Controllers
 
             await CompletarNombresRoles(models);
 
-            return new PaginatedResponse<JerarquiaViewModel>(models, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
+            return new PaginatedResponse<JerarquiaViewModel>();
         }
 
         private async Task CompletarNombresRoles(IEnumerable<JerarquiaViewModel> modelos)

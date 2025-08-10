@@ -44,7 +44,10 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            var result = await ObtenerClientesAsync(page, _itemsPerPage);
+
+            var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);            
+
+            var result = apiData;
             ViewBag.Page = page;
             ViewBag.HasMore = result.HasNextPage;
             return View(result.Items.ToList());
@@ -53,7 +56,9 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar(int page = 1)
         {
-            var result = await ObtenerClientesAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
+
+            var result = apiData;
             return Json(new { success = true, data = result });
         }
 
@@ -147,7 +152,7 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetCustomersByPageAsync(page, items);
             var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
             var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
-            return new PaginatedResponse<ClienteEstructuraViewModel>(clientes, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
+            return new PaginatedResponse<ClienteEstructuraViewModel>();
         }
 
 

@@ -130,8 +130,7 @@ namespace Farmacheck.Controllers
             var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
             var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
 
-            return new PaginatedResponse<MarcaViewModel>(
-                marcas, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
+            return new PaginatedResponse<MarcaViewModel>();
         }
     }
 }

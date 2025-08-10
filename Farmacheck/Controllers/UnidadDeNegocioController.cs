@@ -103,7 +103,7 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, items);
             var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
             var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
-            return new PaginatedResponse<UnidadDeNegocio>(unidades, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
+            return new PaginatedResponse<UnidadDeNegocio>();
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             var url = $"api/v1/HierarchyByRole/pages?page={page}&items={items}";
             return await _http.GetFromJsonAsync<PaginatedResponse<HierarchyByRoleResponse>>(url)
-                   ?? new PaginatedResponse<HierarchyByRoleResponse>(Array.Empty<HierarchyByRoleResponse>(), 0, page, items);
+                   ?? new PaginatedResponse<HierarchyByRoleResponse>();
         }
 
         public async Task<HierarchyByRoleResponse?> GetAsync(int id)
