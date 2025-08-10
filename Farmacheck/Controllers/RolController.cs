@@ -144,6 +144,7 @@ namespace Farmacheck.Controllers
                     var permisos = await _permissionApi.GetPermissionsAsync();
                     var seleccionados = permisos
                         .Where(p => model.Permisos.Contains(p.Id))
+                        .Select(p => p.Id) 
                         .ToList();
 
                     var permisoRolRequest = new PermissionByRoleRequest
@@ -186,6 +187,7 @@ namespace Farmacheck.Controllers
 
                         var seleccionados = permisos
                             .Where(p => nuevosIds2.Contains(p.Id))
+                            .Select(p => p.Id) 
                             .ToList();
 
                         if (seleccionados.Any())

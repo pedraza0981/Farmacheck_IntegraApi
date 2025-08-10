@@ -4,7 +4,7 @@ namespace Farmacheck.Application.Models.PermissionsByRoles
 {
     public class PermissionByRoleRequest
     {
-        public List<PermissionResponse> Permisos { get; set; } = new();
+        public List<int> Permisos { get; set; } = new();
         public int RolId { get; set; }
     }
 }
