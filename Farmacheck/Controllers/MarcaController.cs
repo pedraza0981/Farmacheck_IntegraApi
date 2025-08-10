@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Controllers
 {
@@ -17,6 +18,7 @@ namespace Farmacheck.Controllers
         private readonly IBrandApiClient _apiClient;
         private readonly IMapper _mapper;
         private readonly IBusinessUnitApiClient _businessUnitApiClient;
+        private const int _itemsPerPage = 5;
 
         public MarcaController(IBrandApiClient apiClient, IMapper mapper, IBusinessUnitApiClient businessUnitApiClient)
         {
@@ -25,15 +27,15 @@ namespace Farmacheck.Controllers
             _businessUnitApiClient = businessUnitApiClient;
         }
 
-        public async Task<IActionResult> Index(int unidadId)
+        public async Task<IActionResult> Index(int unidadId, int page = 1)
         {
             ViewBag.UnidadId = unidadId;
 
-            var apiData = await _apiClient.GetBrandsAsync();
-            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
-            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
+            var result = await ObtenerMarcasAsync(page, _itemsPerPage);
+            ViewBag.Page = page;
+            ViewBag.HasMore = result.HasNextPage;
 
-            return View(marcas);
+            return View(result.Items.ToList());
         }
 
         [HttpGet]
@@ -46,13 +48,10 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int unidadId)
+        public async Task<JsonResult> Listar(int page = 1)
         {
-            var apiData = await _apiClient.GetBrandsAsync();
-            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
-            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
-
-            return Json(new { success = true, data = marcas });
+            var result = await ObtenerMarcasAsync(page, _itemsPerPage);
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
@@ -123,6 +122,15 @@ namespace Farmacheck.Controllers
         {
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
+        }
+
+        private async Task<PaginatedResponse<MarcaViewModel>> ObtenerMarcasAsync(int page, int items)
+        {
+            var apiData = await _apiClient.GetBrandsByPageAsync(page, items);
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
+            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
+
+            return new PaginatedResponse<MarcaViewModel>(marcas, apiData.TotalCount, apiData.CurrentPage, apiData.PageSize);
         }
     }
 }
