@@ -29,11 +29,7 @@
     </table>
     <div class="d-flex justify-content-end">
         <nav>
-            <ul class="pagination mb-0">
-                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
-                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
-                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
-            </ul>
+            <ul class="pagination mb-0" id="pagination"></ul>
         </nav>
     </div>
 </div>
@@ -79,19 +75,15 @@
         const unidadId = @ViewBag.UnidadId;
         var pagina = @ViewBag.Page ?? 1;
         var pageSize = 5;
+        var totalPages = @ViewBag.TotalPages ?? 1;
 
         $(document).ready(function () {
             cargar(pagina);
 
-            $('#btnPrev').click(function () {
-                if (pagina > 1) {
-                    pagina--;
-                    cargar(pagina);
-                }
-            });
-
-            $('#btnNext').click(function () {
-                pagina++;
+            $('#pagination').on('click', 'button.page-link', function () {
+                const p = $(this).data('page');
+                if (!p || p === pagina || p < 1 || p > totalPages) return;
+                pagina = p;
                 cargar(pagina);
             });
 
@@ -189,11 +181,22 @@
                         }
                     });
 
-                    $('#lblPage').text(pag);
-                    $('#btnPrev').prop('disabled', pag === 1);
-                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
+                    totalPages = Math.ceil(r.data.totalCount / r.data.pageSize);
+                    renderPagination(totalPages, pag);
                 }
             });
+        }
+
+        function renderPagination(total, current) {
+            const pagUl = $('#pagination');
+            pagUl.empty();
+            const prev = current - 1;
+            pagUl.append(`<li class="page-item ${current === 1 ? 'disabled' : ''}"><button class="page-link" data-page="${prev}">Anterior</button></li>`);
+            for (let i = 1; i <= total; i++) {
+                pagUl.append(`<li class="page-item ${i === current ? 'active' : ''}"><button class="page-link" data-page="${i}">${i}</button></li>`);
+            }
+            const next = current + 1;
+            pagUl.append(`<li class="page-item ${current === total ? 'disabled' : ''}"><button class="page-link" data-page="${next}">Siguiente</button></li>`);
         }
 
         function editar(id) {
