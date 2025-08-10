@@ -3,12 +3,15 @@ using System.Collections.Generic;
 
 namespace Farmacheck.Application.Models.Common;
 
-public sealed class PaginatedResponse<T>(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
-    where T : class
+public sealed class PaginatedResponse<T> where T : class
 {
-    public IEnumerable<T> Items { get; init; } = items;
-    public int TotalCount { get; init; } = totalCount;
-    public int CurrentPage { get; init; } = currentPage;
-    public int PageSize { get; init; } = pageSize;
-    public bool HasNextPage => Math.Ceiling((decimal)TotalCount / PageSize) > CurrentPage;
+    public IReadOnlyList<T> Items { get; init; } = Array.Empty<T>();
+    public int TotalCount { get; init; }
+    public int CurrentPage { get; init; }
+    public int PageSize { get; init; }
+
+    // Estos dos Vienen del API; los dejamos como init para respetar lo que mande
+    public int TotalPages { get; init; }
+    public bool HasNextPage { get; init; }
+    public bool HasPreviousPage { get; init; }
 }
