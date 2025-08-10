@@ -34,7 +34,6 @@ namespace Farmacheck.Controllers
             var result = await ObtenerMarcasAsync(page, _itemsPerPage);
             ViewBag.Page = page;
             ViewBag.HasMore = result.HasNextPage;
-            ViewBag.TotalPages = (int)Math.Ceiling((decimal)result.TotalCount / result.PageSize);
 
             return View(result.Items.ToList());
         }
