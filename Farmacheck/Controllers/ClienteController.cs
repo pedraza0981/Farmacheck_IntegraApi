@@ -45,7 +45,10 @@ namespace Farmacheck.Controllers
         public async Task<IActionResult> Index(int page = 1)
         {
             var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
-            var items = _mapper.Map<List<ClienteEstructuraViewModel>>(apiData.Items);
+
+            // Map first to DTOs and then to the ViewModel to avoid missing configuration
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
+            var items = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 
             var result = new PaginatedResponse<ClienteEstructuraViewModel>
             {
@@ -67,7 +70,10 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> Listar(int page = 1)
         {
             var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
-            var items = _mapper.Map<List<ClienteEstructuraViewModel>>(apiData.Items);
+
+            // Map through DTOs to ensure AutoMapper has the necessary type configurations
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
+            var items = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 
             var result = new PaginatedResponse<ClienteEstructuraViewModel>
             {
