@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Linq;
 using Farmacheck.Application.Models.BusinessUnits;
 using System.Text.Json;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Infrastructure.Services
 {
@@ -23,11 +24,11 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<CustomerResponse>();
         }
 
-        public async Task<List<CustomerResponse>> GetCustomersByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<CustomerResponse>> GetCustomersByPageAsync(int page, int items)
         {
             var url = $"api/v1/Customers/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<CustomerResponse>>(url)
-                   ?? new List<CustomerResponse>();
+            return await _http.GetFromJsonAsync<PaginatedResponse<CustomerResponse>>(url)
+                   ?? new PaginatedResponse<CustomerResponse>();
         }
 
         public async Task<List<CustomerResponse>> GetCustomersByFiltersAsync(IEnumerable<int> subbrand, IEnumerable<int> zone)
