@@ -44,21 +44,42 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
+            var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
+            var items = _mapper.Map<List<ClienteEstructuraViewModel>>(apiData.Items);
 
-            var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);            
+            var result = new PaginatedResponse<ClienteEstructuraViewModel>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
 
-            var result = apiData;
             ViewBag.Page = page;
             ViewBag.HasMore = result.HasNextPage;
-            return View(result.Items.ToList());
+            return View(result);
         }
 
         [HttpGet]
         public async Task<JsonResult> Listar(int page = 1)
         {
             var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
+            var items = _mapper.Map<List<ClienteEstructuraViewModel>>(apiData.Items);
 
-            var result = apiData;
+            var result = new PaginatedResponse<ClienteEstructuraViewModel>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
             return Json(new { success = true, data = result });
         }
 
