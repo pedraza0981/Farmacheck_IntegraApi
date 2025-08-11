@@ -1,5 +1,6 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.ClientesAsignadosArolPorUsuarios;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 using System.Linq;
 
@@ -20,11 +21,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<ClientesAsignadosArolPorUsuarioResponse>();
         }
 
-        public async Task<List<ClientesAsignadosArolPorUsuarioResponse>> GetClientesAsignadosByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<ClientesAsignadosArolPorUsuarioResponse>> GetClientesAsignadosByPageAsync(int page, int items)
         {
             var url = $"api/v1/ClientesAsignadosArolPorUsuarios/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<ClientesAsignadosArolPorUsuarioResponse>>(url)
-                   ?? new List<ClientesAsignadosArolPorUsuarioResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<ClientesAsignadosArolPorUsuarioResponse>>(url)
+                      ?? new PaginatedResponse<ClientesAsignadosArolPorUsuarioResponse>();
+
+            return res;
         }
 
         public async Task<ClientesAsignadosArolPorUsuarioResponse?> GetClienteAsignadoAsync(int id)

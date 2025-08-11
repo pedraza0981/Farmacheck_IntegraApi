@@ -1,11 +1,12 @@
 using Farmacheck.Application.Models.Permissions;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Application.Interfaces
 {
     public interface IPermissionApiClient
     {
         Task<List<PermissionResponse>> GetPermissionsAsync();
-        Task<List<PermissionResponse>> GetPermissionsByPageAsync(int page, int items);
+        Task<PaginatedResponse<PermissionResponse>> GetPermissionsByPageAsync(int page, int items);
         Task<PermissionResponse?> GetPermissionAsync(int id);
         Task<int> CreateAsync(PermissionRequest request);
         Task<bool> UpdateAsync(UpdatePermissionRequest request);

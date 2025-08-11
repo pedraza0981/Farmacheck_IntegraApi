@@ -1,5 +1,6 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.BusinessStructures;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
@@ -19,11 +20,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<BusinessStructureResponse>();
         }
 
-        public async Task<List<BusinessStructureResponse>> GetBusinessStructuresByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<BusinessStructureResponse>> GetBusinessStructuresByPageAsync(int page, int items)
         {
             var url = $"api/v1/BusinessStructure/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<BusinessStructureResponse>>(url)
-                   ?? new List<BusinessStructureResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<BusinessStructureResponse>>(url)
+                      ?? new PaginatedResponse<BusinessStructureResponse>();
+
+            return res;
         }
 
         public async Task<BusinessStructureResponse?> GetBusinessStructureAsync(int id)

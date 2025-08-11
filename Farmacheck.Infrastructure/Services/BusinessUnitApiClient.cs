@@ -23,8 +23,10 @@ namespace Farmacheck.Infrastructure.Services
         public async Task<PaginatedResponse<BusinessUnitResponse>> GetBusinessUnitsByPageAsync(int page, int items)
         {
             var url = $"api/v1/BusinessUnits/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<PaginatedResponse<BusinessUnitResponse>>(url)
-                ?? new PaginatedResponse<BusinessUnitResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<BusinessUnitResponse>>(url)
+                      ?? new PaginatedResponse<BusinessUnitResponse>();
+
+            return res;
         }
 
         public async Task<BusinessUnitResponse?> GetBusinessUnitAsync(int id)

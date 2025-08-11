@@ -1,5 +1,6 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.PermissionsByRoles;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
@@ -19,11 +20,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<PermissionByRoleResponse>();
         }
 
-        public async Task<List<PermissionByRoleResponse>> GetPermissionsByRolesByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<PermissionByRoleResponse>> GetPermissionsByRolesByPageAsync(int page, int items)
         {
             var url = $"api/v1/PermissionsByRoles/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<PermissionByRoleResponse>>(url)
-                   ?? new List<PermissionByRoleResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<PermissionByRoleResponse>>(url)
+                      ?? new PaginatedResponse<PermissionByRoleResponse>();
+
+            return res;
         }
 
         public async Task<PermissionByRoleResponse?> GetPermissionByRoleAsync(int id)

@@ -1,11 +1,12 @@
 using Farmacheck.Application.Models.ClientesAsignadosArolPorUsuarios;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Application.Interfaces
 {
     public interface IClientesAsignadosArolPorUsuariosApiClient
     {
         Task<List<ClientesAsignadosArolPorUsuarioResponse>> GetClientesAsignadosAsync();
-        Task<List<ClientesAsignadosArolPorUsuarioResponse>> GetClientesAsignadosByPageAsync(int page, int items);
+        Task<PaginatedResponse<ClientesAsignadosArolPorUsuarioResponse>> GetClientesAsignadosByPageAsync(int page, int items);
         Task<ClientesAsignadosArolPorUsuarioResponse?> GetClienteAsignadoAsync(int id);
         Task<List<RolPorUsuarioClientesAsignadosResponse>> GetCountByRolPorUsuarioAsync(List<int> rolPorUsuarioIds, int usuarioId);
         Task<int> CreateAsync(ClientesAsignadosArolPorUsuarioRequest request);
