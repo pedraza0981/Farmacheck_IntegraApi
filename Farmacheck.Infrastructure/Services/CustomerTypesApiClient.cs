@@ -1,5 +1,6 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.CustomerTypes;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
@@ -19,11 +20,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<CustomerTypeResponse>();
         }
 
-        public async Task<List<CustomerTypeResponse>> GetCustomerTypesByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<CustomerTypeResponse>> GetCustomerTypesByPageAsync(int page, int items)
         {
             var url = $"api/v1/CustomerTypes/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<CustomerTypeResponse>>(url)
-                   ?? new List<CustomerTypeResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<CustomerTypeResponse>>(url)
+                      ?? new PaginatedResponse<CustomerTypeResponse>();
+
+            return res;
         }
 
         public async Task<CustomerTypeResponse?> GetCustomerTypeAsync(int id)

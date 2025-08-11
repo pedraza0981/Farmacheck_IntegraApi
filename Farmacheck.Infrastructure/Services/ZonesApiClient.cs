@@ -1,5 +1,6 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Zones;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
@@ -19,11 +20,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<ZoneResponse>();
         }
 
-        public async Task<List<ZoneResponse>> GetZonesByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<ZoneResponse>> GetZonesByPageAsync(int page, int items)
         {
             var url = $"api/v1/Zones/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<ZoneResponse>>(url)
-                   ?? new List<ZoneResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<ZoneResponse>>(url)
+                      ?? new PaginatedResponse<ZoneResponse>();
+
+            return res;
         }
 
         public async Task<ZoneResponse?> GetZoneAsync(int id)

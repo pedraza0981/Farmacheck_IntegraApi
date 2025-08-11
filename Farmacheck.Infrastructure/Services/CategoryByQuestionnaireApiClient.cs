@@ -1,5 +1,6 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.CategoriesByQuestionnaires;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
@@ -19,11 +20,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<CategoryByQuestionnaireResponse>();
         }
 
-        public async Task<List<CategoryByQuestionnaireResponse>> GetCategoriesByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<CategoryByQuestionnaireResponse>> GetCategoriesByPageAsync(int page, int items)
         {
             var url = $"api/v1/CategoriesByChecklists/pages?page={page}&items={items}";
-            return await _http.GetFromJsonAsync<List<CategoryByQuestionnaireResponse>>(url)
-                   ?? new List<CategoryByQuestionnaireResponse>();
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<CategoryByQuestionnaireResponse>>(url)
+                      ?? new PaginatedResponse<CategoryByQuestionnaireResponse>();
+
+            return res;
         }
 
         public async Task<CategoryByQuestionnaireResponse?> GetCategoryAsync(byte id)
@@ -56,7 +59,7 @@ namespace Farmacheck.Infrastructure.Services
             catch (Exception ex)
             {
                 // Manejo general de errores
-                Console.WriteLine($"Ocurrió un error inesperado al eliminar el recurso con ID {id}: {ex.Message}");
+                Console.WriteLine($"OcurriÃ³ un error inesperado al eliminar el recurso con ID {id}: {ex.Message}");
                 throw;
             }
         }

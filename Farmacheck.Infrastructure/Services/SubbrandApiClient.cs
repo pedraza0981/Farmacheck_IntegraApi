@@ -1,5 +1,6 @@
 ﻿using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.SubBrands;
+using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
 using System.Linq;
 
@@ -20,10 +21,13 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new List<SubbrandResponse>();
         }
 
-        public async Task<List<SubbrandResponse>> GetSubbrandsByPageAsync(int page, int items)
+        public async Task<PaginatedResponse<SubbrandResponse>> GetSubbrandsByPageAsync(int page, int items)
         {
-            return await _http.GetFromJsonAsync<List<SubbrandResponse>>($"api/v1/Subbrands/pages?page={page}&items={items}")
-                   ?? new List<SubbrandResponse>();
+            var url = $"api/v1/Subbrands/pages?page={page}&items={items}";
+            var res = await _http.GetFromJsonAsync<PaginatedResponse<SubbrandResponse>>(url)
+                      ?? new PaginatedResponse<SubbrandResponse>();
+
+            return res;
         }
         public async Task<List<SubbrandResponse>> GetSubbrandsByBrandsAsync(List<int> brands)
         {
