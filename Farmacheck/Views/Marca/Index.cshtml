@@ -171,6 +171,10 @@
             $.get('@Url.Action("Listar", "Marca")', { page: pag }, function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                        tabla.DataTable().destroy();
+                    }
+                                        
                     const tbody = tabla.find('tbody');
                     tbody.empty();
                     r.data.items.forEach(u => {
@@ -185,9 +189,7 @@
                         </tr>`);
                     });
 
-                    if ($.fn.DataTable.isDataTable(tabla)) {
-                        tabla.DataTable().destroy();
-                    }
+                    
                     tabla.DataTable({
                         paging: false,
                         searching: true,
