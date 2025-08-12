@@ -1,4 +1,4 @@
-@model List<Farmacheck.Models.MarcaViewModel>
+@model Farmacheck.Application.Models.Common.PaginatedResponse<Farmacheck.Models.MarcaViewModel>
 @{
     ViewData["Title"] = "Marcas";
 }
@@ -25,15 +25,24 @@
                 <th style="width:20%;" class="text-center"></th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+        @foreach (var u in Model.Items)
+        {
+            <tr>
+                <td>@u.Id</td>
+                <td>@u.Nombre</td>
+                <td>@(u.Estatus == true ? "Activo" : "Inactivo")</td>
+                <td class="text-center">
+                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@u.Id)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(@u.Id)"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        }
+        </tbody>
     </table>
     <div class="d-flex justify-content-end">
         <nav>
-            <ul class="pagination mb-0">
-                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
-                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
-                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
-            </ul>
+            <ul class="pagination mb-0" id="paginador"></ul>
         </nav>
     </div>
 </div>
@@ -77,23 +86,23 @@
 @section Scripts {
     <script>
         const unidadId = @ViewBag.UnidadId;
-        var pagina = @ViewBag.Page ?? 1;
-        var pageSize = 5;
+        var pagina = @Model.CurrentPage;
+        var pageSize = @Model.PageSize;
 
         $(document).ready(function () {
-            cargar(pagina);
+            cargarUnidades();
 
-            $('#btnPrev').click(function () {
-                if (pagina > 1) {
-                    pagina--;
-                    cargar(pagina);
+            $('#tablaDatos').DataTable({
+                paging: false,
+                searching: true,
+                ordering: true,
+                info: false,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 }
             });
 
-            $('#btnNext').click(function () {
-                pagina++;
-                cargar(pagina);
-            });
+            renderPagination({ totalPages: @Model.TotalPages, hasNextPage: @Model.HasNextPage.ToString().ToLower(), hasPreviousPage: @Model.HasPreviousPage.ToString().ToLower() });
 
             $('#btnNueva').click(function () {
                 limpiar();
@@ -141,7 +150,7 @@
                     }
                 }
             });
-        });
+            });
 
         });
 
@@ -189,9 +198,63 @@
                         }
                     });
 
-                    $('#lblPage').text(pag);
-                    $('#btnPrev').prop('disabled', pag === 1);
-                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
+                    pagina = pag;
+                    renderPagination(r.data);
+                }
+            });
+        }
+
+        function renderPagination(data) {
+            const pagContainer = $('#paginador');
+            pagContainer.empty();
+
+            if (data.totalPages <= 0) return;
+
+            const total = data.totalPages;
+            const current = pagina;
+
+            const addPage = (p) => {
+                const active = p === current ? 'active' : '';
+                pagContainer.append(`<li class="page-item ${active}"><a class="page-link" href="#" data-page="${p}">${p}</a></li>`);
+            };
+
+            pagContainer.append(`<li class="page-item ${data.hasPreviousPage ? '' : 'disabled'}"><a class="page-link" href="#" data-page="${current - 1}">Anterior</a></li>`);
+
+            if (total <= 5) {
+                for (let i = 1; i <= total; i++) {
+                    addPage(i);
+                }
+            } else {
+                if (current <= 3) {
+                    for (let i = 1; i <= 4; i++) {
+                        addPage(i);
+                    }
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    addPage(total);
+                } else if (current >= total - 2) {
+                    addPage(1);
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    for (let i = total - 3; i <= total; i++) {
+                        addPage(i);
+                    }
+                } else {
+                    addPage(1);
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    for (let i = current - 1; i <= current + 1; i++) {
+                        addPage(i);
+                    }
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    addPage(total);
+                }
+            }
+
+            pagContainer.append(`<li class="page-item ${data.hasNextPage ? '' : 'disabled'}"><a class="page-link" href="#" data-page="${current + 1}">Siguiente</a></li>`);
+
+            pagContainer.find('a').off('click').on('click', function (e) {
+                e.preventDefault();
+                const p = parseInt($(this).data('page'));
+                if (!isNaN(p) && p > 0 && p !== current && p <= total) {
+                    cargar(p);
                 }
             });
         }
@@ -213,7 +276,6 @@
                     showAlert(r.error || 'No se pudo cargar', 'error');
                 }
             });
-            cargarUnidades();
         }
 
         function eliminar(id) {

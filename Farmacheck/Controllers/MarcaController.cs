@@ -32,10 +32,11 @@ namespace Farmacheck.Controllers
             ViewBag.UnidadId = unidadId;
 
             var result = await ObtenerMarcasAsync(page, _itemsPerPage);
+
             ViewBag.Page = page;
             ViewBag.HasMore = result.HasNextPage;
 
-            return View(result.Items.ToList());
+            return View(result);
         }
 
         [HttpGet]
@@ -130,7 +131,16 @@ namespace Farmacheck.Controllers
             var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
             var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
 
-            return new PaginatedResponse<MarcaViewModel>();
+            return new PaginatedResponse<MarcaViewModel>
+            {
+                Items = marcas,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
         }
     }
 }
