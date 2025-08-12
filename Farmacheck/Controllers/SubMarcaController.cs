@@ -8,6 +8,7 @@ using AutoMapper;
 using Farmacheck.Application.Models.SubBrands;
 using Farmacheck.Application.Models.Brands;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Controllers
 {
@@ -16,6 +17,7 @@ namespace Farmacheck.Controllers
         private readonly ISubbrandApiClient _subbrandApi;
         private readonly IBrandApiClient _brandApi;
         private readonly IMapper _mapper;
+        private const int _itemsPerPage = 5;
 
         public SubMarcaController(ISubbrandApiClient subbrandApi, IBrandApiClient brandApi, IMapper mapper)
         {
@@ -24,16 +26,13 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index(int marcaId)
+        public async Task<IActionResult> Index(int marcaId, int page = 1)
         {
             ViewBag.MarcaId = marcaId;
-            var apiData = await _subbrandApi.GetSubbrandsAsync();
-            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
+
+            var apiData = await _subbrandApi.GetSubbrandsByPageAsync(page, _itemsPerPage);
+            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData.Items);
             var lista = _mapper.Map<List<SubMarca>>(dtos);
-            if (marcaId > 0)
-            {
-                lista = lista.Where(s => s.MarcaId == marcaId).ToList();
-            }
 
             var brands = await _brandApi.GetBrandsAsync();
             foreach (var s in lista)
@@ -42,14 +41,28 @@ namespace Farmacheck.Controllers
                 s.MarcaNombre = b?.Nombre;
             }
 
-            return View(lista);
+            var result = new PaginatedResponse<SubMarca>
+            {
+                Items = lista,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            ViewBag.Page = page;
+            ViewBag.HasMore = result.HasNextPage;
+
+            return View(result);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar()
+        public async Task<JsonResult> Listar(int page = 1)
         {
-            var apiData = await _subbrandApi.GetSubbrandsAsync();
-            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
+            var apiData = await _subbrandApi.GetSubbrandsByPageAsync(page, _itemsPerPage);
+            var dtos = _mapper.Map<List<SubmarcaDto>>(apiData.Items);
             var lista = _mapper.Map<List<SubMarca>>(dtos);
 
             var brands = await _brandApi.GetBrandsAsync();
@@ -59,7 +72,18 @@ namespace Farmacheck.Controllers
                 s.MarcaNombre = b?.Nombre;
             }
 
-            return Json(new { success = true, data = lista });
+            var result = new PaginatedResponse<SubMarca>
+            {
+                Items = lista,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
