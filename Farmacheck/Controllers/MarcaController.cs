@@ -31,11 +31,49 @@ namespace Farmacheck.Controllers
         {
             ViewBag.UnidadId = unidadId;
 
-            var result = await ObtenerMarcasAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBrandsByPageAsync(page, _itemsPerPage);
+
+            // Map first to DTOs and then to the ViewModel to avoid missing configuration
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
+            var items = _mapper.Map<List<MarcaViewModel>>(dtos);
+
+            var result = new PaginatedResponse<MarcaViewModel>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+            
             ViewBag.Page = page;
             ViewBag.HasMore = result.HasNextPage;
 
-            return View(result.Items.ToList());
+            return View(result);
+        }
+        [HttpGet]
+        public async Task<JsonResult> Listar(int page = 1)
+        {
+            var apiData = await _apiClient.GetBrandsByPageAsync(page, _itemsPerPage);
+
+            // Map first to DTOs and then to the ViewModel to avoid missing configuration
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
+            var items = _mapper.Map<List<MarcaViewModel>>(dtos);
+
+            var result = new PaginatedResponse<MarcaViewModel>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
@@ -47,12 +85,7 @@ namespace Farmacheck.Controllers
             return Json(new { success = true, data = unidades });
         }
 
-        [HttpGet]
-        public async Task<JsonResult> Listar(int page = 1)
-        {
-            var result = await ObtenerMarcasAsync(page, _itemsPerPage);
-            return Json(new { success = true, data = result });
-        }
+        
 
         [HttpGet]
         public async Task<JsonResult> ListarPorUnidadNegocio(int unidadId)

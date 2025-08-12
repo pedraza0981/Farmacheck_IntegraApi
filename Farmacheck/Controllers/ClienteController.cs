@@ -71,7 +71,7 @@ namespace Farmacheck.Controllers
         {
             var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
 
-            // Map through DTOs to ensure AutoMapper has the necessary type configurations
+            // Map first to DTOs and then to the ViewModel to avoid missing configuration
             var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
             var items = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 
