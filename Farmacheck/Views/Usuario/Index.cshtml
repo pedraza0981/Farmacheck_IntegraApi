@@ -234,6 +234,7 @@
         let clientesSeleccionados = [];
         var pagina = @Model.CurrentPage;
         var pageSize = @Model.PageSize;
+        let usuarioGuardado = true;
 
         $(document).ready(function () {
             $('#tablaDatos').DataTable({
@@ -254,13 +255,29 @@
             $('#unidadDeNegocioSelect').change(function () {
                 cargarMarcas($(this).val());
             });
-            $('#modalGestionRol').on('show.bs.modal', function () {
+            $('#modalGestionRol').on('show.bs.modal', function (e) {
+                if (!usuarioGuardado) {
+                    e.preventDefault();
+                    showAlert('Primero guarda el usuario', 'warning');
+                    return;
+                }
                 clientesSeleccionados = [];
                 cargarRolesModal();
             });
 
             $('#btnGestionarRoles').click(function () {
+                if (!usuarioGuardado) {
+                    showAlert('Primero guarda el usuario', 'warning');
+                    return;
+                }
                 $('#idRolPorUsuario').val('');
+            });
+
+            $('#collapseRoles').on('show.bs.collapse', function (e) {
+                if (!usuarioGuardado) {
+                    e.preventDefault();
+                    showAlert('Primero guarda el usuario', 'warning');
+                }
             });
 
             $('#contenedorMarcas').on('change', '.marca-check', function () {
@@ -326,6 +343,11 @@
             $('#buscarCliente').on('input', filtrarClientes);
 
             $('#selectRol').change(function () {
+                if (!usuarioGuardado) {
+                    showAlert('Primero guarda el usuario', 'warning');
+                    $(this).val('');
+                    return;
+                }
                 const rolPorUsuarioId = $(this).val();
                 const usuarioId = $('#entidadId').val() || 0;
                 if (rolPorUsuarioId) {
@@ -366,7 +388,16 @@
             $('#btnNuevo').click(function () {
                 limpiar();
                 $('#modalTitulo').text('Nuevo usuario');
+                usuarioGuardado = false;
+                $('#collapseRoles').collapse('hide');
                 $('#modalEntidad').modal('show');
+            });
+
+            $('#btnResetPassword').click(function () {
+                if (!usuarioGuardado) {
+                    showAlert('Primero guarda el usuario', 'warning');
+                    return;
+                }
             });
 
 
@@ -393,6 +424,8 @@
                             if (parseInt(id) === 0) {
                                 $('#entidadId').val(r.id);
                                 cargarZonas();
+                                usuarioGuardado = true;
+                                $('#collapseRoles').collapse('show');
                             }
                             const mensaje = parseInt(id) === 0
                                 ? 'Usuario registrado correctamente'
@@ -795,8 +828,6 @@
         }
 
         function editar(id) {
-            
-
             $.get('@Url.Action("Obtener", "Usuario")', { id }, function (r) {
                 if (r.success) {
                     const u = r.data;
@@ -810,14 +841,14 @@
                     $('#estatusCheck').prop('checked', u.estatus);
 
                     cargarSelectorRoles();
+                    usuarioGuardado = true;
+                    $('#collapseRoles').collapse('show');
 
                     $('#modalEntidad').modal('show');
                 } else {
                     showAlert(r.error || 'No se pudo cargar', 'error');
                 }
             });
-
-
         }
 
         function eliminar(id) {
