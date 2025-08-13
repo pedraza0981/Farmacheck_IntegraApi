@@ -6,6 +6,7 @@ using AutoMapper;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.PermissionsByRoles;
 using Farmacheck.Application.Models.Permissions;
+using Farmacheck.Application.Models.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace Farmacheck.Controllers
         private readonly IMapper _mapper;
 
         private static readonly Dictionary<int, List<int>> _permisosPorRol = new();
+        private const int _itemsPerPage = 5;
 
         public RolController(IRoleApiClient apiClient,
                              IBusinessUnitApiClient businessUnitApi,
@@ -35,16 +37,13 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index(int unidadId)
+        public async Task<IActionResult> Index(int unidadId, int page = 1)
         {
             ViewBag.UnidadId = unidadId;
 
-            var apiData = await _apiClient.GetRolesAsync();
-            var dtos = _mapper.Map<List<RoleDto>>(apiData);
+            var apiData = await _apiClient.GetRolesByPageAsync(page, _itemsPerPage);
+            var dtos = _mapper.Map<List<RoleDto>>(apiData.Items);
             var roles = _mapper.Map<List<RolViewModel>>(dtos);
-
-            if (unidadId > 0)
-                roles = roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList();
 
             var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
             foreach (var r in roles)
@@ -53,18 +52,29 @@ namespace Farmacheck.Controllers
                 r.UnidadDeNegocioNombre = u?.Nombre;
             }
 
-            return View(roles);
+            var result = new PaginatedResponse<RolViewModel>
+            {
+                Items = roles,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            ViewBag.Page = page;
+            ViewBag.HasMore = result.HasNextPage;
+
+            return View(result);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int unidadId)
+        public async Task<JsonResult> Listar(int unidadId, int page = 1)
         {
-            var apiData = await _apiClient.GetRolesAsync();
-            var dtos = _mapper.Map<List<RoleDto>>(apiData);
+            var apiData = await _apiClient.GetRolesByPageAsync(page, _itemsPerPage);
+            var dtos = _mapper.Map<List<RoleDto>>(apiData.Items);
             var roles = _mapper.Map<List<RolViewModel>>(dtos);
-
-            if (unidadId > 0)
-                roles = roles.Where(r => r.UnidadDeNegocioId == unidadId).ToList();
 
             var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
             foreach (var r in roles)
@@ -73,7 +83,18 @@ namespace Farmacheck.Controllers
                 r.UnidadDeNegocioNombre = u?.Nombre;
             }
 
-            return Json(new { success = true, data = roles });
+            var result = new PaginatedResponse<RolViewModel>
+            {
+                Items = roles,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
