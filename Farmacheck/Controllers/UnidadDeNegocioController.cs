@@ -98,6 +98,14 @@ namespace Farmacheck.Controllers
             return Json(new { success = true });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporte()
+        {
+            var base64 = await _apiClient.GetReport();
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteUnidades.xlsx");
+        }
+
         private async Task<PaginatedResponse<UnidadDeNegocio>> ObtenerUnidadesAsync(int page, int items)
         {
             var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, items);

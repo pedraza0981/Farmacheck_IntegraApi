@@ -11,5 +11,6 @@ namespace Farmacheck.Application.Interfaces
         Task<int> CreateAsync(BusinessUnitRequest request);
         Task<bool> UpdateAsync(BusinessUnitRequest request);
         Task DeleteAsync(int id);
+        Task<string> GetReport();
     }
 }
