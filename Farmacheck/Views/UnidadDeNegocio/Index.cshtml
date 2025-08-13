@@ -40,7 +40,7 @@
                 <td>@u.Nombre</td>
                 <td>@u.Rfc</td>
                 <td>@u.Direccion</td>
-                <td>@(u.Estatus ? "Activo" : "Inactivo")</td>
+                <td>@(u.Estatus == true ? "Activo" : "Inactivo")</td>
                 <td class="text-center">
                     <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@u.Id)"><i class="bi bi-pencil"></i></button>
                     <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(@u.Id)"><i class="bi bi-trash"></i></button>
