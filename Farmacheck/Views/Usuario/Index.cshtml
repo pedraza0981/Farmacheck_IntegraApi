@@ -235,6 +235,7 @@
         var pagina = @Model.CurrentPage;
         var pageSize = @Model.PageSize;
         let usuarioGuardado = true;
+        let rolesUsuarioIds = [];
 
         $(document).ready(function () {
             $('#tablaDatos').DataTable({
@@ -349,40 +350,10 @@
                     return;
                 }
                 const rolPorUsuarioId = $(this).val();
-                const usuarioId = $('#entidadId').val() || 0;
                 if (rolPorUsuarioId) {
-                    $.ajax({
-                        url: '@Url.Action("ListarRolPorUsuarioCount", "Usuario")',
-                        method: 'GET',
-                        traditional: true,
-                        data: { rolPorUsuarioIds: [rolPorUsuarioId], usuarioId: usuarioId },
-                        success: function (r) {
-                            if (r.success) {
-                                const tbody = $('#tablaRoles tbody');
-                                tbody.empty();
-
-                                if (r.data.length === 0) {
-                                    tbody.append('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
-                                } else {
-                                    r.data.forEach(item => {
-                                        tbody.append(`
-                                            <tr>
-                                                <td>${item.roleNombre}</td>
-                                                <td>${item.totalClientesAsignados}</td>
-                                                <td>${item.unidadDeNegocioNombre}</td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarClientesPorRolPorUsuario(${item.rolPorUsuarioId})"><i class="bi bi-pencil"></i></button>
-                                                    <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminarRol(${item.rolPorUsuarioId})"><i class="bi bi-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                        `);
-                                    });
-                                }
-                            } else {
-                                showAlert(r.error || 'Error al listar roles', 'error');
-                            }
-                        }
-                    });
+                    cargarTablaRoles([rolPorUsuarioId]);
+                } else {
+                    cargarTablaRoles(rolesUsuarioIds);
                 }
             });
             $('#btnNuevo').click(function () {
@@ -722,15 +693,59 @@
         function cargarSelectorRoles() {
                 const usuarioId = $('#entidadId').val() || 0;
 
-                $.get('@Url.Action("ListarRolesPorUsuario", "Usuario")',{ usuarioId: usuarioId }, function (r) {
+                $.get('@Url.Action("ListarRolesPorUsuario", "Usuario")', { usuarioId: usuarioId }, function (r) {
                     const select = $('#selectRol');
                     select.empty();
                     select.append('<option value="">-- Selecciona un rol --</option>');
+                    rolesUsuarioIds = [];
                     r.data.forEach(rol => {
                         select.append(`<option value="${rol.id}">${rol.rolNombre}</option>`);
+                        rolesUsuarioIds.push(rol.id);
                     });
+                    cargarTablaRoles(rolesUsuarioIds);
                 });
             }
+
+        function cargarTablaRoles(rolPorUsuarioIds) {
+            const usuarioId = $('#entidadId').val() || 0;
+            const tbody = $('#tablaRoles tbody');
+            tbody.empty();
+
+            if (!rolPorUsuarioIds || rolPorUsuarioIds.length === 0) {
+                tbody.append('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("ListarRolPorUsuarioCount", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { rolPorUsuarioIds: rolPorUsuarioIds, usuarioId: usuarioId },
+                success: function (r) {
+                    if (r.success) {
+                        if (r.data.length === 0) {
+                            tbody.append('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
+                        } else {
+                            r.data.forEach(item => {
+                                tbody.append(`
+                                    <tr>
+                                        <td>${item.roleNombre}</td>
+                                        <td>${item.totalClientesAsignados}</td>
+                                        <td>${item.unidadDeNegocioNombre}</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarClientesPorRolPorUsuario(${item.rolPorUsuarioId})"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminarRol(${item.rolPorUsuarioId})"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                `);
+                            });
+                        }
+                    } else {
+                        showAlert(r.error || 'Error al listar roles', 'error');
+                    }
+                }
+            });
+        }
 
         function cargar(pag) {
             $.get('@Url.Action("Listar", "Usuario")', { page: pag }, function (r) {
@@ -879,6 +894,7 @@
             const selectRol = $('#selectRol');
             selectRol.empty();
             selectRol.append('<option value="">-- Selecciona un rol --</option>');
+            rolesUsuarioIds = [];
 
             // Limpiar tabla de roles
             $('#tablaRoles tbody').html('<tr class="text-center text-muted" id="noRolesRow"><td colspan="4">No hay roles encontrados</td></tr>');
