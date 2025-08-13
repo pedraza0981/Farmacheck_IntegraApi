@@ -2,6 +2,7 @@ using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Users;
+using Farmacheck.Application.Models.Common;
 using AutoMapper;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace Farmacheck.Controllers
         private readonly ICustomersRolesUsersApiClient _customersRolesUsersApiClient;
         private readonly IRoleApiClient _roleApiClient;
         private readonly IBusinessStructureApiClient _businessStructureApiClient;
+        private const int _itemsPerPage = 5;
 
         public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, 
                                  ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient,
@@ -46,23 +48,50 @@ namespace Farmacheck.Controllers
             _businessStructureApiClient = businessStructureApiClient;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var apiData = await _apiClient.GetUsersAsync();
-            var dtos = _mapper.Map<List<UserDto>>(apiData);
+            var apiData = await _apiClient.GetUsersByPageAsync(page, _itemsPerPage);
+
+            var dtos = _mapper.Map<List<UserDto>>(apiData.Items);
             var usuarios = _mapper.Map<List<UsuarioViewModel>>(dtos);
 
-            return View(usuarios);
+            var result = new PaginatedResponse<UsuarioViewModel>
+            {
+                Items = usuarios,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            ViewBag.Page = page;
+            ViewBag.HasMore = result.HasNextPage;
+
+            return View(result);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar()
+        public async Task<JsonResult> Listar(int page = 1)
         {
-            var apiData = await _apiClient.GetUsersAsync();
-            var dtos = _mapper.Map<List<UserDto>>(apiData);
+            var apiData = await _apiClient.GetUsersByPageAsync(page, _itemsPerPage);
+
+            var dtos = _mapper.Map<List<UserDto>>(apiData.Items);
             var usuarios = _mapper.Map<List<UsuarioViewModel>>(dtos);
 
-            return Json(new { success = true, data = usuarios });
+            var result = new PaginatedResponse<UsuarioViewModel>
+            {
+                Items = usuarios,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
