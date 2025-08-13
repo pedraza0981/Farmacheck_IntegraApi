@@ -27,16 +27,47 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            var result = await ObtenerUnidadesAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, _itemsPerPage);
+
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
+            var items = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+
+            var result = new PaginatedResponse<UnidadDeNegocio>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
             ViewBag.Page = page;
             ViewBag.HasMore = result.HasNextPage;
-            return View(result.Items.ToList());
+
+            return View(result);
         }
 
         [HttpGet]
         public async Task<JsonResult> Listar(int page = 1)
         {
-            var result = await ObtenerUnidadesAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, _itemsPerPage);
+
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
+            var items = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+
+            var result = new PaginatedResponse<UnidadDeNegocio>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
             return Json(new { success = true, data = result });
         }
 
@@ -104,14 +135,6 @@ namespace Farmacheck.Controllers
             var base64 = await _apiClient.GetReport();
             var bytes = Convert.FromBase64String(base64);
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteUnidades.xlsx");
-        }
-
-        private async Task<PaginatedResponse<UnidadDeNegocio>> ObtenerUnidadesAsync(int page, int items)
-        {
-            var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, items);
-            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
-            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
-            return new PaginatedResponse<UnidadDeNegocio>();
         }
     }
 }
