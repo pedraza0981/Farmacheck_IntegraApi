@@ -12,9 +12,14 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="text-dark">Marcas</h4>
-        <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
-            <i class="bi bi-plus-circle"></i> Nueva marca
-        </button>
+        <div>
+            <button id="btnDescargar" class="btn btn-secondary me-2">
+                <i class="bi bi-download"></i> Descargar
+            </button>
+            <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
+                <i class="bi bi-plus-circle"></i> Nueva marca
+            </button>
+        </div>
     </div>
     <table class="table table-bordered custom-table" id="tablaDatos">
         <thead>
@@ -109,6 +114,10 @@
                 $('#modalTitulo').text('Nueva marca');
                 $('#estatusCheck').prop('checked', true);
                 $('#modalEntidad').modal('show');
+            });
+
+            $('#btnDescargar').click(function () {
+                descargarReporte();
             });
 
             $('#logotipoArchivo').change(function () {
@@ -259,6 +268,20 @@
                     cargar(p);
                 }
             });
+        }
+
+        function descargarReporte() {
+            fetch('@Url.Action("DescargarReporte", "Marca")')
+                .then(r => r.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ReporteMarcas.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
         }
 
         function editar(id) {
