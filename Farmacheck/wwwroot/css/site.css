@@ -85,7 +85,7 @@ label {
     font-size: 14px;
 }
 
-/* Opcional: botÛn m·s uniforme */
+/* Opcional: bot√≥n m√°s uniforme */
 .btn {
     font-size: 14px;
 }
@@ -135,3 +135,32 @@ label {
     --swal2-confirm-button-background-color: #005bac !important;
 }
 
+/* Button styles */
+#btnDescargar {
+    background-color: #00ab8e !important;
+    border: none !important;
+    color: white !important;
+}
+
+#btnNueva,
+#btnNuevo {
+    background-color: #17a2b8 !important;
+    border: none !important;
+    color: white !important;
+}
+
+button[onclick^="editar"],
+a[onclick^="editar"],
+.btn-edit {
+    background-color: #00ab8e !important;
+    border: none !important;
+    color: white !important;
+}
+
+button[onclick^="eliminar"],
+a[onclick^="eliminar"],
+.btn-delete {
+    background-color: #17a2b8 !important;
+    border: none !important;
+    color: white !important;
+}
