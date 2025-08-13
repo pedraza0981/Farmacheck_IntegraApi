@@ -1,4 +1,4 @@
-@model List<Farmacheck.Models.JerarquiaViewModel>
+@model Farmacheck.Application.Models.Common.PaginatedResponse<Farmacheck.Models.JerarquiaViewModel>
 @{
     ViewData["Title"] = "Jerarquía";
 }
@@ -26,15 +26,26 @@
                 <th style="width:10%;" class="text-center">Acciones</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+        @foreach (var u in Model.Items)
+        {
+            <tr>
+                <td>@u.Id</td>
+                <td>@u.Nombre</td>
+                <td>@u.RolSuperiorNombre</td>
+                <td>@u.RolSubordinadoNombre</td>
+                <td>@(u.Estatus ? "Activo" : "Inactivo")</td>
+                <td class="text-center">
+                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@u.Id)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(@u.Id)"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        }
+        </tbody>
     </table>
     <div class="d-flex justify-content-end">
         <nav>
-            <ul class="pagination mb-0">
-                <li class="page-item"><button class="page-link" id="btnPrev">Anterior</button></li>
-                <li class="page-item"><span class="page-link" id="lblPage"></span></li>
-                <li class="page-item"><button class="page-link" id="btnNext">Siguiente</button></li>
-            </ul>
+            <ul class="pagination mb-0" id="paginador"></ul>
         </nav>
     </div>
 </div>
@@ -91,24 +102,23 @@
 
 @section Scripts {
     <script>
-        var pagina = @ViewBag.Page ?? 1;
-        var pageSize = 5;
+        var pagina = @Model.CurrentPage;
+        var pageSize = @Model.PageSize;
 
         $(document).ready(function () {
-            cargar(pagina);
             cargarRoles();
 
-            $('#btnPrev').click(function () {
-                if (pagina > 1) {
-                    pagina--;
-                    cargar(pagina);
+            $('#tablaDatos').DataTable({
+                paging: false,
+                searching: true,
+                ordering: true,
+                info: false,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 }
             });
 
-            $('#btnNext').click(function () {
-                pagina++;
-                cargar(pagina);
-            });
+            renderPagination({ totalPages: @Model.TotalPages, hasNextPage: @Model.HasNextPage.ToString().ToLower(), hasPreviousPage: @Model.HasPreviousPage.ToString().ToLower() });
 
             $('#btnNuevo').click(function () {
                 limpiar();
@@ -148,7 +158,7 @@
                             <button class="btn btn-sm btn-danger" onclick="$(this).closest('tr').remove()"><i class="bi bi-trash"></i></button>
                         </td>
                     </tr>`);
-                });
+            });
 
             $('#btnGuardar').click(function () {
                 const id = parseInt($('#entidadId').val()) || 0;
@@ -212,10 +222,13 @@
             });
         });
 
-                function cargar(pagina) {
-            $.get('@Url.Action("Listar", "Jerarquia")', { page: pagina }, function (r) {
+        function cargar(pag) {
+            $.get('@Url.Action("Listar", "Jerarquia")', { page: pag }, function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                        tabla.DataTable().destroy();
+                    }
                     const tbody = tabla.find('tbody');
                     tbody.empty();
 
@@ -233,10 +246,6 @@
                         </tr>`);
                     });
 
-                    // Destruir y volver a inicializar DataTable
-                    if ($.fn.DataTable.isDataTable(tabla)) {
-                        tabla.DataTable().destroy();
-                    }
                     tabla.DataTable({
                         paging: false,
                         searching: true,
@@ -247,13 +256,66 @@
                         }
                     });
 
-                    $('#lblPage').text(pagina);
-                    $('#btnPrev').prop('disabled', pagina === 1);
-                    $('#btnNext').prop('disabled', !r.data.hasNextPage);
+                    pagina = pag;
+                    renderPagination(r.data);
                 }
             });
         }
 
+        function renderPagination(data) {
+            const pagContainer = $('#paginador');
+            pagContainer.empty();
+
+            if (data.totalPages <= 0) return;
+
+            const total = data.totalPages;
+            const current = pagina;
+
+            const addPage = (p) => {
+                const active = p === current ? 'active' : '';
+                pagContainer.append(`<li class="page-item ${active}"><a class="page-link" href="#" data-page="${p}">${p}</a></li>`);
+            };
+
+            pagContainer.append(`<li class="page-item ${data.hasPreviousPage ? '' : 'disabled'}"><a class="page-link" href="#" data-page="${current - 1}">Anterior</a></li>`);
+
+            if (total <= 5) {
+                for (let i = 1; i <= total; i++) {
+                    addPage(i);
+                }
+            } else {
+                if (current <= 3) {
+                    for (let i = 1; i <= 4; i++) {
+                        addPage(i);
+                    }
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    addPage(total);
+                } else if (current >= total - 2) {
+                    addPage(1);
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    for (let i = total - 3; i <= total; i++) {
+                        addPage(i);
+                    }
+                } else {
+                    addPage(1);
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    for (let i = current - 1; i <= current + 1; i++) {
+                        addPage(i);
+                    }
+                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                    addPage(total);
+                }
+            }
+
+            pagContainer.append(`<li class="page-item ${data.hasNextPage ? '' : 'disabled'}"><a class="page-link" href="#" data-page="${current + 1}">Siguiente</a></li>`);
+
+            pagContainer.find('a').off('click').on('click', function (e) {
+                e.preventDefault();
+                const p = parseInt($(this).data('page'));
+                if (!isNaN(p) && p > 0 && p !== current && p <= total) {
+                    cargar(p);
+                }
+            });
+        }
 
         function cargarRoles() {
             $.get('@Url.Action("Listar", "Rol")', function (r) {

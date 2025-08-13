@@ -6,6 +6,8 @@ using Farmacheck.Application.Models.Roles;
 using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
 using Farmacheck.Application.Models.Common;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Farmacheck.Controllers
 {
@@ -27,16 +29,50 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            var result = await ObtenerJerarquiasAsync(page, _itemsPerPage);
-            ViewBag.Page = page;
-            ViewBag.HasMore = result.HasNextPage;
-            return View(result.Items.ToList());
+            var apiData = await _apiClient.GetByPageAsync(page, _itemsPerPage);
+
+            // Map first to DTOs and then to the ViewModel to avoid missing configuration
+            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData.Items);
+            var items = _mapper.Map<List<JerarquiaViewModel>>(dtos);
+
+            await CompletarNombresRoles(items);
+
+            var result = new PaginatedResponse<JerarquiaViewModel>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
+            return View(result);
         }
 
         [HttpGet]
         public async Task<JsonResult> Listar(int page = 1)
         {
-            var result = await ObtenerJerarquiasAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetByPageAsync(page, _itemsPerPage);
+
+            // Map first to DTOs and then to the ViewModel to avoid missing configuration
+            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData.Items);
+            var items = _mapper.Map<List<JerarquiaViewModel>>(dtos);
+
+            await CompletarNombresRoles(items);
+
+            var result = new PaginatedResponse<JerarquiaViewModel>
+            {
+                Items = items,
+                TotalCount = apiData.TotalCount,
+                CurrentPage = apiData.CurrentPage,
+                PageSize = apiData.PageSize,
+                TotalPages = apiData.TotalPages,
+                HasNextPage = apiData.HasNextPage,
+                HasPreviousPage = apiData.HasPreviousPage
+            };
+
             return Json(new { success = true, data = result });
         }
 
@@ -112,17 +148,6 @@ namespace Farmacheck.Controllers
         {
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
-        }
-
-        private async Task<PaginatedResponse<JerarquiaViewModel>> ObtenerJerarquiasAsync(int page, int items)
-        {
-            var apiData = await _apiClient.GetByPageAsync(page, items);
-            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData.Items);
-            var models = _mapper.Map<List<JerarquiaViewModel>>(dtos);
-
-            await CompletarNombresRoles(models);
-
-            return new PaginatedResponse<JerarquiaViewModel>();
         }
 
         private async Task CompletarNombresRoles(IEnumerable<JerarquiaViewModel> modelos)
