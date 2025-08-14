@@ -16,7 +16,6 @@ namespace Farmacheck.Controllers
         private readonly IHierarchyByRoleApiClient _apiClient;
         private readonly IRoleApiClient _roleApi;
         private readonly IMapper _mapper;
-        private const int _itemsPerPage = 5;
 
         public JerarquiaController(IHierarchyByRoleApiClient apiClient,
                                    IRoleApiClient roleApi,
@@ -27,53 +26,31 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetAllAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
             var items = _mapper.Map<List<JerarquiaViewModel>>(dtos);
 
             await CompletarNombresRoles(items);
 
-            var result = new PaginatedResponse<JerarquiaViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            return View(result);
+            return View(items);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int page = 1)
+        public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetAllAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<HierarchyByRoleDto>>(apiData);
             var items = _mapper.Map<List<JerarquiaViewModel>>(dtos);
 
             await CompletarNombresRoles(items);
 
-            var result = new PaginatedResponse<JerarquiaViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            return Json(new { success = true, data = result });
+            return Json(new { success = true, data = items });
         }
 
         [HttpGet]
