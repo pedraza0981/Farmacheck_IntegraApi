@@ -26,7 +26,7 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetBusinessUnitsAsync();
+            var apiData = await _apiClient.GetAllBusinessUnitsAsync();
 
             var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
             var items = _mapper.Map<List<UnidadDeNegocio>>(dtos);
@@ -37,7 +37,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetBusinessUnitsAsync();
+            var apiData = await _apiClient.GetAllBusinessUnitsAsync();
 
             var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
             var items = _mapper.Map<List<UnidadDeNegocio>>(dtos);

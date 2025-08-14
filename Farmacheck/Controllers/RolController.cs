@@ -40,7 +40,7 @@ namespace Farmacheck.Controllers
         {
             ViewBag.UnidadId = unidadId;
 
-            var apiData = await _apiClient.GetRolesAsync();
+            var apiData = await _apiClient.GetAllRolesAsync();
             var dtos = _mapper.Map<List<RoleDto>>(apiData);
             var roles = _mapper.Map<List<RolViewModel>>(dtos);
 
@@ -57,7 +57,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar(int unidadId)
         {
-            var apiData = await _apiClient.GetRolesAsync();
+            var apiData = await _apiClient.GetAllRolesAsync();
             var dtos = _mapper.Map<List<RoleDto>>(apiData);
             var roles = _mapper.Map<List<RolViewModel>>(dtos);
 

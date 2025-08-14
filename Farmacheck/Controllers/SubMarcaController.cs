@@ -29,7 +29,7 @@ namespace Farmacheck.Controllers
         {
             ViewBag.MarcaId = marcaId;
 
-            var apiData = await _subbrandApi.GetSubbrandsAsync();
+            var apiData = await _subbrandApi.GetAllSubbrandsAsync();
             var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
             var lista = _mapper.Map<List<SubMarca>>(dtos);
 
@@ -46,7 +46,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _subbrandApi.GetSubbrandsAsync();
+            var apiData = await _subbrandApi.GetAllSubbrandsAsync();
             var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
             var lista = _mapper.Map<List<SubMarca>>(dtos);
 

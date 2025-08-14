@@ -25,7 +25,7 @@ namespace Farmacheck.Controllers
         {
             try
             {
-                var apiData = await _apiClient.GetCategoriesAsync();
+                var apiData = await _apiClient.GetAllCategoriesAsync();
 
                 var dtos = _mapper.Map<List<CategoryByQuestionnaireDto>>(apiData); // <- puede fallar
                 var categorias = _mapper.Map<List<CategoriaCuestionarioViewModel>>(dtos);
@@ -41,7 +41,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetCategoriesAsync();
+            var apiData = await _apiClient.GetAllCategoriesAsync();
             var dtos = _mapper.Map<List<CategoryByQuestionnaireDto>>(apiData);
             var categorias = _mapper.Map<List<CategoriaCuestionarioViewModel>>(dtos);
 

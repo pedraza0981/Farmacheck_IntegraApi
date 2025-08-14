@@ -42,7 +42,7 @@ namespace Farmacheck.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetCustomersAsync();
+            var apiData = await _apiClient.GetAllCustomersAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
             var dtos = _mapper.Map<List<CustomerDto>>(apiData);
@@ -54,7 +54,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetCustomersAsync();
+            var apiData = await _apiClient.GetAllCustomersAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
             var dtos = _mapper.Map<List<CustomerDto>>(apiData);
