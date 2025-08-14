@@ -42,7 +42,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetBrandsAsync();
+            var apiData = await _apiClient.GetAllBrandsAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
             var dtos = _mapper.Map<List<MarcaDto>>(apiData);
