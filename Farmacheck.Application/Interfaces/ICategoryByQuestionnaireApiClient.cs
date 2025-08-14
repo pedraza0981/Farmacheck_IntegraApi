@@ -5,6 +5,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface ICategoryByQuestionnaireApiClient
     {
+        Task<IEnumerable<CategoryByQuestionnaireResponse>> GetAllCategoriesAsync();
         Task<List<CategoryByQuestionnaireResponse>> GetCategoriesAsync();
         Task<PaginatedResponse<CategoryByQuestionnaireResponse>> GetCategoriesByPageAsync(int page, int items);
         Task<CategoryByQuestionnaireResponse?> GetCategoryAsync(byte id);

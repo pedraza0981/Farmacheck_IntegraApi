@@ -14,6 +14,12 @@ namespace Farmacheck.Infrastructure.Services
             _http = http;
         }
 
+        public async Task<IEnumerable<RoleResponse>> GetAllRolesAsync()
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<RoleResponse>>("api/v1/Roles/all")
+                   ?? Enumerable.Empty<RoleResponse>();
+        }
+
         public async Task<List<RoleResponse>> GetRolesAsync()
         {
             return await _http.GetFromJsonAsync<List<RoleResponse>>("api/v1/Roles")

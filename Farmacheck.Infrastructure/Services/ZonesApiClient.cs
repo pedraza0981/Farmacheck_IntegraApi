@@ -14,6 +14,12 @@ namespace Farmacheck.Infrastructure.Services
             _http = http;
         }
 
+        public async Task<IEnumerable<ZoneResponse>> GetAllZonesAsync()
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<ZoneResponse>>("api/v1/Zones/all")
+                   ?? Enumerable.Empty<ZoneResponse>();
+        }
+
         public async Task<List<ZoneResponse>> GetZonesAsync()
         {
             return await _http.GetFromJsonAsync<List<ZoneResponse>>("api/v1/Zones")

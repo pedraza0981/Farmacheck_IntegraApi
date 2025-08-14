@@ -5,6 +5,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface IUserApiClient
     {
+        Task<IEnumerable<UserResponse>> GetAllUsersAsync();
         Task<List<UserResponse>> GetUsersAsync();
         Task<PaginatedResponse<UserResponse>> GetUsersByPageAsync(int page, int items);
         Task<UserResponse?> GetUserAsync(int id);

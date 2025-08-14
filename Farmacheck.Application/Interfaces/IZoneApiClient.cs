@@ -5,6 +5,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface IZoneApiClient
     {
+        Task<IEnumerable<ZoneResponse>> GetAllZonesAsync();
         Task<List<ZoneResponse>> GetZonesAsync();
         Task<PaginatedResponse<ZoneResponse>> GetZonesByPageAsync(int page, int items);
         Task<ZoneResponse?> GetZoneAsync(int id);
