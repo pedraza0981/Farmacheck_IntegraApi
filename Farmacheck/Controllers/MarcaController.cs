@@ -18,7 +18,6 @@ namespace Farmacheck.Controllers
         private readonly IBrandApiClient _apiClient;
         private readonly IMapper _mapper;
         private readonly IBusinessUnitApiClient _businessUnitApiClient;
-        private const int _itemsPerPage = 5;
 
         public MarcaController(IBrandApiClient apiClient, IMapper mapper, IBusinessUnitApiClient businessUnitApiClient)
         {
@@ -27,53 +26,29 @@ namespace Farmacheck.Controllers
             _businessUnitApiClient = businessUnitApiClient;
         }
 
-        public async Task<IActionResult> Index(int unidadId, int page = 1)
+        public async Task<IActionResult> Index(int unidadId = 0)
         {
             ViewBag.UnidadId = unidadId;
 
-            var apiData = await _apiClient.GetBrandsByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBrandsAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
             var items = _mapper.Map<List<MarcaViewModel>>(dtos);
 
-            var result = new PaginatedResponse<MarcaViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-            
-            ViewBag.Page = page;
-            ViewBag.HasMore = result.HasNextPage;
-
-            return View(result);
+            return View(items);
         }
+
         [HttpGet]
-        public async Task<JsonResult> Listar(int page = 1)
+        public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetBrandsByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBrandsAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<MarcaDto>>(apiData);
             var items = _mapper.Map<List<MarcaViewModel>>(dtos);
 
-            var result = new PaginatedResponse<MarcaViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            return Json(new { success = true, data = result });
+            return Json(new { success = true, data = items });
         }
 
         [HttpGet]
@@ -165,13 +140,5 @@ namespace Farmacheck.Controllers
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteMarcas.xlsx");
         }
 
-        private async Task<PaginatedResponse<MarcaViewModel>> ObtenerMarcasAsync(int page, int items)
-        {
-            var apiData = await _apiClient.GetBrandsByPageAsync(page, items);
-            var dtos = _mapper.Map<List<MarcaDto>>(apiData.Items);
-            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
-
-            return new PaginatedResponse<MarcaViewModel>();
-        }
     }
 }
