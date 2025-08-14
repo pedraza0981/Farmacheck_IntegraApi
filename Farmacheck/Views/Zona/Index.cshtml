@@ -1,4 +1,4 @@
-@model Farmacheck.Application.Models.Common.PaginatedResponse<Farmacheck.Models.ZonaViewModel>
+@model List<Farmacheck.Models.ZonaViewModel>
 @{
     ViewData["Title"] = "Zonas";
 }
@@ -25,7 +25,7 @@
             </tr>
         </thead>
         <tbody>
-        @foreach (var u in Model.Items)
+        @foreach (var u in Model)
         {
             <tr>
                 <td>@u.Id</td>
@@ -39,11 +39,6 @@
         }
         </tbody>
     </table>
-    <div class="d-flex justify-content-end">
-        <nav>
-            <ul class="pagination mb-0" id="paginador"></ul>
-        </nav>
-    </div>
 </div>
 
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
@@ -74,21 +69,18 @@
 
 @section Scripts {
     <script>
-        var pagina = @Model.CurrentPage;
-        var pageSize = @Model.PageSize;
-
         $(document).ready(function () {
             $('#tablaDatos').DataTable({
-                paging: false,
+                paging: true,
                 searching: true,
                 ordering: true,
-                info: false,
+                info: true,
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 5,
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 }
             });
-
-            renderPagination({ totalPages: @Model.TotalPages, hasNextPage: @Model.HasNextPage.ToString().ToLower(), hasPreviousPage: @Model.HasPreviousPage.ToString().ToLower() });
 
             $('#btnNueva').click(function () {
                 limpiar();
@@ -116,7 +108,7 @@
                                 ? 'Zona registrada correctamente'
                                 : 'Zona actualizada correctamente';
                             showAlert(mensaje, 'success');
-                            cargar(pagina);
+                            cargar();
                         } else {
                             showAlert(r.error || 'Error al guardar', 'error');
                         }
@@ -125,8 +117,8 @@
             });
         });
 
-        function cargar(pag) {
-            $.get('@Url.Action("Listar", "Zona")', { page: pag }, function (r) {
+        function cargar() {
+            $.get('@Url.Action("Listar", "Zona")', function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
                     if ($.fn.DataTable.isDataTable(tabla)) {
@@ -135,7 +127,7 @@
 
                     const tbody = tabla.find('tbody');
                     tbody.empty();
-                    r.data.items.forEach(u => {
+                    r.data.forEach(u => {
                         tbody.append(`<tr>
                             <td>${u.id}</td>
                             <td>${u.nombre}</td>
@@ -148,72 +140,16 @@
                     });
 
                     tabla.DataTable({
-                        paging: false,
+                        paging: true,
                         searching: true,
                         ordering: true,
-                        info: false,
+                        info: true,
+                        lengthMenu: [5, 10, 25, 50],
+                        pageLength: 5,
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
                     });
-
-                    pagina = pag;
-                    renderPagination(r.data);
-                }
-            });
-        }
-
-        function renderPagination(data) {
-            const pagContainer = $('#paginador');
-            pagContainer.empty();
-
-            if (data.totalPages <= 0) return;
-
-            const total = data.totalPages;
-            const current = pagina;
-
-            const addPage = (p) => {
-                const active = p === current ? 'active' : '';
-                pagContainer.append(`<li class="page-item ${active}"><a class="page-link" href="#" data-page="${p}">${p}</a></li>`);
-            };
-
-            pagContainer.append(`<li class="page-item ${data.hasPreviousPage ? '' : 'disabled'}"><a class="page-link" href="#" data-page="${current - 1}">Anterior</a></li>`);
-
-            if (total <= 5) {
-                for (let i = 1; i <= total; i++) {
-                    addPage(i);
-                }
-            } else {
-                if (current <= 3) {
-                    for (let i = 1; i <= 4; i++) {
-                        addPage(i);
-                    }
-                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                    addPage(total);
-                } else if (current >= total - 2) {
-                    addPage(1);
-                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                    for (let i = total - 3; i <= total; i++) {
-                        addPage(i);
-                    }
-                } else {
-                    addPage(1);
-                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                    for (let i = current - 1; i <= current + 1; i++) {
-                        addPage(i);
-                    }
-                    pagContainer.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                    addPage(total);
-                }
-            }
-
-            pagContainer.append(`<li class="page-item ${data.hasNextPage ? '' : 'disabled'}"><a class="page-link" href="#" data-page="${current + 1}">Siguiente</a></li>`);
-
-            pagContainer.find('a').off('click').on('click', function (e) {
-                e.preventDefault();
-                const p = parseInt($(this).data('page'));
-                if (!isNaN(p) && p > 0 && p !== current && p <= total) {
-                    cargar(p);
                 }
             });
         }
@@ -238,7 +174,7 @@
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "Zona")', { id }, function (r) {
                     if (r.success) {
-                        cargar(pagina);
+                        cargar();
                     } else {
                         showAlert(r.error || 'Error al eliminar', 'error');
                     }

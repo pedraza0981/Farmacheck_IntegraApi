@@ -15,7 +15,6 @@ namespace Farmacheck.Controllers
     {
         private readonly IZoneApiClient _apiClient;
         private readonly IMapper _mapper;
-        private const int _itemsPerPage = 5;
 
         public ZonaController(IZoneApiClient apiClient, IMapper mapper)
         {
@@ -23,52 +22,27 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetZonesByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetZonesAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<ZonaDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<ZonaDto>>(apiData);
             var items = _mapper.Map<List<ZonaViewModel>>(dtos);
 
-            var result = new PaginatedResponse<ZonaViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            ViewBag.Page = page;
-            ViewBag.HasMore = result.HasNextPage;
-
-            return View(result);
+            return View(items);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int page = 1)
+        public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetZonesByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetZonesAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<ZonaDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<ZonaDto>>(apiData);
             var items = _mapper.Map<List<ZonaViewModel>>(dtos);
 
-            var result = new PaginatedResponse<ZonaViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            return Json(new { success = true, data = result });
+            return Json(new { success = true, data = items });
         }
 
         [HttpGet]

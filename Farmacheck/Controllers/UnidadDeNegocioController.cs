@@ -17,7 +17,6 @@ namespace Farmacheck.Controllers
     {
         private readonly IBusinessUnitApiClient _apiClient;
         private readonly IMapper _mapper;
-        private const int _itemsPerPage = 5;
 
         public UnidadDeNegocioController(IBusinessUnitApiClient apiClient, IMapper mapper)
         {
@@ -25,50 +24,25 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBusinessUnitsAsync();
 
-            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
             var items = _mapper.Map<List<UnidadDeNegocio>>(dtos);
 
-            var result = new PaginatedResponse<UnidadDeNegocio>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            ViewBag.Page = page;
-            ViewBag.HasMore = result.HasNextPage;
-
-            return View(result);
+            return View(items);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int page = 1)
+        public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetBusinessUnitsByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetBusinessUnitsAsync();
 
-            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
             var items = _mapper.Map<List<UnidadDeNegocio>>(dtos);
 
-            var result = new PaginatedResponse<UnidadDeNegocio>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            return Json(new { success = true, data = result });
+            return Json(new { success = true, data = items });
         }
 
         [HttpGet]

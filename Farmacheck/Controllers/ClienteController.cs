@@ -9,7 +9,6 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Customers;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.BusinessStructures;
-using Farmacheck.Application.Models.Common;
 
 namespace Farmacheck.Controllers
 {
@@ -22,7 +21,6 @@ namespace Farmacheck.Controllers
         private readonly IMapper _mapper;
         private readonly IBrandApiClient _ibrand;
         private readonly IBusinessUnitApiClient _businessUnitApiClient;
-        private const int _itemsPerPage = 5;
 
         public ClienteController(
             ICustomersApiClient apiClient,
@@ -42,51 +40,27 @@ namespace Farmacheck.Controllers
             _businessUnitApiClient = businessUnitApiClient;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index()
         {
-            var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetCustomersAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
             var items = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 
-            var result = new PaginatedResponse<ClienteEstructuraViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            ViewBag.Page = page;
-            ViewBag.HasMore = result.HasNextPage;
-            return View(result);
+            return View(items);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Listar(int page = 1)
+        public async Task<JsonResult> Listar()
         {
-            var apiData = await _apiClient.GetCustomersByPageAsync(page, _itemsPerPage);
+            var apiData = await _apiClient.GetCustomersAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
-            var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
+            var dtos = _mapper.Map<List<CustomerDto>>(apiData);
             var items = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 
-            var result = new PaginatedResponse<ClienteEstructuraViewModel>
-            {
-                Items = items,
-                TotalCount = apiData.TotalCount,
-                CurrentPage = apiData.CurrentPage,
-                PageSize = apiData.PageSize,
-                TotalPages = apiData.TotalPages,
-                HasNextPage = apiData.HasNextPage,
-                HasPreviousPage = apiData.HasPreviousPage
-            };
-
-            return Json(new { success = true, data = result });
+            return Json(new { success = true, data = items });
         }
 
         [HttpGet]
@@ -171,15 +145,6 @@ namespace Farmacheck.Controllers
             await _apiClient.DeleteAsync(id);
             await _businessStructureApi.DeleteAsync(id);
             return Json(new { success = true });
-        }
-
-
-        private async Task<PaginatedResponse<ClienteEstructuraViewModel>> ObtenerClientesAsync(int page, int items)
-        {
-            var apiData = await _apiClient.GetCustomersByPageAsync(page, items);
-            var dtos = _mapper.Map<List<CustomerDto>>(apiData.Items);
-            var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
-            return new PaginatedResponse<ClienteEstructuraViewModel>();
         }
 
 
