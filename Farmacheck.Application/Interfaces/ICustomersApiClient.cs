@@ -6,6 +6,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface ICustomersApiClient
     {
+        Task<IEnumerable<CustomerResponse>> GetAllCustomersAsync();
         Task<List<CustomerResponse>> GetCustomersAsync();
         Task<PaginatedResponse<CustomerResponse>> GetCustomersByPageAsync(int page, int items);
         Task<List<CustomerResponse>> GetCustomersByFiltersAsync(IEnumerable<int> subbrand, IEnumerable<int> zone);
