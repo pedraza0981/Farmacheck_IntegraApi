@@ -15,6 +15,12 @@ namespace Farmacheck.Infrastructure.Services
             _http = http;
         }
 
+        public async Task<IEnumerable<SubbrandResponse>> GetAllSubbrandsAsync()
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<SubbrandResponse>>("api/v1/Subbrands/all")
+                   ?? Enumerable.Empty<SubbrandResponse>();
+        }
+
         public async Task<List<SubbrandResponse>> GetSubbrandsAsync()
         {
             return await _http.GetFromJsonAsync<List<SubbrandResponse>>("api/v1/Subbrands")

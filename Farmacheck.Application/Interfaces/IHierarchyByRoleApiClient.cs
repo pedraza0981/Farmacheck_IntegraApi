@@ -5,6 +5,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface IHierarchyByRoleApiClient
     {
+        Task<IEnumerable<HierarchyByRoleResponse>> GetAllHierarchyByRolesAsync();
         Task<List<HierarchyByRoleResponse>> GetAllAsync();
         Task<PaginatedResponse<HierarchyByRoleResponse>> GetByPageAsync(int page, int items);
         Task<HierarchyByRoleResponse?> GetAsync(int id);

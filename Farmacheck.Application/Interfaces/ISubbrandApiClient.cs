@@ -6,6 +6,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface ISubbrandApiClient
     {
+        Task<IEnumerable<SubbrandResponse>> GetAllSubbrandsAsync();
         Task<List<SubbrandResponse>> GetSubbrandsAsync();
         Task<PaginatedResponse<SubbrandResponse>> GetSubbrandsByPageAsync(int page, int items);
         Task<List<SubbrandResponse>> GetSubbrandsByBrandsAsync(List<int> brands);

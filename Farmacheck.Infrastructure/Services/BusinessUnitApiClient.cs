@@ -14,6 +14,12 @@ namespace Farmacheck.Infrastructure.Services
             _http = http;
         }
 
+        public async Task<IEnumerable<BusinessUnitResponse>> GetAllBusinessUnitsAsync()
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<BusinessUnitResponse>>("api/v1/BusinessUnits/all")
+                   ?? Enumerable.Empty<BusinessUnitResponse>();
+        }
+
         public async Task<List<BusinessUnitResponse>> GetBusinessUnitsAsync()
         {
             return await _http.GetFromJsonAsync<List<BusinessUnitResponse>>("api/v1/BusinessUnits")
