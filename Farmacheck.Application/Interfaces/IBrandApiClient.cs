@@ -5,6 +5,7 @@ namespace Farmacheck.Application.Interfaces
 {
     public interface IBrandApiClient
     {
+        Task<IEnumerable<BrandResponse>> GetAllBrandsAsync();
         Task<List<BrandResponse>> GetBrandsAsync();
         Task<PaginatedResponse<BrandResponse>> GetBrandsByPageAsync(int page, int items);
         Task<List<BrandResponse>> GetBrandsByBusinessUnitAsync(int businessUnitId);

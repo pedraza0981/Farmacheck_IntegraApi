@@ -30,7 +30,7 @@ namespace Farmacheck.Controllers
         {
             ViewBag.UnidadId = unidadId;
 
-            var apiData = await _apiClient.GetBrandsAsync();
+            var apiData = await _apiClient.GetAllBrandsAsync();
 
             // Map first to DTOs and then to the ViewModel to avoid missing configuration
             var dtos = _mapper.Map<List<MarcaDto>>(apiData);
