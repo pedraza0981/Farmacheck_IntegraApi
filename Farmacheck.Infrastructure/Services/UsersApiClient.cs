@@ -42,9 +42,17 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<int> CreateAsync(UserRequest request)
         {
-            var response = await _http.PostAsJsonAsync("api/v1/Users", request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<int>();
+            try
+            {
+
+                var response = await _http.PostAsJsonAsync("api/v1/Users", request);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<int>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Ocurrió un error inesperado al crear el usuario.", ex);
+            }
         }
 
         public async Task<bool> UpdateAsync(UpdateUserRequest request)

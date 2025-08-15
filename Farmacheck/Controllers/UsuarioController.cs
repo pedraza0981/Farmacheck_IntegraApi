@@ -235,7 +235,11 @@ namespace Farmacheck.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    error = "Ocurrió un error inesperado. Favor de verificar si el usuario o el correo ya fueron registrados."
+                });
             }
         }
 
