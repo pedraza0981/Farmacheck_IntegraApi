@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Farmacheck.Application.Interfaces;
 using System.Threading.Tasks;
+using System;
 using AutoMapper;
 using Farmacheck.Application.Models.SubBrands;
 using Farmacheck.Application.Models.Brands;
@@ -119,6 +120,14 @@ namespace Farmacheck.Controllers
         {
             await _subbrandApi.DeleteAsync(id);
             return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporte()
+        {
+            var base64 = await _subbrandApi.GetReport();
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteSubmarcas.xlsx");
         }
     }
 }

@@ -68,5 +68,12 @@ namespace Farmacheck.Infrastructure.Services
             var response = await _http.DeleteAsync($"api/v1/Subbrands/{id}");
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task<string> GetReport()
+        {
+            var response = await _http.GetAsync("api/v1/Subbrands/report");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
     }
 }
