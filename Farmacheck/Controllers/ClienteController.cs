@@ -9,6 +9,7 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Customers;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.BusinessStructures;
+using System;
 
 namespace Farmacheck.Controllers
 {
@@ -171,6 +172,14 @@ namespace Farmacheck.Controllers
         {
             var result = await _businessUnitApiClient.GetBusinessUnitsAsync();
             return Json(new { success = true, data = result });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporte()
+        {
+            var base64 = await _apiClient.GetReport();
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteClientes.xlsx");
         }
     }
 }
