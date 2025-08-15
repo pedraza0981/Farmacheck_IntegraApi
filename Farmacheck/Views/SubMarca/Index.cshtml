@@ -12,9 +12,14 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="text-dark">Submarcas</h4>
-        <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
-            <i class="bi bi-plus-circle"></i> Nueva submarca
-        </button>
+        <div>
+            <button id="btnDescargar" class="btn btn-secondary me-2">
+                <i class="bi bi-download"></i> Descargar
+            </button>
+            <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
+                <i class="bi bi-plus-circle"></i> Nueva submarca
+            </button>
+        </div>
     </div>
     <table class="table table-bordered custom-table" id="tablaDatos">
         <thead>
@@ -131,7 +136,25 @@
                 });
             });
 
+            $('#btnDescargar').click(function () {
+                descargarReporte();
+            });
+
         });
+
+        function descargarReporte() {
+            fetch('@Url.Action("DescargarReporte", "SubMarca")')
+                .then(r => r.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ReporteSubmarcas.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
+        }
 
         function cargar() {
             $.get('@Url.Action("Listar", "SubMarca")', function (r) {
