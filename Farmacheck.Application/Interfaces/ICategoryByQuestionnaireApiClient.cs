@@ -9,6 +9,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<CategoryByQuestionnaireResponse>> GetCategoriesAsync();
         Task<PaginatedResponse<CategoryByQuestionnaireResponse>> GetCategoriesByPageAsync(int page, int items);
         Task<CategoryByQuestionnaireResponse?> GetCategoryAsync(byte id);
+        Task<CategoryByQuestionnaireResponse?> GetByNameAsync(string name);
         Task<byte> CreateAsync(CategoryByQuestionnaireRequest request);
         Task<bool> UpdateAsync(UpdateCategoryByQuestionnaireRequest request);
         Task DeleteAsync(byte id);

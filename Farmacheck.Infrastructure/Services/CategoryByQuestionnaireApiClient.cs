@@ -40,6 +40,11 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<CategoryByQuestionnaireResponse>($"api/v1/CategoriesByChecklists/{id}");
         }
 
+        public async Task<CategoryByQuestionnaireResponse?> GetByNameAsync(string name)
+        {
+            return await _http.GetFromJsonAsync<CategoryByQuestionnaireResponse>($"api/v1/CategoriesByChecklists/name/{name}");
+        }
+
         public async Task<byte> CreateAsync(CategoryByQuestionnaireRequest request)
         {
             var response = await _http.PostAsJsonAsync("api/v1/CategoriesByChecklists", request);
