@@ -40,6 +40,11 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<RoleResponse>($"api/v1/Roles/{id}");
         }
 
+        public async Task<RoleResponse?> GetRoleByNameAsync(string rolName)
+        {
+            return await _http.GetFromJsonAsync<RoleResponse>($"api/v1/Roles/name/{rolName}");
+        }
+
         public async Task<int> CreateAsync(RoleRequest request)
         {
             var response = await _http.PostAsJsonAsync("api/v1/Roles", request);
