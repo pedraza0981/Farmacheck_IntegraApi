@@ -73,8 +73,17 @@ namespace Farmacheck.Controllers
 
                 if (model.Id == 0)
                 {
-                    var id = await _apiClient.CreateAsync(request);
-                    return Json(new { success = true, id });
+                    var res = await _apiClient.GetByNameAsync(model.Nombre);
+                    if (res.Nombre is null)
+                    {
+                        var id = await _apiClient.CreateAsync(request);
+                        return Json(new { success = true, id });
+                    }
+                    else 
+                    {
+                        return Json(new { success = false, error = string.Format("Categoria {0} ya existe, favor de validar información", res.Nombre) }); 
+                    }
+                    
                 }
                 else
                 {
