@@ -90,17 +90,23 @@
         $(document).ready(function () {
             cargarUnidades();
 
-            $('#tablaDatos').DataTable({
+            const storedLength = localStorage.getItem('marcasPageLength');
+            const initialPageLength = storedLength ? parseInt(storedLength) : 5;
+
+            const tabla = $('#tablaDatos').DataTable({
                 paging: true,
                 searching: true,
                 ordering: true,
                 info: true,
                 lengthMenu: [5, 10, 25, 50],
-                pageLength: 5,
-                stateSave: true,
+                pageLength: initialPageLength,
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 }
+            });
+
+            tabla.on('length.dt', function (e, settings, len) {
+                localStorage.setItem('marcasPageLength', len);
             });
 
             $('#btnNueva').click(function () {
@@ -174,7 +180,7 @@
             $.get('@Url.Action("Listar", "Marca")', function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
-                    let pageLength = 5;
+                    let pageLength = parseInt(localStorage.getItem('marcasPageLength')) || 5;
                     if ($.fn.DataTable.isDataTable(tabla)) {
                         pageLength = tabla.DataTable().page.len();
                         tabla.DataTable().destroy();
@@ -194,17 +200,20 @@
                         </tr>`);
                     });
 
-                    tabla.DataTable({
+                    const nuevaTabla = tabla.DataTable({
                         paging: true,
                         searching: true,
                         ordering: true,
                         info: true,
                         lengthMenu: [5, 10, 25, 50],
                         pageLength: pageLength,
-                        stateSave: true,
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
+                    });
+
+                    nuevaTabla.on('length.dt', function (e, settings, len) {
+                        localStorage.setItem('marcasPageLength', len);
                     });
                 }
             });
