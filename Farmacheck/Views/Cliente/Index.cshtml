@@ -150,16 +150,21 @@
         $(document).ready(function () {
             cargarCatalogos();
 
-            $('#tablaDatos').DataTable({
+            const storedLength = localStorage.getItem('clientesPageLength');
+            const initialPageLength = storedLength ? parseInt(storedLength) : 5;
+            const tabla = $('#tablaDatos').DataTable({
                 paging: true,
                 searching: true,
                 ordering: true,
                 info: true,
                 lengthMenu: [5, 10, 25, 50],
-                pageLength: 5,
+                pageLength: initialPageLength,
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 }
+            });
+            tabla.on('length.dt', function (e, settings, len) {
+                localStorage.setItem('clientesPageLength', len);
             });
 
             $('#marcaSelect').change(function () {
@@ -311,7 +316,9 @@
             $.get('@Url.Action("Listar", "Cliente")', function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
+                    let pageLength = parseInt(localStorage.getItem('clientesPageLength')) || 5;
                     if ($.fn.DataTable.isDataTable(tabla)) {
+                        pageLength = tabla.DataTable().page.len();
                         tabla.DataTable().destroy();
                     }
 
@@ -330,16 +337,19 @@
                         </tr>`);
                     });
 
-                    tabla.DataTable({
+                    const nuevaTabla = tabla.DataTable({
                         paging: true,
                         searching: true,
                         ordering: true,
                         info: true,
                         lengthMenu: [5, 10, 25, 50],
-                        pageLength: 5,
+                        pageLength: pageLength,
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
+                    });
+                    nuevaTabla.on('length.dt', function (e, settings, len) {
+                        localStorage.setItem('clientesPageLength', len);
                     });
                 }
             });

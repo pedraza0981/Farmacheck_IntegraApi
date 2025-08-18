@@ -98,7 +98,9 @@
             $.get('@Url.Action("Listar", "CategoriaCuestionario")', function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
+                    let pageLength = parseInt(localStorage.getItem('categoriasPageLength')) || 5;
                     if ($.fn.DataTable.isDataTable(tabla)) {
+                        pageLength = tabla.DataTable().page.len();
                         tabla.DataTable().destroy();
                     }
 
@@ -116,12 +118,15 @@
                         </tr>`);
                     });
 
-                    tabla.DataTable({
-                        pageLength: 5,
+                    const nuevaTabla = tabla.DataTable({
+                        pageLength: pageLength,
                         lengthMenu: [5, 10, 25, 50, 100],
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
+                    });
+                    nuevaTabla.on('length.dt', function (e, settings, len) {
+                        localStorage.setItem('categoriasPageLength', len);
                     });
                 }
             });
