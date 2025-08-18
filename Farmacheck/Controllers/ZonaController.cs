@@ -96,5 +96,13 @@ namespace Farmacheck.Controllers
             await _apiClient.DeleteAsync(id);
             return Json(new { success = true });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporte()
+        {
+            var base64 = await _apiClient.GetReport();
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteZonas.xlsx");
+        }
     }
 }
