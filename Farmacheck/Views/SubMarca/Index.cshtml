@@ -86,16 +86,23 @@
         $(document).ready(function () {
             cargarMarcas();
 
-            $('#tablaDatos').DataTable({
+            const storedLength = localStorage.getItem('submarcasPageLength');
+            const initialPageLength = storedLength ? parseInt(storedLength) : 5;
+
+            const tabla = $('#tablaDatos').DataTable({
                 paging: true,
                 searching: true,
                 ordering: true,
                 info: true,
                 lengthMenu: [5, 10, 25, 50],
-                pageLength: 5,
+                pageLength: initialPageLength,
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 }
+            });
+
+            tabla.on('length.dt', function (e, settings, len) {
+                localStorage.setItem('submarcasPageLength', len);
             });
 
             $('#btnNueva').click(function () {
@@ -160,7 +167,9 @@
             $.get('@Url.Action("Listar", "SubMarca")', function (r) {
                 if (r.success) {
                     const tabla = $('#tablaDatos');
+                    let pageLength = parseInt(localStorage.getItem('submarcasPageLength')) || 5;
                     if ($.fn.DataTable.isDataTable(tabla)) {
+                        pageLength = tabla.DataTable().page.len();
                         tabla.DataTable().destroy();
                     }
 
@@ -179,16 +188,20 @@
                         </tr>`);
                     });
 
-                    tabla.DataTable({
+                    const nuevaTabla = tabla.DataTable({
                         paging: true,
                         searching: true,
                         ordering: true,
                         info: true,
                         lengthMenu: [5, 10, 25, 50],
-                        pageLength: 5,
+                        pageLength: pageLength,
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }
+                    });
+
+                    nuevaTabla.on('length.dt', function (e, settings, len) {
+                        localStorage.setItem('submarcasPageLength', len);
                     });
                 }
             });
