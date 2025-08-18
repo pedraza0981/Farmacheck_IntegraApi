@@ -130,6 +130,12 @@ namespace Farmacheck.Controllers
 
             if (model.Id == 0)
             {
+                var existente = await _apiClient.GetRoleByNameAsync(model.Nombre);
+                if (existente != null)
+                {
+                    return Json(new { success = false, error = "El rol ya ha sido registrado." });
+                }
+
                 var request = _mapper.Map<RoleRequest>(model);
                 var id = await _apiClient.CreateAsync(request);
                 _permisosPorRol[id] = model.Permisos ?? new List<int>();
