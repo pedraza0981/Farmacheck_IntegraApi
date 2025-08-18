@@ -13,5 +13,6 @@ namespace Farmacheck.Application.Interfaces
         Task<int> CreateAsync(RoleRequest request);
         Task<bool> UpdateAsync(UpdateRoleRequest request);
         Task DeleteAsync(byte id);
+        Task<string> GetReport();
     }
 }

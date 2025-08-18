@@ -7,6 +7,7 @@ using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.PermissionsByRoles;
 using Farmacheck.Application.Models.Permissions;
 using Farmacheck.Application.Models.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -231,6 +232,14 @@ namespace Farmacheck.Controllers
             await _apiClient.DeleteAsync((byte)id);
             //_permisosPorRol.Remove(id);
             return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporte()
+        {
+            var base64 = await _apiClient.GetReport();
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteRoles.xlsx");
         }
     }
 }
