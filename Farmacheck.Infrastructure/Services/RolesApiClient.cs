@@ -71,5 +71,6 @@ namespace Farmacheck.Infrastructure.Services
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
+
     }
 }
