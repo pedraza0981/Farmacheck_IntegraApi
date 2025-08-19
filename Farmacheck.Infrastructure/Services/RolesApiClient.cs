@@ -42,7 +42,13 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<RoleResponse?> GetRoleByNameAsync(string rolName)
         {
-            return await _http.GetFromJsonAsync<RoleResponse>($"api/v1/Roles/name/{rolName}");
+            try {
+                return await _http.GetFromJsonAsync<RoleResponse>($"api/v1/Roles/name/{rolName}");
+            }
+            catch (Exception ex) {
+                throw new Exception(ex.Message);
+            }
+            
         }
 
         public async Task<int> CreateAsync(RoleRequest request)

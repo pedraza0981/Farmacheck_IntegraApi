@@ -132,7 +132,7 @@ namespace Farmacheck.Controllers
             if (model.Id == 0)
             {
                 var existente = await _apiClient.GetRoleByNameAsync(model.Nombre);
-                if (existente != null)
+                if (existente.Id != 0)
                 {
                     return Json(new { success = false, error = "El rol ya ha sido registrado." });
                 }
