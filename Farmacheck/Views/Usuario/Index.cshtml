@@ -293,7 +293,6 @@
                 }).get();
 
                 cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
-                cargarClientes();
             });
 
             $('#checkAllMarcas').change(function () {
@@ -309,7 +308,6 @@
                     return parseInt(this.value);
                 }).get();
                 cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
-                cargarClientes();
             });
 
             $('#contenedorSubMarcas').on('change', '.submarca-check', function () {
@@ -326,7 +324,6 @@
                     return parseInt(this.value);
                 }).get();
                 cargarZonas(marcas, subbrands, zonasSeleccionadas);
-                cargarClientes();
             });
 
             $('#checkAllSubMarcas').change(function () {
@@ -342,7 +339,6 @@
                     return parseInt(this.value);
                 }).get();
                 cargarZonas(marcas, subbrands, zonasSeleccionadas);
-                cargarClientes();
             });
 
             $('#contenedorZonas').on('change', '.zona-check', function () {
@@ -625,7 +621,6 @@
                         $('#checkAllSubMarcas').prop('checked', total > 0 && total === checkedCount);
                         if (submarcasSeleccionadas.length > 0) {
                             cargarZonas(marcaIds, submarcasSeleccionadas, zonasSeleccionadas);
-                            cargarClientes();
                         }
                     }
                 }
@@ -658,9 +653,6 @@
                         const total = $('#contenedorZonas .zona-check').length;
                         const checkedCount = $('#contenedorZonas .zona-check:checked').length;
                         $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
-                        if (zonasSeleccionadas.length > 0) {
-                            cargarClientes();
-                        }
                     }
                 }
             });
