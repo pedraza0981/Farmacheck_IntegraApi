@@ -40,7 +40,6 @@
                 <td>@(c.Estatus ? "Activo" : "Inactivo")</td>
                 <td class="text-center">
                     <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@c.ClienteId)"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(@c.ClienteId)"><i class="bi bi-trash"></i></button>
                 </td>
             </tr>
         }
@@ -332,7 +331,6 @@
                             <td>${c.estatus ? 'Activo' : 'Inactivo'}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${c.clienteId})"><i class="bi bi-pencil"></i></button>
-                                <button class="btn btn-sm" style="background-color:#79b828; color:white;" onclick="eliminar(${c.clienteId})"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>`);
                     });
