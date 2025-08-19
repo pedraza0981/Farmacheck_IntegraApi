@@ -9,7 +9,7 @@ namespace Farmacheck.Application.Interfaces
         Task<IEnumerable<CustomerResponse>> GetAllCustomersAsync();
         Task<List<CustomerResponse>> GetCustomersAsync();
         Task<PaginatedResponse<CustomerResponse>> GetCustomersByPageAsync(int page, int items);
-        Task<List<CustomerResponse>> GetCustomersByFiltersAsync(IEnumerable<int> subbrand, IEnumerable<int> zone);
+        Task<List<CustomerResponse>> GetCustomersByFiltersAsync(IEnumerable<int>? brand, IEnumerable<int>? subbrand, IEnumerable<int>? zone);
         Task<List<BusinessUnitResponse>> GetBusinessUnitsByRoleAsync(int rolByUser);
         Task<CustomerResponse?> GetCustomerAsync(int id);
         Task<int> CreateAsync(CustomerRequest request);

@@ -121,9 +121,9 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> ListarClientesPorFiltros(List<int> subbrandIds, List<int> zoneIds)
+        public async Task<JsonResult> ListarClientesPorFiltros(List<int> brandIds , List<int> subbrandIds, List<int> zoneIds)
         {
-            var apiData = await _customersApi.GetCustomersByFiltersAsync(subbrandIds, zoneIds);
+            var apiData = await _customersApi.GetCustomersByFiltersAsync(brandIds, subbrandIds, zoneIds);
             var dtos = _mapper.Map<List<CustomerDto>>(apiData);
             var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
 

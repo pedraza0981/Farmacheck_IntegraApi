@@ -39,27 +39,27 @@ namespace Farmacheck.Infrastructure.Services
             return res;
         }
 
-        public async Task<List<CustomerResponse>> GetCustomersByFiltersAsync(IEnumerable<int> subbrand, IEnumerable<int> zone)
+        public async Task<List<CustomerResponse>> GetCustomersByFiltersAsync( IEnumerable<int>? brand, IEnumerable<int>? subbrand, IEnumerable<int>? zone)
         {
-            var query = new List<string>();
-            if (subbrand != null && subbrand.Any())
-            {
-                query.Add(string.Join("&", subbrand.Select(s => $"subbrand={s}")));
-            }
-            if (zone != null && zone.Any())
-            {
-                query.Add(string.Join("&", zone.Select(z => $"zone={z}")));
-            }
+                var query = new List<string>();
 
-            var url = "api/v1/Customers/filters";
-            if (query.Any())
-            {
-                url += "?" + string.Join("&", query);
-            }
+                if (brand != null && brand.Any())
+                    query.Add(string.Join("&", brand.Select(b => $"brand={b}")));
 
-            return await _http.GetFromJsonAsync<List<CustomerResponse>>(url)
-                   ?? new List<CustomerResponse>();
+                if (subbrand != null && subbrand.Any())
+                    query.Add(string.Join("&", subbrand.Select(s => $"subbrand={s}")));
+
+                if (zone != null && zone.Any())
+                    query.Add(string.Join("&", zone.Select(z => $"zone={z}")));
+
+                var url = "api/v1/Customers/filters";
+                if (query.Any())
+                    url += "?" + string.Join("&", query);
+
+                return await _http.GetFromJsonAsync<List<CustomerResponse>>(url)
+                       ?? new List<CustomerResponse>();
         }
+
         public async Task<List<BusinessUnitResponse>> GetBusinessUnitsByRoleAsync(int rolByUser)
         {
             return await _http.GetFromJsonAsync<List<BusinessUnitResponse>>($"api/v1/Customers/rolesPorUsuario/{rolByUser}")

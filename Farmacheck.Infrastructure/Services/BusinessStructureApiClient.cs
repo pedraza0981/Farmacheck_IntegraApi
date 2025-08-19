@@ -34,6 +34,31 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<BusinessStructureResponse>($"api/v1/BusinessStructure/{id}");
         }
 
+        public async Task<List<BusinessStructureResponse>> GetBusinessStructuresByFiltersAsync(
+        IEnumerable<int>? brand,
+        IEnumerable<int>? subbrand,
+        IEnumerable<int>? zone)
+        {
+            var query = new List<string>();
+
+            if (brand != null && brand.Any())
+                query.Add(string.Join("&", brand.Select(b => $"brand={b}")));
+
+            if (subbrand != null && subbrand.Any())
+                query.Add(string.Join("&", subbrand.Select(s => $"sub_brand={s}")));
+
+            if (zone != null && zone.Any())
+                query.Add(string.Join("&", zone.Select(z => $"zone={z}")));
+
+            var url = "api/v1/BusinessStructure/filters";
+            if (query.Any())
+                url += "?" + string.Join("&", query);
+
+            return await _http.GetFromJsonAsync<List<BusinessStructureResponse>>(url)
+                   ?? new List<BusinessStructureResponse>();
+        }
+
+
         public async Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(long customerId)
         {
             try

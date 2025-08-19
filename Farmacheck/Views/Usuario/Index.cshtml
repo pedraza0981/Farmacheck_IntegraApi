@@ -627,6 +627,10 @@
         }
 
         function cargarClientes() {
+            const brands = $('#contenedorMarcas .marca-check:checked').map(function () {
+                return parseInt(this.value);
+            }).get();
+
             const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
                 return parseInt(this.value);
             }).get();
@@ -639,7 +643,7 @@
             contenedor.empty();
             $('#checkAllClientes').prop('checked', false);
 
-            if (subbrands.length === 0 && zones.length === 0) {
+            if (brands.length === 0 && subbrands.length === 0 && zones.length === 0) {
                 return;
             }
 
@@ -647,7 +651,7 @@
                 url: '@Url.Action("ListarClientesPorFiltros", "Usuario")',
                 method: 'GET',
                 traditional: true,
-                data: { subbrandIds: subbrands, zoneIds: zones },
+                data: { brandIds: brands,subbrandIds: subbrands, zoneIds: zones },
                 success: function (r) {
                     if (r.success) {
                         const ids = new Set();
