@@ -20,7 +20,6 @@ namespace Farmacheck.Controllers
         private readonly IMapper _mapper;
         private readonly IBusinessUnitApiClient _businessUnitApi;
         private readonly ISubbrandApiClient _subbrandApi;
-        private readonly IZoneApiClient _zoneApi;
         private readonly IClientesAsignadosArolPorUsuariosApiClient _clientesAsignadosArolPorUsuariosApiClient;
         private readonly ICustomersApiClient _customersApi;
         private readonly IUserByRoleApiClient _userByRoleApiClient;
@@ -29,7 +28,7 @@ namespace Farmacheck.Controllers
         private readonly IBusinessStructureApiClient _businessStructureApiClient;
 
         public UsuarioController(IUserApiClient apiClient, IBrandApiClient brandApi, IMapper mapper, IBusinessUnitApiClient businessUnitApi, 
-                                 ISubbrandApiClient subbrandApi, IZoneApiClient zoneApi,IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient,
+                                 ISubbrandApiClient subbrandApi, IClientesAsignadosArolPorUsuariosApiClient clientesAsignadosArolPorUsuariosApiClient,
                                  ICustomersApiClient customersApi, IUserByRoleApiClient userByRoleApiClient, ICustomersRolesUsersApiClient customersRolesUsersApiClient,
                                  IRoleApiClient roleApiClient, IBusinessStructureApiClient businessStructureApiClient)
         {
@@ -38,7 +37,6 @@ namespace Farmacheck.Controllers
             _mapper = mapper;
             _businessUnitApi = businessUnitApi;
             _subbrandApi = subbrandApi;
-            _zoneApi = zoneApi;
             _clientesAsignadosArolPorUsuariosApiClient = clientesAsignadosArolPorUsuariosApiClient;
             _customersApi = customersApi;
             _userByRoleApiClient = userByRoleApiClient;
@@ -111,11 +109,13 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> ListarZonas()
+        public async Task<JsonResult> ListarZonas(List<int>? brandIds, List<int>? subbrandIds)
         {
-            var apiData = await _zoneApi.GetZonesAsync();
-            var dtos = _mapper.Map<List<ZonaDto>>(apiData);
-            var zonas = _mapper.Map<List<ZonaViewModel>>(dtos);
+            var apiData = await _businessStructureApiClient.GetBusinessStructuresByFiltersAsync(brandIds, subbrandIds, null);
+            var zonas = apiData
+                .GroupBy(z => z.ZonaId)
+                .Select(g => new ZonaViewModel { Id = g.Key, Nombre = g.First().Zona ?? string.Empty })
+                .ToList();
 
             return Json(new { success = true, data = zonas });
         }

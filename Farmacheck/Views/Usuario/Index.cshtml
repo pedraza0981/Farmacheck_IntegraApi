@@ -249,7 +249,6 @@
 
             cargarRolesModal();
             cargarUnidadesNegocio();
-            cargarZonas();
             $('#unidadDeNegocioSelect').change(function () {
                 cargarMarcas($(this).val());
             });
@@ -286,8 +285,14 @@
                 const seleccionadas = $('#contenedorMarcas .marca-check:checked').map(function () {
                     return parseInt(this.value);
                 }).get();
+                const subSeleccionadas = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
 
-                cargarSubMarcas(seleccionadas);
+                cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
                 cargarClientes();
             });
 
@@ -297,7 +302,13 @@
                 const seleccionadas = checked ? $('#contenedorMarcas .marca-check').map(function () {
                     return parseInt(this.value);
                 }).get() : [];
-                cargarSubMarcas(seleccionadas);
+                const subSeleccionadas = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
                 cargarClientes();
             });
 
@@ -305,12 +316,32 @@
                 const total = $('#contenedorSubMarcas .submarca-check').length;
                 const checked = $('#contenedorSubMarcas .submarca-check:checked').length;
                 $('#checkAllSubMarcas').prop('checked', total > 0 && total === checked);
+                const marcas = $('#contenedorMarcas .marca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                cargarZonas(marcas, subbrands, zonasSeleccionadas);
                 cargarClientes();
             });
 
             $('#checkAllSubMarcas').change(function () {
                 const checked = this.checked;
                 $('#contenedorSubMarcas .submarca-check').prop('checked', checked);
+                const marcas = $('#contenedorMarcas .marca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                cargarZonas(marcas, subbrands, zonasSeleccionadas);
                 cargarClientes();
             });
 
@@ -391,7 +422,6 @@
                         if (r.success) {
                             if (parseInt(id) === 0) {
                                 $('#entidadId').val(r.id);
-                                cargarZonas();
                                 usuarioGuardado = true;
                                 $('#collapseRoles').collapse('show');
                             }
@@ -536,7 +566,7 @@
             });
         }
 
-        function cargarMarcas(unidadId, marcasSeleccionadas = [], submarcasSeleccionadas = []) {
+        function cargarMarcas(unidadId, marcasSeleccionadas = [], submarcasSeleccionadas = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorMarcas');
             const contenedorSub = $('#contenedorSubMarcas');
             contenedor.empty();
@@ -561,13 +591,13 @@
                     const checkedCount = $('#contenedorMarcas .marca-check:checked').length;
                     $('#checkAllMarcas').prop('checked', total > 0 && total === checkedCount);
                     if (marcasSeleccionadas.length > 0) {
-                        cargarSubMarcas(marcasSeleccionadas, submarcasSeleccionadas);
+                        cargarSubMarcas(marcasSeleccionadas, submarcasSeleccionadas, zonasSeleccionadas);
                     }
                 }
             });
         }
 
-        function cargarSubMarcas(marcaIds, submarcasSeleccionadas = []) {
+        function cargarSubMarcas(marcaIds, submarcasSeleccionadas = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorSubMarcas');
             contenedor.empty();
             $('#checkAllSubMarcas').prop('checked', false);
@@ -594,6 +624,7 @@
                         const checkedCount = $('#contenedorSubMarcas .submarca-check:checked').length;
                         $('#checkAllSubMarcas').prop('checked', total > 0 && total === checkedCount);
                         if (submarcasSeleccionadas.length > 0) {
+                            cargarZonas(marcaIds, submarcasSeleccionadas, zonasSeleccionadas);
                             cargarClientes();
                         }
                     }
@@ -601,26 +632,35 @@
             });
         }
 
-        function cargarZonas(zonasSeleccionadas = []) {
+        function cargarZonas(brands = [], subbrands = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorZonas');
             contenedor.empty();
             $('#checkAllZonas').prop('checked', false);
-            $.get('@Url.Action("ListarZonas", "Usuario")', function (r) {
-                if (r.success) {
-                    r.data.forEach(z => {
-                        const checked = zonasSeleccionadas.includes(z.id) ? 'checked' : '';
-                        contenedor.append(`
-                            <div class="form-check">
-                                <input class="form-check-input zona-check" type="checkbox" value="${z.id}" id="zona_${z.id}" ${checked}>
-                                <label class="form-check-label" for="zona_${z.id}">${z.nombre}</label>
-                            </div>
-                        `);
-                    });
-                    const total = $('#contenedorZonas .zona-check').length;
-                    const checkedCount = $('#contenedorZonas .zona-check:checked').length;
-                    $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
-                    if (zonasSeleccionadas.length > 0) {
-                        cargarClientes();
+            if (!subbrands || subbrands.length === 0) {
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("ListarZonas", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { brandIds: brands, subbrandIds: subbrands },
+                success: function (r) {
+                    if (r.success) {
+                        r.data.forEach(z => {
+                            const checked = zonasSeleccionadas.includes(z.id) ? 'checked' : '';
+                            contenedor.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input zona-check" type="checkbox" value="${z.id}" id="zona_${z.id}" ${checked}>
+                                    <label class="form-check-label" for="zona_${z.id}">${z.nombre}</label>
+                                </div>
+                            `);
+                        });
+                        const total = $('#contenedorZonas .zona-check').length;
+                        const checkedCount = $('#contenedorZonas .zona-check:checked').length;
+                        $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
+                        if (zonasSeleccionadas.length > 0) {
+                            cargarClientes();
+                        }
                     }
                 }
             });
@@ -912,8 +952,7 @@
                     clientesSeleccionados = r.data.clienteIds || [];
                     $('#rolSelectModal').val(r.data.rolId);
                     $('#unidadDeNegocioSelect').val(r.data.unidadDeNegocioId);
-                    cargarZonas(r.data.zonaIds || []);
-                    cargarMarcas(r.data.unidadDeNegocioId, r.data.marcaIds || [], r.data.submarcaIds || []);
+                    cargarMarcas(r.data.unidadDeNegocioId, r.data.marcaIds || [], r.data.submarcaIds || [], r.data.zonaIds || []);
                 } else {
                     showAlert(r.error || 'Error al obtener datos', 'error');
                 }
