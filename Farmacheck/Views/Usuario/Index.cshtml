@@ -695,11 +695,13 @@
             $('#processingModal').modal({ backdrop: 'static', keyboard: false });
             $('#processingModal').modal('show');
 
+            let zonasTimeout = false;
             $.ajax({
                 url: '@Url.Action("ListarZonas", "Usuario")',
                 method: 'GET',
                 traditional: true,
                 data: { brandIds: brands, subbrandIds: subbrands },
+                timeout: 60000,
                 success: function (r) {
                     if (r.success) {
                         r.data.forEach(z => {
@@ -720,11 +722,20 @@
                         }
                     }
                 },
+                error: function (xhr, textStatus) {
+                    if (textStatus === 'timeout') {
+                        zonasTimeout = true;
+                    }
+                },
                 complete: function () {
                     // ⬇️ Ocultar modal siempre que termine la petición (éxito o error)
                     $('#processingModal').modal('hide');
                     $('body').removeClass('backdrop-oscuro');
                     $('#processingModal').appendTo('body');
+                    if (zonasTimeout) {
+                        showAlert('La espera de respuesta de zonas excedió el límite. Reinicia la selección.', 'warning');
+                        limpiarModalGestionRol();
+                    }
                 }
             });
         }
