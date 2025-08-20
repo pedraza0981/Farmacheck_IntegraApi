@@ -184,7 +184,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-4">
-                        <label class="form-label">Marcas</label>
+                        <label class="form-label">Marcas <span id="countMarcas" style="font-size:12px;">(0)</span></label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="checkAllMarcas">
                             <label class="form-check-label" for="checkAllMarcas">All</label>
@@ -192,7 +192,7 @@
                         <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Submarcas</label>
+                        <label class="form-label">Submarcas <span id="countSubMarcas" style="font-size:12px;">(0)</span></label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="checkAllSubMarcas">
                             <label class="form-check-label" for="checkAllSubMarcas">All</label>
@@ -200,7 +200,7 @@
                         <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Zonas</label>
+                        <label class="form-label">Zonas <span id="countZonas" style="font-size:12px;">(0)</span></label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="checkAllZonas">
                             <label class="form-check-label" for="checkAllZonas">All</label>
@@ -210,7 +210,7 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
-                        <label class="form-label">Clientes</label>
+                        <label class="form-label">Clientes <span id="countClientes" style="font-size:12px;">(0)</span></label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="checkAllClientes">
                             <label class="form-check-label" for="checkAllClientes">All</label>
@@ -590,10 +590,24 @@
         function cargarMarcas(unidadId, marcasSeleccionadas = [], submarcasSeleccionadas = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorMarcas');
             const contenedorSub = $('#contenedorSubMarcas');
+            const contenedorZonas = $('#contenedorZonas');
+            const contenedorClientes = $('#contenedorClientes');
+
             contenedor.empty();
             contenedorSub.empty();
+            contenedorZonas.empty();
+            contenedorClientes.empty();
+
             $('#checkAllMarcas').prop('checked', false);
             $('#checkAllSubMarcas').prop('checked', false);
+            $('#checkAllZonas').prop('checked', false);
+            $('#checkAllClientes').prop('checked', false);
+
+            $('#countMarcas').text('(0)');
+            $('#countSubMarcas').text('(0)');
+            $('#countZonas').text('(0)');
+            $('#countClientes').text('(0)');
+
             if (!unidadId) {
                 return;
             }
@@ -609,6 +623,7 @@
                         `);
                     });
                     const total = $('#contenedorMarcas .marca-check').length;
+                    $('#countMarcas').text(`(${total})`);
                     const checkedCount = $('#contenedorMarcas .marca-check:checked').length;
                     $('#checkAllMarcas').prop('checked', total > 0 && total === checkedCount);
                     if (marcasSeleccionadas.length > 0) {
@@ -622,6 +637,7 @@
             const contenedor = $('#contenedorSubMarcas');
             contenedor.empty();
             $('#checkAllSubMarcas').prop('checked', false);
+            $('#countSubMarcas').text('(0)');
             if (!marcaIds || marcaIds.length === 0) {
                 cargarZonas();
                 return;
@@ -643,6 +659,7 @@
                             `);
                         });
                         const total = $('#contenedorSubMarcas .submarca-check').length;
+                        $('#countSubMarcas').text(`(${total})`);
                         const checkedCount = $('#contenedorSubMarcas .submarca-check:checked').length;
                         $('#checkAllSubMarcas').prop('checked', total > 0 && total === checkedCount);
                         const seleccionadasActuales = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
@@ -661,8 +678,13 @@
 
         function cargarZonas(brands = [], subbrands = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorZonas');
+            const contenedorClientes = $('#contenedorClientes');
             contenedor.empty();
+            contenedorClientes.empty();
             $('#checkAllZonas').prop('checked', false);
+            $('#checkAllClientes').prop('checked', false);
+            $('#countZonas').text('(0)');
+            $('#countClientes').text('(0)');
             if (!subbrands || subbrands.length === 0) {
                 return;
             }
@@ -688,6 +710,7 @@
                             `);
                         });
                         const total = $('#contenedorZonas .zona-check').length;
+                        $('#countZonas').text(`(${total})`);
                         const checkedCount = $('#contenedorZonas .zona-check:checked').length;
                         $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
                         if (zonasSeleccionadas.length > 0) {
@@ -719,8 +742,9 @@
             const contenedor = $('#contenedorClientes');
             contenedor.empty();
             $('#checkAllClientes').prop('checked', false);
+            $('#countClientes').text('(0)');
 
-            if (brands.length === 0 && subbrands.length === 0 && zones.length === 0) {
+            if (zones.length === 0) {
                 return;
             }
 
@@ -751,6 +775,7 @@
                             $(`#cliente_${id}`).prop('checked', true);
                         });
                         const total = $('#contenedorClientes .cliente-check').length;
+                        $('#countClientes').text(`(${total})`);
                         const checked = $('#contenedorClientes .cliente-check:checked').length;
                         $('#checkAllClientes').prop('checked', total > 0 && total === checked);
                         filtrarClientes();
