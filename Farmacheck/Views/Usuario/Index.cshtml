@@ -9,6 +9,13 @@
         <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
             <i class="bi bi-plus-circle"></i> Nuevo usuario
         </button>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#processingModal">
+            Mostrar modal
+        </button>
+
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-target="#processingModal">
+            Ocultar modal
+        </button>
     </div>
     <table class="table table-bordered custom-table" id="tablaDatos">
         <thead>
@@ -22,19 +29,19 @@
             </tr>
         </thead>
         <tbody>
-        @foreach (var u in Model)
-        {
-            <tr>
-                <td>@u.Id</td>
-                <td>@u.Nombre @u.ApellidoPaterno</td>
-                <td>@u.Email</td>
-                <td>@u.NumeroDeTelefono</td>
-                <td>@(u.Estatus ? "Activo" : "Inactivo")</td>
-                <td class="text-center">
-                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@u.Id)"><i class="bi bi-pencil"></i></button>
-                </td>
-            </tr>
-        }
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Nombre @u.ApellidoPaterno</td>
+                    <td>@u.Email</td>
+                    <td>@u.NumeroDeTelefono</td>
+                    <td>@(u.Estatus ? "Activo" : "Inactivo")</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@u.Id)"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -117,7 +124,7 @@
                                         <i class="bi bi-gear"></i> Nuevo rol por Usuario
                                     </button>
                                 </div>
-                               @*  <div class="col-md-6">
+                                @*  <div class="col-md-6">
                                     <label class="form-label">Seleccionar Rol</label>
                                     <select class="form-select w-100 rounded-3" id="selectRol">
                                         <option value="">-- Selecciona un rol --</option>
@@ -221,6 +228,18 @@
     </div>
 </div>
 
+<div class="modal fade" id="processingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 bg-transparent shadow-none">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Procesando...</span>
+                </div>
+                <p class="mt-2">Procesando...</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
 
@@ -293,7 +312,7 @@
                 }).get();
 
                 cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
-                cargarClientes();
+                // cargarClientes();
             });
 
             $('#checkAllMarcas').change(function () {
@@ -309,7 +328,7 @@
                     return parseInt(this.value);
                 }).get();
                 cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
-                cargarClientes();
+                // cargarClientes();
             });
 
             $('#contenedorSubMarcas').on('change', '.submarca-check', function () {
@@ -326,7 +345,7 @@
                     return parseInt(this.value);
                 }).get();
                 cargarZonas(marcas, subbrands, zonasSeleccionadas);
-                cargarClientes();
+                // cargarClientes();
             });
 
             $('#checkAllSubMarcas').change(function () {
@@ -342,7 +361,7 @@
                     return parseInt(this.value);
                 }).get();
                 cargarZonas(marcas, subbrands, zonasSeleccionadas);
-                cargarClientes();
+                // cargarClientes();
             });
 
             $('#contenedorZonas').on('change', '.zona-check', function () {
@@ -639,6 +658,11 @@
             if (!subbrands || subbrands.length === 0) {
                 return;
             }
+
+            // ⬇️ Mostrar modal al iniciar
+            $('#processingModal').modal({ backdrop: 'static', keyboard: false });
+            $('#processingModal').modal('show');
+
             $.ajax({
                 url: '@Url.Action("ListarZonas", "Usuario")',
                 method: 'GET',
@@ -662,9 +686,14 @@
                             cargarClientes();
                         }
                     }
+                },
+                complete: function () {
+                    // ⬇️ Ocultar modal siempre que termine la petición (éxito o error)
+                    $('#processingModal').modal('hide');
                 }
             });
         }
+
 
         function cargarClientes() {
             const brands = $('#contenedorMarcas .marca-check:checked').map(function () {
