@@ -164,3 +164,11 @@ a[onclick^="eliminar"],
     border: none !important;
     color: white !important;
 }
+
+.backdrop-oscuro .modal-backdrop {
+    background-color: #000;
+}
+
+.backdrop-oscuro .modal-backdrop.show {
+    opacity: .8;
+}
