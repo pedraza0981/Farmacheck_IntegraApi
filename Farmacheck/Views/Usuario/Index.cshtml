@@ -222,34 +222,12 @@
 </div>
 
 
-<div class="modal fade" id="modalProcesando" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-transparent border-0">
-            <div class="modal-body text-center text-white">
-                <div class="spinner-border text-light" style="width:3rem;height:3rem;" role="status">
-                    <span class="visually-hidden">Procesando...</span>
-                </div>
-                <p class="mt-3">Procesando...</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 @section Scripts {
 
     <script>
         let clientesSeleccionados = [];
         let usuarioGuardado = true;
         let rolesUsuarioIds = [];
-
-        function mostrarProcesando() {
-            $('#modalProcesando').modal('show');
-        }
-
-        function ocultarProcesando() {
-            $('#modalProcesando').modal('hide');
-        }
 
         $(document).ready(function () {
             const storedLength = localStorage.getItem('usuariosPageLength');
@@ -587,37 +565,28 @@
         function cargarMarcas(unidadId, marcasSeleccionadas = [], submarcasSeleccionadas = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorMarcas');
             const contenedorSub = $('#contenedorSubMarcas');
-            const contenedorZonas = $('#contenedorZonas');
             contenedor.empty();
             contenedorSub.empty();
-            contenedorZonas.empty();
             $('#checkAllMarcas').prop('checked', false);
             $('#checkAllSubMarcas').prop('checked', false);
-            $('#checkAllZonas').prop('checked', false);
-            cargarClientes();
             if (!unidadId) {
                 return;
             }
-            $.ajax({
-                url: '@Url.Action("ListarMarcas", "Usuario")',
-                method: 'GET',
-                data: { unidadId },
-                beforeSend: mostrarProcesando,
-                complete: ocultarProcesando,
-                success: function (r) {
-                    if (r.success) {
-                        r.data.forEach(m => {
-                            const checked = marcasSeleccionadas.includes(m.id) ? 'checked' : '';
-                            contenedor.append(`
-                                <div class="form-check">
-                                    <input class="form-check-input marca-check" type="checkbox" value="${m.id}" id="marca_${m.id}" ${checked}>
-                                    <label class="form-check-label" for="marca_${m.id}">${m.nombre}</label>
-                                </div>
-                            `);
-                        });
-                        const total = $('#contenedorMarcas .marca-check').length;
-                        const checkedCount = $('#contenedorMarcas .marca-check:checked').length;
-                        $('#checkAllMarcas').prop('checked', total > 0 && total === checkedCount);
+            $.get('@Url.Action("ListarMarcas", "Usuario")', { unidadId }, function (r) {
+                if (r.success) {
+                    r.data.forEach(m => {
+                        const checked = marcasSeleccionadas.includes(m.id) ? 'checked' : '';
+                        contenedor.append(`
+                            <div class="form-check">
+                                <input class="form-check-input marca-check" type="checkbox" value="${m.id}" id="marca_${m.id}" ${checked}>
+                                <label class="form-check-label" for="marca_${m.id}">${m.nombre}</label>
+                            </div>
+                        `);
+                    });
+                    const total = $('#contenedorMarcas .marca-check').length;
+                    const checkedCount = $('#contenedorMarcas .marca-check:checked').length;
+                    $('#checkAllMarcas').prop('checked', total > 0 && total === checkedCount);
+                    if (marcasSeleccionadas.length > 0) {
                         cargarSubMarcas(marcasSeleccionadas, submarcasSeleccionadas, zonasSeleccionadas);
                     }
                 }
@@ -626,13 +595,9 @@
 
         function cargarSubMarcas(marcaIds, submarcasSeleccionadas = [], zonasSeleccionadas = []) {
             const contenedor = $('#contenedorSubMarcas');
-            const contenedorZonas = $('#contenedorZonas');
             contenedor.empty();
-            contenedorZonas.empty();
             $('#checkAllSubMarcas').prop('checked', false);
-            $('#checkAllZonas').prop('checked', false);
             if (!marcaIds || marcaIds.length === 0) {
-                cargarClientes();
                 return;
             }
             $.ajax({
@@ -640,8 +605,6 @@
                 method: 'GET',
                 traditional: true,
                 data: { marcaId: marcaIds },
-                beforeSend: mostrarProcesando,
-                complete: ocultarProcesando,
                 success: function (r) {
                     if (r.success) {
                         r.data.forEach(s => {
@@ -656,12 +619,9 @@
                         const total = $('#contenedorSubMarcas .submarca-check').length;
                         const checkedCount = $('#contenedorSubMarcas .submarca-check:checked').length;
                         $('#checkAllSubMarcas').prop('checked', total > 0 && total === checkedCount);
-                        const seleccionadasActuales = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
-                            return parseInt(this.value);
-                        }).get();
-                        cargarZonas(marcaIds, seleccionadasActuales, zonasSeleccionadas);
-                    } else {
-                        cargarZonas(marcaIds, [], zonasSeleccionadas);
+                        if (submarcasSeleccionadas.length > 0) {
+                            cargarZonas(marcaIds, submarcasSeleccionadas, zonasSeleccionadas);
+                        }
                     }
                 }
             });
@@ -672,7 +632,6 @@
             contenedor.empty();
             $('#checkAllZonas').prop('checked', false);
             if (!subbrands || subbrands.length === 0) {
-                cargarClientes();
                 return;
             }
             $.ajax({
@@ -680,7 +639,6 @@
                 method: 'GET',
                 traditional: true,
                 data: { brandIds: brands, subbrandIds: subbrands },
-                beforeSend: mostrarProcesando,
                 success: function (r) {
                     if (r.success) {
                         r.data.forEach(z => {
@@ -696,10 +654,6 @@
                         const checkedCount = $('#contenedorZonas .zona-check:checked').length;
                         $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
                     }
-                },
-                complete: function () {
-                    ocultarProcesando();
-                    cargarClientes();
                 }
             });
         }
@@ -729,9 +683,7 @@
                 url: '@Url.Action("ListarClientesPorFiltros", "Usuario")',
                 method: 'GET',
                 traditional: true,
-                data: { brandIds: brands, subbrandIds: subbrands, zoneIds: zones },
-                beforeSend: mostrarProcesando,
-                complete: ocultarProcesando,
+                data: { brandIds: brands,subbrandIds: subbrands, zoneIds: zones },
                 success: function (r) {
                     if (r.success) {
                         const ids = new Set();
