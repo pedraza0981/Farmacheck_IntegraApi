@@ -312,6 +312,7 @@
                 }).get();
 
                 cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
+                cargarZonas();
                 // cargarClientes();
             });
 
@@ -328,6 +329,7 @@
                     return parseInt(this.value);
                 }).get();
                 cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
+                cargarZonas();
                 // cargarClientes();
             });
 
@@ -621,6 +623,7 @@
             contenedor.empty();
             $('#checkAllSubMarcas').prop('checked', false);
             if (!marcaIds || marcaIds.length === 0) {
+                cargarZonas();
                 return;
             }
             $.ajax({
@@ -642,9 +645,14 @@
                         const total = $('#contenedorSubMarcas .submarca-check').length;
                         const checkedCount = $('#contenedorSubMarcas .submarca-check:checked').length;
                         $('#checkAllSubMarcas').prop('checked', total > 0 && total === checkedCount);
-                        if (submarcasSeleccionadas.length > 0) {
-                            cargarZonas(marcaIds, submarcasSeleccionadas, zonasSeleccionadas);
+                        const seleccionadasActuales = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                            return parseInt(this.value);
+                        }).get();
+                        if (seleccionadasActuales.length > 0) {
+                            cargarZonas(marcaIds, seleccionadasActuales, zonasSeleccionadas);
                             cargarClientes();
+                        } else {
+                            cargarZonas();
                         }
                     }
                 }
