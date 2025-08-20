@@ -126,7 +126,8 @@ namespace Farmacheck.Controllers
             var apiData = await _customersApi.GetCustomersByFiltersAsync(brandIds, subbrandIds, zoneIds);
             var dtos = _mapper.Map<List<CustomerDto>>(apiData);
             var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
-
+            clientes.ForEach(c => c.Nombre = $"{c.ClienteId} - {c.Nombre} ");
+            clientes = clientes.OrderBy(c => c.ClienteId).ToList();
             return Json(new { success = true, data = clientes });
         }
 
