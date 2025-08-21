@@ -689,17 +689,17 @@
                 return;
             }
 
-            // ⬇️ Mostrar modal al iniciar
-            
-            
-            
-            $('#processingModal').modal('show');
-
             $.ajax({
                 url: '@Url.Action("ListarZonas", "Usuario")',
                 method: 'GET',
                 traditional: true,
                 data: { brandIds: brands, subbrandIds: subbrands },
+                beforeSend: function () {
+                    $('#processingModal').modal('show');
+                },
+                complete: function () {
+                    $('#processingModal').modal('hide');
+                },
                 success: function (r) {
                     if (r.success) {
                         r.data.forEach(z => {
@@ -715,11 +715,10 @@
                         $('#countZonas').text(`(${total})`);
                         const checkedCount = $('#contenedorZonas .zona-check:checked').length;
                         $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
-                                                
+
                         if (zonasSeleccionadas.length > 0) {
                             cargarClientes();
                         }
-                        $('#processingModal').modal('hide');
                     }
                 }
             });
