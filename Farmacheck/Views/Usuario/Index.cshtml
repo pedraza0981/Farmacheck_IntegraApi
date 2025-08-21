@@ -690,9 +690,9 @@
             }
 
             // ⬇️ Mostrar modal al iniciar
-            $('#processingModal').appendTo('#modalGestionRol .modal-dialog');
-            $('body').addClass('backdrop-oscuro');
-            $('#processingModal').modal({ backdrop: 'static', keyboard: false });
+            
+            
+            
             $('#processingModal').modal('show');
 
             $.ajax({
@@ -715,16 +715,12 @@
                         $('#countZonas').text(`(${total})`);
                         const checkedCount = $('#contenedorZonas .zona-check:checked').length;
                         $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
+                                                
                         if (zonasSeleccionadas.length > 0) {
                             cargarClientes();
                         }
+                        $('#processingModal').modal('hide');
                     }
-                },
-                complete: function () {
-                    // ⬇️ Ocultar modal siempre que termine la petición (éxito o error)
-                    $('#processingModal').modal('hide');
-                    $('body').removeClass('backdrop-oscuro');
-                    $('#processingModal').appendTo('body');
                 }
             });
         }
