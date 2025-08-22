@@ -31,18 +31,18 @@
             </tr>
         </thead>
         <tbody>
-        @foreach (var c in Model)
-        {
-            <tr>
-                <td>@c.Nombre</td>
-                <td>@c.CentroDeCosto</td>
-                <td>@c.Direccion</td>
-                <td>@(c.Estatus ? "Activo" : "Inactivo")</td>
-                <td class="text-center">
-                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@c.ClienteId)"><i class="bi bi-pencil"></i></button>
-                </td>
-            </tr>
-        }
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.Nombre</td>
+                    <td>@c.CentroDeCosto</td>
+                    <td>@c.Direccion</td>
+                    <td>@(c.Estatus ? "Activo" : "Inactivo")</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@c.ClienteId)"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -109,11 +109,11 @@
                     </div>
                     <div class="col-md-6 mb-2">
                         <label>Latitud GPS</label>
-                        <input type="number" class="form-control" id="latitudGPS" />
+                        <input type="number" class="form-control" id="latitudGPS" step="0.0000001" />
                     </div>
                     <div class="col-md-6 mb-2">
                         <label>Longitud GPS</label>
-                        <input type="number" class="form-control" id="longitudGPS" />
+                        <input type="number" class="form-control" id="longitudGPS" step="0.0000001" />
                     </div>
                     <div class="col-md-6 mb-2">
                         <div class="form-check form-switch mb-3">

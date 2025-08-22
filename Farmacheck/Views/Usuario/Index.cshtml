@@ -9,13 +9,7 @@
         <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
             <i class="bi bi-plus-circle"></i> Nuevo usuario
         </button>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#processingModal">
-            Mostrar modal
-        </button>
-
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-target="#processingModal">
-            Ocultar modal
-        </button>
+        
     </div>
     <table class="table table-bordered custom-table" id="tablaDatos">
         <thead>
@@ -693,13 +687,7 @@
                 url: '@Url.Action("ListarZonas", "Usuario")',
                 method: 'GET',
                 traditional: true,
-                data: { brandIds: brands, subbrandIds: subbrands },
-                beforeSend: function () {
-                    $('#processingModal').modal('show');
-                },
-                complete: function () {
-                    $('#processingModal').modal('hide');
-                },
+                data: { brandIds: brands, subbrandIds: subbrands },                
                 success: function (r) {
                     if (r.success) {
                         r.data.forEach(z => {
