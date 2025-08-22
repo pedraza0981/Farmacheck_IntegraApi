@@ -60,5 +60,13 @@ namespace Farmacheck.Infrastructure.Services
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
+
+        public async Task<string> GetReport()
+        {
+            var response = await _http.GetAsync("api/v1/UsersByRoles/report");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
     }
+
 }
