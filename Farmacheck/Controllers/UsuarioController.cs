@@ -134,6 +134,9 @@ namespace Farmacheck.Controllers
         [HttpPost]
         public async Task<JsonResult> GuardarRolPorUsuario([FromBody] UsuarioRolViewModel model)
         {
+            int userRoleId = 0;
+            string customerRolUserResult = string.Empty;
+
             try
             {
                 if (model.Id > 0)
@@ -158,12 +161,12 @@ namespace Farmacheck.Controllers
                             await _customersRolesUsersApiClient.CreateAsync(addRequest);
                         }
 
-                        if (remover.Count > 0) 
+                        if (remover.Count > 0)
                         {
                             await _customersRolesUsersApiClient.RemoveByCustomerAsync(remover, 0);
                         }
-                        
-                        
+
+
 
                         if (!seleccionados.Any())
                         {
@@ -177,8 +180,6 @@ namespace Farmacheck.Controllers
                         return Json(new { success = false, error = "Error al actualizar el rol del usuario: " + ex.Message });
                     }
                 }
-
-                int userRoleId = 0;
 
                 var request = _mapper.Map<UserByRoleRequest>(model);
                 userRoleId = await _userByRoleApiClient.CreateAsync(request);
@@ -195,13 +196,30 @@ namespace Farmacheck.Controllers
                     GeolocalizacionActiva = true
                 };
 
-                string result = await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
+                customerRolUserResult = await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);
 
 
                 return Json(new { success = true, id = userRoleId });
             }
             catch (Exception ex)
             {
+                if (userRoleId > 0)
+                {
+                    await _userByRoleApiClient.DeleteAsync(userRoleId);
+                }
+
+                if (!string.IsNullOrEmpty(customerRolUserResult))
+                {
+                    var ids = customerRolUserResult.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var idStr in ids)
+                    {
+                        if (int.TryParse(idStr, out var id))
+                        {
+                            await _customersRolesUsersApiClient.DeleteAsync(id);
+                        }
+                    }
+                }
+
                 return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
             }
         }
