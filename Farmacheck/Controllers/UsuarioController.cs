@@ -359,6 +359,14 @@ namespace Farmacheck.Controllers
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteUsuarios.xlsx");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporteRolesPorUsuario()
+        {
+            var base64 = await _userByRoleApiClient.GetReport();
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteRolesPorUsuario.xlsx");
+        }
+
         
     }
 }

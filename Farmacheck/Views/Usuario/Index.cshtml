@@ -10,6 +10,9 @@
             <button id="btnDescargar" class="btn btn-secondary me-2">
                 <i class="bi bi-download"></i> Descargar
             </button>
+            <button id="btnDescargarRoles" class="btn btn-secondary me-2">
+                <i class="bi bi-download"></i> Descargar roles por usuario
+            </button>
             <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
                 <i class="bi bi-plus-circle"></i> Nuevo usuario
             </button>
@@ -405,6 +408,9 @@
             });
             $('#btnDescargar').click(function () {
                 descargarReporte();
+            });
+            $('#btnDescargarRoles').click(function () {
+                descargarReporteRolesPorUsuario();
             });
             $('#btnNuevo').click(function () {
                 limpiar();
@@ -894,6 +900,20 @@
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = 'ReporteUsuarios.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
+        }
+
+        function descargarReporteRolesPorUsuario() {
+            fetch('@Url.Action("DescargarReporteRolesPorUsuario", "Usuario")')
+                .then(r => r.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ReporteRolesPorUsuario.xlsx';
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
