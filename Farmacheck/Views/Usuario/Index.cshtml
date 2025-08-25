@@ -288,6 +288,8 @@
                     return;
                 }
                 $('#idRolPorUsuario').val('');
+                $('#rolSelectModal').prop('disabled', false);
+                $('#unidadDeNegocioSelect').prop('disabled', false);
             });
 
             $('#collapseRoles').on('show.bs.collapse', function (e) {
@@ -998,8 +1000,8 @@
 
         function limpiarModalGestionRol() {
             $('#idRolPorUsuario').val('');
-            $('#rolSelectModal').val('');
-            $('#unidadDeNegocioSelect').val('');
+            $('#rolSelectModal').val('').prop('disabled', false);
+            $('#unidadDeNegocioSelect').val('').prop('disabled', false);
             $('#checkAllMarcas').prop('checked', false);
             $('#checkAllSubMarcas').prop('checked', false);
             $('#checkAllZonas').prop('checked', false);
@@ -1040,8 +1042,8 @@
             $.get('@Url.Action("ObtenerClientesPorRolPorUsuario", "Usuario")', { id }, function (r) {
                 if (r.success) {
                     clientesSeleccionados = r.data.clienteIds || [];
-                    $('#rolSelectModal').val(r.data.rolId);
-                    $('#unidadDeNegocioSelect').val(r.data.unidadDeNegocioId);
+                    $('#rolSelectModal').val(r.data.rolId).prop('disabled', true);
+                    $('#unidadDeNegocioSelect').val(r.data.unidadDeNegocioId).prop('disabled', true);
                     cargarMarcas(r.data.unidadDeNegocioId, r.data.marcaIds || [], r.data.submarcaIds || [], r.data.zonaIds || []);
                 } else {
                     showAlert(r.error || 'Error al obtener datos', 'error');
