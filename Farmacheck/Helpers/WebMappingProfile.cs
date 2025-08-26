@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Farmacheck.Application.Models.BusinessStructures;
 using Farmacheck.Application.Models.Zones;
 using Farmacheck.Application.Models.CategoriesByQuestionnaires;
+using Farmacheck.Application.Models.PeriodicitiesByQuestionnaires;
 using Farmacheck.Application.Models.Roles;
 using Farmacheck.Application.Models.HierarchyByRoles;
 using Farmacheck.Application.Models.Users;
@@ -123,6 +124,19 @@ namespace Farmacheck.Helpers
             CreateMap<CategoriaCuestionarioViewModel, CategoryByQuestionnaireRequest>();
 
             CreateMap<CategoriaCuestionarioViewModel, UpdateCategoryByQuestionnaireRequest>();
+
+            CreateMap<PeriodicityByQuestionnaireResponse, PeriodicityByQuestionnaireDto>().ReverseMap();
+
+            CreateMap<PeriodicityByQuestionnaireDto, PeriodicidadCuestionarioViewModel>()
+                .ForMember(dest => dest.Meta, opt => opt.MapFrom(src => src.CadaCuantosDias))
+                .ReverseMap()
+                .ForMember(dest => dest.CadaCuantosDias, opt => opt.MapFrom(src => src.Meta));
+
+            CreateMap<PeriodicidadCuestionarioViewModel, PeriodicityByQuestionnaireRequest>()
+                .ForMember(dest => dest.CadaCuantosDias, opt => opt.MapFrom(src => src.Meta));
+
+            CreateMap<PeriodicidadCuestionarioViewModel, UpdatePeriodicityByQuestionnaireRequest>()
+                .ForMember(dest => dest.CadaCuantosDias, opt => opt.MapFrom(src => src.Meta));
 
             CreateMap<HierarchyByRoleDto, JerarquiaViewModel>().ReverseMap();
             CreateMap<JerarquiaViewModel, HierarchyByRoleRequest>();

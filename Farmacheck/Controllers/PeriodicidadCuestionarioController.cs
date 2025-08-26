@@ -1,0 +1,82 @@
+using Farmacheck.Models;
+using Microsoft.AspNetCore.Mvc;
+using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.PeriodicitiesByQuestionnaires;
+using AutoMapper;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using Farmacheck.Application.DTOs;
+
+namespace Farmacheck.Controllers
+{
+    public class PeriodicidadCuestionarioController : Controller
+    {
+        private readonly IPeriodicityByQuestionnaireApiClient _apiClient;
+        private readonly IMapper _mapper;
+
+        public PeriodicidadCuestionarioController(IPeriodicityByQuestionnaireApiClient apiClient, IMapper mapper)
+        {
+            _apiClient = apiClient;
+            _mapper = mapper;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var apiData = await _apiClient.GetPeriodicitiesAsync();
+            var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
+            var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
+            return View(items);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> Listar()
+        {
+            var apiData = await _apiClient.GetPeriodicitiesAsync();
+            var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
+            var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
+            return Json(new { success = true, data = items });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> Obtener(int id)
+        {
+            var entidad = await _apiClient.GetPeriodicityAsync(id);
+            if (entidad == null)
+                return Json(new { success = false, error = "No encontrado" });
+
+            var dto = _mapper.Map<PeriodicityByQuestionnaireDto>(entidad);
+            var model = _mapper.Map<PeriodicidadCuestionarioViewModel>(dto);
+            return Json(new { success = true, data = model });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> Guardar([FromBody] PeriodicidadCuestionarioViewModel model)
+        {
+            try
+            {
+                var request = _mapper.Map<PeriodicityByQuestionnaireRequest>(model);
+                var id = await _apiClient.CreateAsync(request);
+                return Json(new { success = true, id });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> Eliminar(int id)
+        {
+            try
+            {
+                await _apiClient.DeleteAsync(id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Ocurrió un error inesperado: " + ex.Message });
+            }
+        }
+    }
+}
