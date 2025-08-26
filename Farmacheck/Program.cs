@@ -25,6 +25,7 @@ namespace Farmacheck
                 typeof(CustomerTypeProfile),
                 typeof(ZoneProfile),
                 typeof(CategoryByQuestionnaireProfile),
+                typeof(PeriodicityByQuestionnaireProfile),
                 typeof(RoleProfile),
                 typeof(PermissionProfile),
                 typeof(HierarchyByRoleProfile),

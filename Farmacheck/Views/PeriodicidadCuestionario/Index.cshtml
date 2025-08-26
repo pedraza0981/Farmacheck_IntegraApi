@@ -1,0 +1,190 @@
+@model List<Farmacheck.Models.PeriodicidadCuestionarioViewModel>
+@{
+    ViewData["Title"] = "Periodicidad por cuestionario";
+}
+<style>
+    #tablaDatos thead th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Periodicidad por cuestionario</h4>
+        <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
+            <i class="bi bi-plus-circle"></i> Nuevo periodo
+        </button>
+    </div>
+    <table class="table table-bordered custom-table" id="tablaDatos">
+        <thead>
+            <tr>
+                <th style="width:25%;">Cuestionario</th>
+                <th style="width:25%;">Periodicidad</th>
+                <th style="width:25%;">Meta</th>
+                <th style="width:25%;" class="text-center"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.CuestionarioId</td>
+                <td>@p.Frecuencia</td>
+                <td>@p.Meta</td>
+                <td class="text-center">
+                    <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@p.CuestionarioId)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminar(@p.CuestionarioId)"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalTitulo">Nuevo periodo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label>Formulario</label>
+                    <select class="form-select" id="cuestionarioSelect">
+                        <option value="1">Formulario 1</option>
+                        <option value="2">Formulario 2</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label>Periodicidad</label>
+                    <select class="form-select" id="frecuenciaSelect">
+                        <option value="1">Diario</option>
+                        <option value="2">Semanal</option>
+                        <option value="3">Quincenal</option>
+                        <option value="4">Mensual</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label>Meta</label>
+                    <input type="number" class="form-control" id="metaInput" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+    $(document).ready(function(){
+        const storedLength = localStorage.getItem('periodicidadesPageLength');
+        const initialPageLength = storedLength ? parseInt(storedLength) : 5;
+        const tabla = $('#tablaDatos').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            lengthMenu: [5,10,25,50],
+            pageLength: initialPageLength,
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+        });
+        tabla.on('length.dt', function (e, settings, len) {
+            localStorage.setItem('periodicidadesPageLength', len);
+        });
+        $('#btnNuevo').click(function(){
+            limpiar();
+            $('#modalTitulo').text('Nuevo periodo');
+            $('#modalEntidad').modal('show');
+        });
+        $('#btnGuardar').click(function(){
+            const datos = {
+                CuestionarioId: $('#cuestionarioSelect').val(),
+                Frecuencia: $('#frecuenciaSelect').val(),
+                Meta: parseInt($('#metaInput').val()) || 0
+            };
+            $.ajax({
+                url: '@Url.Action("Guardar", "PeriodicidadCuestionario")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function(r){
+                    if(r.success){
+                        $('#modalEntidad').modal('hide');
+                        showAlert('Periodicidad guardada correctamente', 'success');
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al guardar', 'error');
+                    }
+                }
+            });
+        });
+    });
+    function cargar(){
+        $.get('@Url.Action("Listar", "PeriodicidadCuestionario")', function(r){
+            if(r.success){
+                const tabla = $('#tablaDatos');
+                let pageLength = parseInt(localStorage.getItem('periodicidadesPageLength')) || 5;
+                if($.fn.DataTable.isDataTable(tabla)){
+                    pageLength = tabla.DataTable().page.len();
+                    tabla.DataTable().destroy();
+                }
+                const tbody = tabla.find('tbody');
+                tbody.empty();
+                r.data.forEach(p => {
+                    tbody.append(`<tr>
+                        <td>${p.cuestionarioId}</td>
+                        <td>${p.frecuencia}</td>
+                        <td>${p.meta}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${p.cuestionarioId})"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminar(${p.cuestionarioId})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`);
+                });
+                const nuevaTabla = tabla.DataTable({
+                    pageLength: pageLength,
+                    lengthMenu: [5,10,25,50],
+                    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+                });
+                nuevaTabla.on('length.dt', function (e, settings, len) {
+                    localStorage.setItem('periodicidadesPageLength', len);
+                });
+            }
+        });
+    }
+    function editar(id){
+        $.get('@Url.Action("Obtener", "PeriodicidadCuestionario")', { id }, function(r){
+            if(r.success){
+                const u = r.data;
+                $('#modalTitulo').text('Editar periodo');
+                $('#cuestionarioSelect').val(u.cuestionarioId);
+                $('#frecuenciaSelect').val(u.frecuencia);
+                $('#metaInput').val(u.meta);
+                $('#modalEntidad').modal('show');
+            } else {
+                showAlert(r.error || 'No se pudo cargar', 'error');
+            }
+        });
+    }
+    function eliminar(id){
+        confirmAction('¿Deseas eliminar esta periodicidad?').then(function(ok){
+            if(!ok) return;
+            $.post('@Url.Action("Eliminar", "PeriodicidadCuestionario")', { id }, function(r){
+                if(r.success){
+                    cargar();
+                    showAlert('Periodicidad eliminada correctamente', 'success');
+                } else {
+                    showAlert(r.error || 'Error al eliminar', 'error');
+                }
+            });
+        });
+    }
+    function limpiar(){
+        $('#cuestionarioSelect').val('1');
+        $('#frecuenciaSelect').val('1');
+        $('#metaInput').val('');
+    }
+</script>
+}
