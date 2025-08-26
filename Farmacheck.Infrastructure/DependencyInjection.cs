@@ -64,6 +64,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["CategoriesByQuestionnairesApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IPeriodicityByQuestionnaireApiClient, PeriodicityByQuestionnaireApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["PeriodicityByQuestionnaireApi:BaseUrl"]!);
+        });
+
         services.AddHttpClient<IHierarchyByRoleApiClient, HierarchyByRolesApiClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["HierarchyByRolesApi:BaseUrl"]!);
