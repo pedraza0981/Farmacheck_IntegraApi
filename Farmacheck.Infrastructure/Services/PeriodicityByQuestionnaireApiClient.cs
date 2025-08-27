@@ -32,19 +32,41 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<PeriodicityByQuestionnaireResponse>($"api/v1/PeriodicityByQuestionnaire/{id}");
         }
 
-        public async Task<int> CreateAsync(PeriodicityByQuestionnaireRequest request)
+        public async Task<bool> CreateAsync(PeriodicityByQuestionnaireRequest request)
         {
-            var response = await _http.PostAsJsonAsync("api/v1/PeriodicityByQuestionnaire", request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<int>();
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/v1/PeriodicityByQuestionnaire", request);
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+           
+            catch (Exception ex)
+            {
+                // cualquier otro error (serialización, timeout, etc.)
+                Console.WriteLine($"Error en CreateAsync: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<bool> UpdateAsync(UpdatePeriodicityByQuestionnaireRequest request)
         {
-            var response = await _http.PutAsJsonAsync("api/v1/PeriodicityByQuestionnaire", request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<bool>();
+            try
+            {
+                var response = await _http.PutAsJsonAsync("api/v1/PeriodicityByQuestionnaire", request);
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+       
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en UpdateAsync: {ex.Message}");
+                return false;
+            }
         }
+
 
         public async Task DeleteAsync(int id)
         {

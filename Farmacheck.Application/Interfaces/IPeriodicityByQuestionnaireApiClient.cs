@@ -8,7 +8,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<PeriodicityByQuestionnaireResponse>> GetPeriodicitiesAsync();
         Task<PaginatedResponse<PeriodicityByQuestionnaireResponse>> GetPeriodicitiesByPageAsync(int page, int items);
         Task<PeriodicityByQuestionnaireResponse?> GetPeriodicityAsync(int id);
-        Task<int> CreateAsync(PeriodicityByQuestionnaireRequest request);
+        Task<bool> CreateAsync(PeriodicityByQuestionnaireRequest request);
         Task<bool> UpdateAsync(UpdatePeriodicityByQuestionnaireRequest request);
         Task DeleteAsync(int id);
     }
