@@ -371,5 +371,14 @@ namespace Farmacheck.Controllers
             _formularios.Remove(formulario);
             return Json(new { success = true });
         }
+
+        [HttpPost]
+        public JsonResult GuardarAsignaciones([FromBody] AsignacionFormularioInputModel model)
+        {
+            if (model == null || model.FormularioId == 0)
+                return Json(new { success = false, error = "Datos inválidos" });
+
+            return Json(new { success = true, message = "Asignaciones guardadas (simulación)" });
+        }
     }
 }
