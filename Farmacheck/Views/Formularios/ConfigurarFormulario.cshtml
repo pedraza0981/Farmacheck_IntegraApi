@@ -227,8 +227,7 @@
                     <input type="hidden" id="idFormularioAsignacion" />
                     <div class="mb-3">
                         <label>Rol 1</label>
-                        <select id="rolSelect1" class="form-select">
-                            <option value="">-- Seleccione --</option>
+                        <select id="rolSelect1" class="form-select" multiple>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -239,8 +238,7 @@
                     </div>
                     <div class="mb-3">
                         <label>Rol 3</label>
-                        <select id="rolSelect3" class="form-select">
-                            <option value="">-- Seleccione --</option>
+                        <select id="rolSelect3" class="form-select" multiple>
                         </select>
                     </div>
                 </div>
@@ -360,12 +358,17 @@
         }
         
         function cargarRolesAsignaciones() {
-            const selects = ['#rolSelect1', '#rolSelect2', '#rolSelect3'];
-            selects.forEach(s => $(s).empty().append('<option value="">-- Seleccione --</option>'));
+            const multiSelects = ['#rolSelect1', '#rolSelect3'];
+            const singleSelect = '#rolSelect2';
+
+            multiSelects.forEach(s => $(s).empty());
+            $(singleSelect).empty().append('<option value="">-- Seleccione --</option>');
+
             $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
                 if (r.success) {
-                    selects.forEach(s => {
-                        r.data.forEach(rol => $(s).append(`<option value="${rol.id}">${rol.nombre}</option>`));
+                    r.data.forEach(rol => {
+                        multiSelects.forEach(s => $(s).append(`<option value="${rol.id}">${rol.nombre}</option>`));
+                        $(singleSelect).append(`<option value="${rol.id}">${rol.nombre}</option>`);
                     });
                 } else {
                     showAlert(r.error || 'Error al cargar roles', 'error');
@@ -381,9 +384,9 @@
         $('#btnGuardarAsignaciones').click(function () {
             const data = {
                 FormularioId: parseInt($('#idFormularioAsignacion').val() || 0),
-                Rol1: $('#rolSelect1').val(),
+                Rol1: ($('#rolSelect1').val() || []).map(Number),
                 Rol2: $('#rolSelect2').val(),
-                Rol3: $('#rolSelect3').val()
+                Rol3: ($('#rolSelect3').val() || []).map(Number)
             };
 
             $.ajax({
