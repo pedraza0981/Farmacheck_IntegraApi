@@ -30,11 +30,19 @@
 
         <!-- MENÚ -->
         <div class="px-3 pt-3 w-100 flex-grow-1">
-            
-            <a href="#" class="d-block py-2 text-white"><i class="bi bi-geo-alt me-2"></i> Ubicaciones</a>                        
-            <a asp-controller="Formularios" asp-action="Index" class="d-block py-2 text-white">
+
+            <a href="#" class="d-block py-2 text-white"><i class="bi bi-geo-alt me-2"></i> Ubicaciones</a>
+            <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#submenuFormularios" role="button" aria-expanded="false" aria-controls="submenuFormularios">
                 <i class="bi bi-ui-checks-grid me-2"></i> Formularios
             </a>
+            <div class="collapse ps-3" id="submenuFormularios">
+                <a asp-controller="Formularios" asp-action="Index" class="d-block py-2 text-white">
+                    <i class="bi bi-file-earmark-text me-2"></i> Formularios
+                </a>
+                <a asp-controller="PeriodicidadCuestionario" asp-action="Index" class="d-block py-2 text-white">
+                    <i class="bi bi-tag-fill me-2"></i> Periodicidad Cuestionario
+                </a>
+            </div>
             <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#submenuCatalogos" role="button" aria-expanded="false" aria-controls="submenuCatalogos"><i class="bi bi-journal-text me-2"></i> Catálogos</a>
             <div class="collapse ps-3" id="submenuCatalogos">
                 <a asp-controller="UnidadDeNegocio" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-building me-2"></i> Unidades de Negocio</a>

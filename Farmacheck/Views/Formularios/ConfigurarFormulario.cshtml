@@ -5,6 +5,20 @@
     ViewData["Title"] = isEditing ? "Actualizar" : "Guardar";
 }
 
+    <style>
+        /* Ítems seleccionados (chips en multiselect) */
+        .choices[data-type*="select-multiple"] .choices__list--multiple .choices__item {
+            background-color: #06264c !important;
+        }
+
+        /* Valor seleccionado en select-one */
+        .choices[data-type*="select-one"] .choices__item.choices__item--selectable {
+            background-color: #06264c !important;
+        }
+
+        
+    </style>
+
 <div class="container-fluid p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
@@ -377,9 +391,12 @@
             });
         }
 
-        $('#btnAsignaciones').click(function () {
+             $('#btnAsignaciones').click(function () {
             cargarRolesAsignaciones();
-            $('#modalAsignaciones').modal('show');
+            $('#modalAsignaciones').modal({
+                backdrop: 'static', // No se cierra al hacer click fuera
+                keyboard: false      // No se cierra con la tecla ESC
+            }).modal('show');
         });
 
         $('#btnGuardarAsignaciones').click(function () {
