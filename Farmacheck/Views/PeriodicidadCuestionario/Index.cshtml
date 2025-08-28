@@ -50,9 +50,15 @@
             <div class="modal-body">
                 <div class="mb-2">
                     <label>Formulario</label>
+                    @{
+                        var formularios = ViewBag.Formularios as IEnumerable<Farmacheck.Application.Models.Checklists.ChecklistResponse>
+                            ?? System.Linq.Enumerable.Empty<Farmacheck.Application.Models.Checklists.ChecklistResponse>();
+                    }
                     <select class="form-select" id="cuestionarioSelect">
-                        <option value="1">Formulario 1</option>
-                        <option value="1000">Formulario 2</option>
+                        @foreach (var f in formularios)
+                        {
+                            <option value="@f.Id">@f.Nombre</option>
+                        }
                     </select>
                 </div>
                 <div class="mb-2">
@@ -159,7 +165,7 @@
             if(r.success){
                 const u = r.data;
                 $('#modalTitulo').text('Editar periodo');
-                $('#cuestionarioSelect').val(u.cuestionarioId);
+                $('#cuestionarioSelect').val(u.cuestionarioId).prop('disabled', true);
                 $('#frecuenciaSelect').val(u.frecuencia);
                 $('#metaInput').val(u.meta);
                 $('#modalEntidad').modal('show');
@@ -182,7 +188,8 @@
         });
     }
     function limpiar(){
-        $('#cuestionarioSelect').val('1');
+        const first = $('#cuestionarioSelect option:first').val();
+        $('#cuestionarioSelect').val(first).prop('disabled', false);
         $('#frecuenciaSelect').val('1');
         $('#metaInput').val('');
     }

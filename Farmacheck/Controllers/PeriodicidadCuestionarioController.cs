@@ -13,11 +13,14 @@ namespace Farmacheck.Controllers
     public class PeriodicidadCuestionarioController : Controller
     {
         private readonly IPeriodicityByQuestionnaireApiClient _apiClient;
+        private readonly IChecklistApiClient _checklistApiClient;
         private readonly IMapper _mapper;
 
-        public PeriodicidadCuestionarioController(IPeriodicityByQuestionnaireApiClient apiClient, IMapper mapper)
+        public PeriodicidadCuestionarioController(IPeriodicityByQuestionnaireApiClient apiClient,
+            IChecklistApiClient checklistApiClient, IMapper mapper)
         {
             _apiClient = apiClient;
+            _checklistApiClient = checklistApiClient;
             _mapper = mapper;
         }
 
@@ -26,6 +29,7 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetPeriodicitiesAsync();
             var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
             var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
+            ViewBag.Formularios = await _checklistApiClient.GetAllChecklistsAsync();
             return View(items);
         }
 
