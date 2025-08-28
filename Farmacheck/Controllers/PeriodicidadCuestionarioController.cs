@@ -37,11 +37,18 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetPeriodicitiesAsync();
             var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
             var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
+
+            var formularios = await _checklistApiClient.GetAllChecklistsAsync();
+            var dict = formularios.ToDictionary(f => f.Id, f => f.Nombre);
+
             foreach (var item in items)
             {
                 item.FrecuenciaDescripcion = _frecuencias.TryGetValue(item.Frecuencia, out var desc)
                     ? desc
                     : item.Frecuencia.ToString();
+                item.CuestionarioNombre = dict.TryGetValue(item.CuestionarioId, out var nombre)
+                    ? nombre
+                    : item.CuestionarioId.ToString();
             }
             return View(items);
         }
@@ -64,9 +71,14 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetPeriodicitiesAsync();
             var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
             var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
+
+            var formularios = await _checklistApiClient.GetAllChecklistsAsync();
+            var dict = formularios.ToDictionary(f => f.Id, f => f.Nombre);
+
             var result = items.Select(i => new
             {
                 i.CuestionarioId,
+                CuestionarioNombre = dict.TryGetValue(i.CuestionarioId, out var nombre) ? nombre : i.CuestionarioId.ToString(),
                 Frecuencia = _frecuencias.TryGetValue(i.Frecuencia, out var desc) ? desc : i.Frecuencia.ToString(),
                 i.Meta
             });
@@ -82,6 +94,11 @@ namespace Farmacheck.Controllers
 
             var dto = _mapper.Map<PeriodicityByQuestionnaireDto>(entidad);
             var model = _mapper.Map<PeriodicidadCuestionarioViewModel>(dto);
+
+            var checklist = await _checklistApiClient.GetAllChecklistsAsync();
+            var nombre = checklist.FirstOrDefault(c => c.Id == model.CuestionarioId)?.Nombre;
+            model.CuestionarioNombre = nombre ?? model.CuestionarioId.ToString();
+
             return Json(new { success = true, data = model });
         }
 
