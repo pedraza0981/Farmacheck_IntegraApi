@@ -28,7 +28,7 @@
         @foreach (var p in Model)
         {
             <tr>
-                <td>@p.CuestionarioId</td>
+                <td>@p.CuestionarioNombre</td>
                 <td>@p.FrecuenciaDescripcion</td>
                 <td>@p.Meta</td>
                 <td class="text-center">
@@ -145,7 +145,7 @@
                 tbody.empty();
                 r.data.forEach(p => {
                     tbody.append(`<tr>
-                        <td>${p.cuestionarioId}</td>
+                        <td>${p.cuestionarioNombre}</td>
                         <td>${p.frecuencia}</td>
                         <td>${p.meta}</td>
                         <td class="text-center">
