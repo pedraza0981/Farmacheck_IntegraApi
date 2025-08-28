@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using Farmacheck.Application.DTOs;
+using System.Linq;
 
 namespace Farmacheck.Controllers
 {
@@ -15,6 +16,13 @@ namespace Farmacheck.Controllers
         private readonly IPeriodicityByQuestionnaireApiClient _apiClient;
         private readonly IChecklistApiClient _checklistApiClient;
         private readonly IMapper _mapper;
+        private static readonly Dictionary<int, string> _frecuencias = new()
+        {
+            { 1, "Diario" },
+            { 2, "Semanal" },
+            { 3, "Quincenal" },
+            { 4, "Mensual" }
+        };
 
         public PeriodicidadCuestionarioController(IPeriodicityByQuestionnaireApiClient apiClient,
             IChecklistApiClient checklistApiClient, IMapper mapper)
@@ -29,6 +37,12 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetPeriodicitiesAsync();
             var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
             var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
+            foreach (var item in items)
+            {
+                item.FrecuenciaDescripcion = _frecuencias.TryGetValue(item.Frecuencia, out var desc)
+                    ? desc
+                    : item.Frecuencia.ToString();
+            }
             ViewBag.Formularios = await _checklistApiClient.GetAllChecklistsAsync();
             return View(items);
         }
@@ -39,7 +53,13 @@ namespace Farmacheck.Controllers
             var apiData = await _apiClient.GetPeriodicitiesAsync();
             var dtos = _mapper.Map<List<PeriodicityByQuestionnaireDto>>(apiData);
             var items = _mapper.Map<List<PeriodicidadCuestionarioViewModel>>(dtos);
-            return Json(new { success = true, data = items });
+            var result = items.Select(i => new
+            {
+                i.CuestionarioId,
+                Frecuencia = _frecuencias.TryGetValue(i.Frecuencia, out var desc) ? desc : i.Frecuencia.ToString(),
+                i.Meta
+            });
+            return Json(new { success = true, data = result });
         }
 
         [HttpGet]
