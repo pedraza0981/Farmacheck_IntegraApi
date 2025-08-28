@@ -166,8 +166,8 @@
             }
         });
     }
-    function cargarFormularios(){
-        $.get('@Url.Action("FormulariosDisponibles","PeriodicidadCuestionario")', function(r){
+    function cargarFormularios(idSeleccionado, callback){
+        $.get('@Url.Action("FormulariosDisponibles","PeriodicidadCuestionario")', { id: idSeleccionado }, function(r){
             if(r.success){
                 const select = $('#cuestionarioSelect');
                 select.empty();
@@ -175,6 +175,10 @@
                 r.data.forEach(f => {
                     select.append(`<option value="${f.id}">${f.nombre}</option>`);
                 });
+                if(idSeleccionado){
+                    select.val(idSeleccionado);
+                }
+                if(callback) callback();
             }
         });
     }
@@ -183,10 +187,12 @@
             if(r.success){
                 const u = r.data;
                 $('#modalTitulo').text('Editar periodo');
-                $('#cuestionarioSelect').val(u.cuestionarioId).prop('disabled', true);
-                $('#frecuenciaSelect').val(u.frecuencia);
-                $('#metaInput').val(u.meta);
-                $('#modalEntidad').modal('show');
+                cargarFormularios(u.cuestionarioId, function(){
+                    $('#cuestionarioSelect').prop('disabled', true);
+                    $('#frecuenciaSelect').val(u.frecuencia);
+                    $('#metaInput').val(u.meta);
+                    $('#modalEntidad').modal('show');
+                });
             } else {
                 showAlert(r.error || 'No se pudo cargar', 'error');
             }
