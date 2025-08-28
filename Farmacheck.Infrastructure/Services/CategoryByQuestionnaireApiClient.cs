@@ -16,7 +16,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<IEnumerable<CategoryByQuestionnaireResponse>> GetAllCategoriesAsync()
         {
-            return await _http.GetFromJsonAsync<IEnumerable<CategoryByQuestionnaireResponse>>("api/v1/CategoriesByChecklists/all")
+            return await _http.GetFromJsonAsync<IEnumerable<CategoryByQuestionnaireResponse>>("api/v1/CategoriesByChecklists")
                    ?? Enumerable.Empty<CategoryByQuestionnaireResponse>();
         }
 

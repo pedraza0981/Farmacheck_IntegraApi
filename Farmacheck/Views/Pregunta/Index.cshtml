@@ -3,6 +3,14 @@
     ViewData["Title"] = "Sección de preguntas";
 }
 
+<style>
+    hr {
+        background-color: cornflowerblue;
+        height: 2px;
+        border: none;
+    }
+</style>
+
 <div class="container py-4">
     <div class="d-flex justify-content-center mb-2">
         <h4 class="text-dark text-center">Sección de preguntas - @ViewBag.NombreFormulario</h4>
@@ -12,7 +20,7 @@
            href="@Url.Action("ConfigurarSecciones", "Formularios", new { id = ViewBag.FormularioId })">
             <i class="bi bi-arrow-left"></i> Regresar
         </a>
-        <a href="#" id="btnNuevaPregunta" class="btn" style="background-color: #00ab8e; color:white;">
+        <a href="#" id="btnNuevaPregunta" class="btn" style="background-color: #00ab8e; color:white;"> 
             <i class="bi bi-plus-circle"></i> Nueva pregunta
         </a>
     </div>
@@ -21,7 +29,7 @@
         <thead>
             <tr>
                 <th style="width: 20%">Id</th>
-                <th style="width: 30%">Título</th>
+                <th style="width: 30%">Nombre</th>
                 <th class="text-center" style="width: 50%">Acciones</th>
             </tr>
         </thead>
@@ -30,7 +38,7 @@
             {
                 <tr>
                     <td>@p.Id</td>
-                    <td>@p.Titulo</td>
+                    <td>@p.Nombre</td>
                     <td class="text-center">
                         <a class="btn btn-outline-primary btn-sm" asp-action="Visualizar" asp-route-id="@p.Id">
                             <i class="bi bi-eye"></i> Visualizar
@@ -58,19 +66,37 @@
                 <div class="modal-body">
                     <input type="hidden" id="preguntaId" />
                     <input type="hidden" id="seccionId" value="@ViewBag.SeccionId" />
+                    <input type="hidden" id="cuestionarioId" value="@ViewBag.FormularioId" />
 
                     <div class="mb-2">
-                        <label>Título</label>
-                        <input type="text" class="form-control" id="titulo" placeholder="Escribe la pregunta aquí" />
+                        <h6 class="text-primary">Información General</h6>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Nombre</label>
+                        <input type="text" class="form-control" id="titulo" placeholder="Escribe la pregunta aquí" autocomplete="off" />
                     </div>
 
                     <div class="mb-2">
                         <label>Descripción</label>
-                        <textarea class="form-control" id="descripcion" rows="2" placeholder="(Opcional)"></textarea>
+                        <input type="text" class="form-control" id="descripcion" placeholder="(Opcional)" autocomplete="off" />
                     </div>
 
-                    <div class="mb-2 row">
-                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Imagen de referencia</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="file" class="form-control" id="imagenArchivo" accept="image/*" />
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="imagenNombre" readonly />
+                            </div>
+                        </div>
+                        <input type="hidden" id="imagenBase64" />
+                    </div>
+
+                    <div class="mb-3 mt-3 row">
+                        <div class="col-md-12">
                             <label>Tipo de pregunta</label>
                             <select class="form-select" id="tipoPregunta">
                                 @foreach (var tipo in ViewBag.TiposPregunta as List<SelectListItem>)
@@ -79,63 +105,76 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-6 d-flex align-items-end">
+                    </div>
+
+                    <div class="mb-2 row">
+                        <div class="col-md-4 d-flex align-items-end">
                             <div class="form-check ms-3">
-                                <input type="checkbox" class="form-check-input" id="esRequerido" />
+                                <input type="checkbox" class="form-check-input" id="multipleSeleccion" />
+                                <label class="form-check-label" for="multipleSeleccion">Múltiple selección</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" id="esRequerido">
                                 <label class="form-check-label" for="esRequerido">Requerido</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" id="conPonderacion">
+                                <label class="form-check-label" for="conPonderacion">Con Ponderación</label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mb-2">
-                        <label>Prioridad</label>
-                        <select class="form-select" id="prioridad">
-                            @foreach (var p in ViewBag.Prioridades as List<SelectListItem>)
-                            {
-                                <option value="@p.Value">@p.Text</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <label>Hipervínculo</label>
-                        <input type="url" class="form-control" id="hipervinculo" placeholder="http://example.com" />
-                    </div>
-
-                    <div class="row mb-2">
-                        <div class="col">
-                            <label>Agregar comentario</label>
-                            <select class="form-select" id="agregarComentario">
-                                <option value="true">Sí</option>
-                                <option value="false">No</option>
-                            </select>
+                    <div class="mb-2 row">
+                        <div class="col-md-4 mb-3 d-flex align-items-end">
+                            <div class="form-check ms-3">
+                                <input type="checkbox" class="form-check-input" id="requiereEvidencia" />
+                                <label class="form-check-label" for="requiereEvidencia">Requiere evidencia</label>
+                            </div>
                         </div>
-                        <div class="col">
-                            <label>Agregar imagen</label>
-                            <select class="form-select" id="agregarImagen">
-                                <option value="true">Sí</option>
-                                <option value="false">No</option>
-                            </select>
+                        <div class="col-md-4 mb-2">
+                            <label>Límite de evidencias</label>
+                            <input type="number" class="form-control" id="limiteDeEvidencias" autocomplete="off" />
                         </div>
-                        <div class="col">
-                            <label>Campos extra</label>
-                            <select class="form-select" id="agregarCamposExtras">
-                                <option value="true">Sí</option>
-                                <option value="false">No</option>
-                            </select>
+                        <div class="col-md-4 mb-2">
+                            <label>Evidencias obligatorias</label>
+                            <input type="number" class="form-control" id="numeroDeEvidenciasObligatorias" autocomplete="off" />
                         </div>
-                    </div>
+                    </div>                    
 
                     <hr />
                     <div>
-                        <label><strong>Lista de opciones y puntuaciones</strong></label>
-                        <div id="opcionesContainer"></div>
+                        <div class="mb-2">
+                            <h6 class="text-primary">Lista de Opciones y Puntuaciones</h6>
+                        </div>
+                        
+                            <div id="opcionesContainer"></div>
+                    
                         <button class="btn btn-outline-dark btn-sm mt-2" type="button" onclick="agregarOpcion()">+ Agregar opción</button>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-outline-secondary" onclick="cerrarModalPregunta()">Cancelar</button>
                     <button class="btn btn-primary" onclick="guardarPregunta()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de guardado -->
+    <div class="modal fade" id="modalGuardado" tabindex="-1" aria-labelledby="modalGuardadoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary_form text-white">
+                    <h5 class="modal-title" id="modalGuardadoLabel">Pregunta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="mensajeGuardado"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnAceptarGuardado" onclick="recargarPreguntas()">Aceptar</button>
                 </div>
             </div>
         </div>
@@ -199,40 +238,101 @@
         function agregarOpcion() {
             const index = $('#opcionesContainer .opcion-item').length;
             $('#opcionesContainer').append(`
-                <div class="row opcion-item mb-2">
-                    <div class="col-6">
-                        <input type="text" class="form-control" placeholder="Opción" name="opciones[${index}].Texto" />
-                    </div>
-                    <div class="col-4">
-                        <input type="number" class="form-control" placeholder="Valor" name="opciones[${index}].Valor" />
-                    </div>
-                    <div class="col-2">
-                        <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                <fieldset class="border p-3 mb-1 rounded">
+                <div class="opcion-item" id="item-contenedor${index}">
+                    <div class="row">
+                        <div class="col-3">
+                            <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${index}].Texto" autocomplete="off"/>
+                        </div>
+                        <div class="col-2">
+                            <input type="number" class="form-control" placeholder="Valor" id="opcionPonderacion" name="opciones[${index}].Valor" autocomplete="off" />
+                        </div>
+                        <div class="col-3">
+                            <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" onchange="agregarComplemento(this.checked, ${index}, null)"/>
+                            <label class="form-check-label" for="reqInformacionExtra">Información Extra</label>
+                        </div>
+                        <div class="col-3">
+                            <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" />
+                            <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
+                        </div> 
+                        <div class="col-1">
+                            <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                        </div>
                     </div>
                 </div>
+                </fieldset>
             `);
+        }
+
+        function agregarComplemento(isChecked, index, complemento) {
+            const idIndex = 'item-contenedor' + index;
+            const nombre = complemento != null ? complemento.nombre : '';
+            const lista = complemento != null ? complemento.listaDeOpcionesPredefinidas : '';
+            if (isChecked) {
+                $('#' + idIndex).append(`
+                    <div class="row" id="complemento${index}">
+                        <div class="col-5 "></div>
+                        <div class="col-3">
+                            <input type="text" class="form-control" id="complementoNombre" placeholder="Nombre" value="${nombre}" autocomplete="off"/>
+                        </div>
+                        <div class="col-4">
+                            <input type="text" class="form-control" id="complementoListaDeOpciones" placeholder="Lista de Opciones" value="${lista}" autocomplete="off" />
+                        </div>
+                    </div>
+            `);
+            } else {
+                const idIndexRemove = 'complemento' + index;
+                $('#' + idIndexRemove).remove();
+            }
         }
 
         function guardarPregunta() {
             const data = {
                 Id: parseInt($('#preguntaId').val() || 0),
-                Titulo: $('#titulo').val(),
+                SeccionDelCuestionarioId: parseInt($('#seccionId').val() || 0),
+                CuestionarioId: parseInt($('#cuestionarioId').val() || 0),
+                Nombre: $('#titulo').val(),
                 Descripcion: $('#descripcion').val(),
-                TipoPreguntaId: parseInt($('#tipoPregunta').val()),
-                EsRequerido: $('#esRequerido').is(':checked'),
-                PrioridadId: parseInt($('#prioridad').val()),
-                Hipervinculo: $('#hipervinculo').val(),
+                EsPreguntaObligatoria: $('#esRequerido').is(':checked'),
+                EsPreguntaConPonderacion: $('#conPonderacion').is(':checked'),
+                NumeroDeEvidenciasLimitadasA: $('#limiteDeEvidencias').val() || 0,
+                NumeroDeEvidenciasObligatorias: $('#numeroDeEvidenciasObligatorias').val() || 0,
+                RequiereEvidencia: $('#requiereEvidencia').is(':checked'),
+                FormatoDeRespuesta: {
+                    FormatoId: parseInt($('#tipoPregunta').val()),
+                    PermiteMultipleSeleccion: $('#multipleSeleccion').is(':checked')
+                },
                 AgregarComentario: $('#agregarComentario').val() === "true",
                 AgregarImagen: $('#agregarImagen').val() === "true",
                 AgregarCamposExtras: $('#agregarCamposExtras').val() === "true",
                 SeccionId: parseInt($('#seccionId').val()),
-                Opciones: []
+                OpcionesPorPregunta: []
             };
-
+             
             $('#opcionesContainer .opcion-item').each(function () {
-                const texto = $(this).find('input[type="text"]').val();
-                const valor = parseInt($(this).find('input[type="number"]').val() || 0);
-                data.Opciones.push({ Texto: texto, Valor: valor });
+                const etiqueta = $(this).find("#opcionEtiqueta").val();
+                const ponderacion = $(this).find("#opcionPonderacion").val();
+                const reqEvidencia = $(this).find("#requiereEvidenciaOpcion").is(':checked');
+                const reqInfoExtra = $(this).find("#requiereInformacionExtra").is(':checked');
+                const complementoNombre = $(this).find("#complementoNombre").val();
+                const listaDeOpciones = $(this).find("#complementoListaDeOpciones").val();
+
+                const opciones = {
+                    Etiqueta: etiqueta,
+                    Ponderacion: ponderacion,
+                    RequiereEvidencia: reqEvidencia,
+                    RequiereInformacionExtra: reqInfoExtra
+                };
+
+                if (reqInfoExtra ==  true) {
+                    opciones.OpcionesComplemento = [{
+                        EtiquetaId: etiqueta,
+                        Nombre: complementoNombre,
+                        ListaDeOpcionesPredefinidas: listaDeOpciones
+                    }];
+                }
+
+                data.OpcionesPorPregunta.push(opciones);
             });
 
             fetch('@Url.Action("Guardar", "Pregunta")', {
@@ -244,7 +344,8 @@
             .then(r => {
                 if (r.success) {
                     $('#modalPregunta').modal('hide');
-                    location.reload(); // recarga o llama función
+                    mostrarModalGuardado();
+                    //location.reload();
                 } else {
                     showAlert(r.error || "Error al guardar la pregunta", 'error');
                 }
@@ -258,30 +359,52 @@
                     const p = r.data;
                     $('#modalPreguntaTitulo').text('Editar pregunta');
                     $('#preguntaId').val(p.id);
-                    $('#titulo').val(p.titulo);
+                    $('#titulo').val(p.nombre);
                     $('#descripcion').val(p.descripcion);
-                    $('#tipoPregunta').val(p.tipoPreguntaId);
-                    $('#esRequerido').prop('checked', p.esRequerido);
-                    $('#prioridad').val(p.prioridadId);
-                    $('#hipervinculo').val(p.hipervinculo);
-                    $('#agregarComentario').val(p.agregarComentario.toString());
-                    $('#agregarImagen').val(p.agregarImagen.toString());
-                    $('#agregarCamposExtras').val(p.agregarCamposExtras.toString());
+                    $('#tipoPregunta').val(p.formatoDeRespuesta.formatoId);
+                    $('#multipleSeleccion').prop('checked', p.formatoDeRespuesta.permiteMultipleSeleccion);
+                    $('#esRequerido').prop('checked', p.esPreguntaObligatoria);
+                    $('#conPonderacion').prop('checked', p.esPreguntaConPonderacion);
+                    $('#limiteDeEvidencias').val(p.numeroDeEvidenciasLimitadasA);
+                    $('#numeroDeEvidenciasObligatorias').val(p.numeroDeEvidenciasObligatorias.toString());
+                    $('#requiereEvidencia').prop('checked', p.requiereEvidencia);
+                    
                     $('#opcionesContainer').empty();
-                    if (p.opciones) {
-                        p.opciones.forEach((o, idx) => {
+                    if (p.opcionesPorPregunta) {
+                        p.opcionesPorPregunta.forEach((o, idx) => {
+                            const evidenciaChecked = o.requiereEvidencia ? 'checked' : '';
+                            const infoExtraChecked = o.requiereInformacionExtra ? 'checked' : '';
+
+                            console.log('infoExtraChecked: ' +  infoExtraChecked)
                             $('#opcionesContainer').append(`
-                                <div class="row opcion-item mb-2">
-                                    <div class="col-6">
-                                        <input type="text" class="form-control" placeholder="Opción" name="opciones[${idx}].Texto" value="${o.texto}" />
+                                <fieldset class="border p-3 mb-1 rounded">
+                                <div class="opcion-item" id="item-contenedor${idx}">
+                                    <div class="row mb-1">
+                                        <div class="col-3">
+                                            <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${idx}].Texto" value="${o.etiqueta}" autocomplete="off"/>
+                                        </div>
+                                        <div class="col-2">
+                                            <input type="number" class="form-control" placeholder="Ponderación" id="opcionPonderacion" name="opciones[${idx}].Valor" value="${o.ponderacion}" autocomplete="off"/>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" value="${p.requiereInformacionExtra}" ${infoExtraChecked} onchange="agregarComplemento(this.checked, ${idx}, null)"/>
+                                            <label class="form-check-label" for="reqInformacionExtra">Informacion Extra</label>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" value="${p.requiereEvidencia}" ${evidenciaChecked} />
+                                            <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
+                                        </div>
+                                        <div class="col-1">
+                                            <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                                        </div>
                                     </div>
-                                    <div class="col-4">
-                                        <input type="number" class="form-control" placeholder="Valor" name="opciones[${idx}].Valor" value="${o.valor}" />
-                                    </div>
-                                    <div class="col-2">
-                                        <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
-                                    </div>
-                                </div>`);
+                                </div>
+                                </fieldset>
+                            `);
+
+                            if (infoExtraChecked) {
+                                agregarComplemento(true, idx, o.opcionesComplemento[0]);
+                            }
                         });
                     }
                     $('#modalPregunta').modal('show');
@@ -289,6 +412,16 @@
                     showAlert(r.error || 'No se pudo cargar la pregunta', 'error');
                 }
             });
+        }
+
+        function mostrarModalGuardado() {
+            $('#mensajeGuardado').text('Guardado correctamente');
+            $('#modalGuardado').modal('show');
+        }
+
+        function recargarPreguntas() {
+            $('#modalGuardado').modal('hide');
+            location.reload();
         }
 
         let preguntaIdEliminar = 0;

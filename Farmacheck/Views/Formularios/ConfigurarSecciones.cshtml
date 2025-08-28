@@ -7,7 +7,7 @@
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="text-dark">Secciones del Formulario</h4>        
+        <h4 class="text-dark">Secciones del Checklist</h4>        
         <button id="btnNuevaSeccion" class="btn mb-3" style="background-color: #00ab8e; color:white;">
             <i class="bi bi-plus-circle"></i> Nueva sección
         </button>
@@ -36,39 +36,13 @@
             <div class="modal-body">
                 <input type="hidden" id="seccionId" />
                 <div class="mb-2">
-                    <label>Título</label>
+                    <label>Nombre</label>
                     <input type="text" class="form-control" id="titulo" placeholder="Ej. Cierre, Inventario, Seguridad" />
-                </div>
-                <div class="form-check mb-2">
-                    <input type="checkbox" class="form-check-input" id="activarNA" />
-                    <label class="form-check-label" for="activarNA">Activar NA</label>
-                </div>
-                <div class="mb-2">
-                    <label>Descripción</label>
-                    <textarea class="form-control" id="descripcion" rows="2" placeholder="Opcional: Describe el objetivo de esta sección."></textarea>
-                </div>
-                <div class="mb-2">
-                    <label class="mb-1">Semáforo de rangos</label>
-
-                    <div class="input-group mb-2">
-                        <span class="input-group-text bg-success text-white"><i class="bi bi-circle-fill"></i></span>
-                        <input type="text" class="form-control" id="rangoVerde" placeholder="Rango verde">
-                    </div>
-
-                    <div class="input-group mb-2">
-                        <span class="input-group-text bg-warning text-white"><i class="bi bi-circle-fill"></i></span>
-                        <input type="text" class="form-control" id="rangoAmarillo" placeholder="Rango amarillo">
-                    </div>
-
-                    <div class="input-group">
-                        <span class="input-group-text bg-danger text-white"><i class="bi bi-circle-fill"></i></span>
-                        <input type="text" class="form-control" id="rangoRojo" placeholder="Rango rojo">
-                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button id="btnGuardarSeccion" class="btn btn-primary">Crear sección</button>
+                <button id="btnGuardarSeccion" class="btn btn-primary">Guardar</button>
             </div>
         </div>
     </div>
@@ -78,6 +52,7 @@
 @section Scripts {
     <script>
         const baseUrl = '@Url.Action("Index", "Pregunta")';
+        const formularioId = @ViewBag.FormularioId;
 
         $(document).ready(function () {
             cargarSecciones();            
@@ -93,12 +68,7 @@
                 const datos = {
                     Id: $('#seccionId').val() || 0,
                     FormularioId: @ViewBag.FormularioId ?? 1,
-                    Titulo: $('#titulo').val(),
-                    ActivarNA: $('#activarNA').is(':checked'),
-                    Descripcion: $('#descripcion').val(),
-                    RangoVerde: $('#rangoVerde').val(),
-                    RangoAmarillo: $('#rangoAmarillo').val(),
-                    RangoRojo: $('#rangoRojo').val()
+                    Nombre: $('#titulo').val()
                 };
 
                 $.ajax({
@@ -109,6 +79,10 @@
                     success: function (r) {
                         if (r.success) {
                             $('#modalSeccion').modal('hide');
+
+                            const mensaje = 'Sección guardada correctamente';
+
+                            showAlert(mensaje, 'success');
                             cargarSecciones();
                         } else {
                             showAlert(r.error || "Error al guardar", 'error');
@@ -123,13 +97,18 @@
         function cargarSecciones() {
             $.get('@Url.Action("ListarSecciones", "Formularios")', { formularioId: @ViewBag.FormularioId ?? 1 }, function (r) {
                 if (r.success) {
-                    const tbody = $('#tablaSecciones tbody');
+                    const tabla = $('#tablaSecciones');
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                        tabla.DataTable().destroy();
+                    }
+
+                   const tbody = tabla.find('tbody');
                     tbody.empty();
                     r.secciones.forEach(s => {
                         tbody.append(`
                                    <tr>
                                     <td style="width: 20%;">${s.id}</td>
-                                    <td style="width: 20%;">${s.titulo}</td>
+                                    <td style="width: 20%;">${s.nombre}</td>
                                     <td style="width: 60%; text-align:center;">
                                         <div class="btn-group" role="group">
                                          
@@ -149,6 +128,18 @@
                                 </tr>
                         `);
                     });
+
+                    tabla.DataTable({
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        info: true,
+                        lengthMenu: [5, 10, 25, 50],
+                        pageLength: 5,
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                        }
+                    });
                 }
             });
         }
@@ -159,12 +150,7 @@
                     const s = r.data;
                     $('#modalSeccionTitulo').text("Editar sección");
                     $('#seccionId').val(s.id);
-                    $('#titulo').val(s.titulo);
-                    $('#activarNA').prop('checked', s.activarNA);
-                    $('#descripcion').val(s.descripcion);
-                    $('#rangoVerde').val(s.rangoVerde);
-                    $('#rangoAmarillo').val(s.rangoAmarillo);
-                    $('#rangoRojo').val(s.rangoRojo);
+                    $('#titulo').val(s.nombre);
                     $('#modalSeccion').modal('show');
                 } else {
                     showAlert(r.error || "No se pudo cargar la sección", 'error');
@@ -172,11 +158,12 @@
             });
         }
 
-        function eliminarSeccion(id) {
+        function eliminarSeccion(seccionId) {
              confirmAction("¿Estás seguro de que deseas eliminar esta sección?").then(function (ok) {
                 if (!ok) return;
-                $.post('@Url.Action("EliminarSeccion", "Formularios")', { id }, function (r) {
+                $.post('@Url.Action("EliminarSeccion", "Formularios")', { formularioId, seccionId }, function (r) {
                     if (r.success) {
+                        showAlert('Sección eliminada correctamente', 'success');
                         cargarSecciones();
                     } else {
                         showAlert(r.error || "Error al eliminar", 'error');
@@ -188,11 +175,6 @@
         function limpiarModal() {
             $('#seccionId').val('');
             $('#titulo').val('');
-            $('#activarNA').prop('checked', false);
-            $('#descripcion').val('');
-            $('#rangoVerde').val('');
-            $('#rangoAmarillo').val('');
-            $('#rangoRojo').val('');
         }
     </script>
 }

@@ -17,7 +17,7 @@
                     <div class="accordion-item mb-2" data-seccion-id="@seccion.Id">
                         <h2 class="accordion-header" id="heading@seccion.Id">
                             <div class="d-flex justify-content-between align-items-center bg-secondary text-white px-3 py-2 rounded-top">
-                                <span class="fs-5 fw-bold">@seccion.Titulo</span>
+                                <!--<span class="fs-5 fw-bold">seccion.Titulo</span>-->
                                 <div class="d-flex align-items-center gap-2">
                                     <button class="btn btn-sm btn-outline-light border-0" onclick="mostrarConfigSeccion('@seccion.Id')" title="Configurar sección">
                                         <i class="bi bi-gear"></i>
@@ -44,15 +44,15 @@
                                     </button>
                                 </div>
 
-                                @foreach (var pregunta in seccion.Preguntas)
+                                <!--foreach (var pregunta in seccion.Preguntas)
                                 {
                                     <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-                                        <span>@pregunta.Titulo</span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="mostrarConfigPregunta('@pregunta.Id')" title="Configurar pregunta">
+                                        <span>pregunta.Titulo</span>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="mostrarConfigPregunta('pregunta.Id')" title="Configurar pregunta">
                                             <i class="bi bi-gear"></i>
                                         </button>
                                     </div>
-                                }
+                                }-->
                             </div>
                         </div>
                     </div>

@@ -34,6 +34,21 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["CustomerTypesApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IChecklistApiClient, ChecklistApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["ChecklistApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<IChecklistSectionApiClient, ChecklistSectionApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["ChecklistSectionApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<IQuestionApiClient, QuestionApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["QuestionApi:BaseUrl"]!);
+        });
+
         services.AddHttpClient<IZoneApiClient, ZonesApiClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["ZonesApi:BaseUrl"]!);

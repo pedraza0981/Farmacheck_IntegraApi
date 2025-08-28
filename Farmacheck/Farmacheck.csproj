@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Farmacheck.Infrastructure\Farmacheck.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Cuestionarios\" />
+  </ItemGroup>
+
 </Project>

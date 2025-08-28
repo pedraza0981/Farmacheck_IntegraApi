@@ -1,0 +1,11 @@
+﻿namespace Farmacheck.Application.Models.ChecklistSections
+{
+    public class SectionResponse
+    {
+        public int Id { get; set; }
+
+        public string Nombre { get; set; } = null!;
+
+        public bool Estatus { get; set; }
+    }
+}

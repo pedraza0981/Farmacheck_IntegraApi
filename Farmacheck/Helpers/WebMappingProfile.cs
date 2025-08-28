@@ -1,18 +1,26 @@
 ﻿using AutoMapper;
 using Farmacheck.Application.DTOs;
-using Farmacheck.Application.Models.BusinessUnits;
-using Farmacheck.Models;
 using Farmacheck.Application.Models.Brands;
-using Farmacheck.Application.Models.SubBrands;
-using Farmacheck.Application.Models.Customers;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Farmacheck.Application.Models.BusinessStructures;
-using Farmacheck.Application.Models.Zones;
+using Farmacheck.Application.Models.BusinessUnits;
 using Farmacheck.Application.Models.CategoriesByQuestionnaires;
+using Farmacheck.Application.Models.Checklists;
+using Farmacheck.Application.Models.ChecklistScoreRating;
+using Farmacheck.Application.Models.ChecklistSections;
+using Farmacheck.Application.Models.Customers;
 using Farmacheck.Application.Models.PeriodicitiesByQuestionnaires;
 using Farmacheck.Application.Models.Roles;
 using Farmacheck.Application.Models.HierarchyByRoles;
+using Farmacheck.Application.Models.OptionsByQuestion;
+using Farmacheck.Application.Models.OptionsComplementByQuestion;
+using Farmacheck.Application.Models.Questions;
+using Farmacheck.Application.Models.ResponseFormatByQuestion;
+using Farmacheck.Application.Models.SubBrands;
 using Farmacheck.Application.Models.Users;
+using Farmacheck.Application.Models.Zones;
+using Farmacheck.Models;
+using Farmacheck.Models.Inputs;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 
 namespace Farmacheck.Helpers
@@ -25,6 +33,12 @@ namespace Farmacheck.Helpers
 
             //CreateMap<MarcaViewModel, BrandRequest>();
             //CreateMap<MarcaViewModel, UpdateBrandRequest>();
+            CreateMap<CuestionarioDto, CuestionarioViewModel>();
+
+            CreateMap<SeccionDelCuestionarioDto, SeccionDelCuestionarioViewModel>();
+            CreateMap<SeccionDto, SeccionViewModel>();
+
+            CreateMap<ClasificacionDePuntajeDto, ClasificacionDePuntajeViewModel>();
 
             CreateMap<BusinessUnitDto, UnidadDeNegocio>()
             .ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.Ignore()) // No viene del DTO
@@ -51,7 +65,35 @@ namespace Farmacheck.Helpers
             .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre))
             .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo))
             .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
-            //.ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.MapFrom(src => src.LogotipoNombreArchivo));
+
+            CreateMap<CuestionarioViewModel, ChecklistRequest>();
+            CreateMap<CuestionarioViewModel, UpdateChecklistRequest>();
+
+            CreateMap<ClasificacionDePuntajeViewModel, ChecklistScoreRatingRequest>();
+            CreateMap<ClasificacionDePuntajeViewModel, UpdateChecklistScoreRatingRequest>();
+            CreateMap<SeccionInputModel, ChecklistSectionRequest>()
+                .ForMember(dest => dest.CuestionarioId, opt => opt.MapFrom(src => src.FormularioId));
+
+            CreateMap<PreguntaViewModel, QuestionRequest>()
+                .ForMember(dest => dest.SeccionId, opt => opt.MapFrom(src => src.SeccionDelCuestionarioId));
+            CreateMap<FormatoDeRespuestaPorPreguntaViewModel, ResponseFormatByQuestionRequest>();
+            CreateMap<OpcionesPorPreguntaViewModel, OptionsByQuestionRequest>();
+            CreateMap<OpcionesComplementoPorPreguntaViewModel, OptionsComplementByQuestionRequest>();
+
+            CreateMap<PreguntaDto, PreguntaViewModel>();
+            CreateMap<FormatoDeRespuestaPorPreguntaDto, FormatoDeRespuestaPorPreguntaViewModel>();
+
+            CreateMap<OpcionesPorPreguntaDto, OpcionesPorPreguntaViewModel>();
+            CreateMap<OpcionesComplementoPorPreguntaDto, OpcionesComplementoPorPreguntaViewModel>();
+
+            CreateMap<PreguntaViewModel, UpdateQuestionRequest>()
+                .ForMember(dest => dest.SeccionId, opt => opt.MapFrom(src => src.SeccionDelCuestionarioId))
+                .ForMember(dest => dest.PreguntaId, opt => opt.MapFrom(src => src.Id));
+
+            CreateMap<FormatoDeRespuestaPorPreguntaViewModel, UpdateResponseFormatByQuestionRequest>();
+            CreateMap<OpcionesPorPreguntaViewModel, UpdateOptionsByQuestionRequest>();
+            CreateMap<OpcionesComplementoPorPreguntaViewModel, UpdateOptionsComplementByQuestionRequest>();
+            //CreateMap<EtiquetasDeEscalaNumericaViewModel, UpdateLabelsByNumericalScaleRequest>();
 
             CreateMap<CustomerDto, ClienteEstructuraViewModel>()
              .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))

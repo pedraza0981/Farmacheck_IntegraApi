@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AutoMapper;
+using Farmacheck.Application.DTOs;
+using Farmacheck.Application.Interfaces;
+using Farmacheck.Application.Models.Checklists;
+using Farmacheck.Application.Models.ChecklistScoreRating;
+using Farmacheck.Application.Models.ChecklistSections;
+using Farmacheck.Infrastructure.Services;
 using Farmacheck.Models;
 using Farmacheck.Models.Inputs;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Reflection;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Farmacheck.Controllers
 {
@@ -13,31 +18,183 @@ namespace Farmacheck.Controllers
     {
         private static readonly List<SeccionInputModel> _inMemorySections = new();
         private static int _nextSectionId = 1;
+        private static int cuestionarioSeleccionado;
 
         public static List<FormularioViewModel> _formularios = new List<FormularioViewModel>
         {
-            new FormularioViewModel { Id = 1, Nombre = "Actividades Día 1", Fecha = new DateTime(2024, 01, 15), EstaActivo = true },
-            new FormularioViewModel { Id = 2, Nombre = "Caducidad y Merma - Pruebas", Fecha  = new DateTime(2024, 03, 01), EstaActivo = false },
-            new FormularioViewModel { Id = 3, Nombre = "Check List Prueba", Fecha = new DateTime(2024, 02, 10), EstaActivo = true }
+            new FormularioViewModel { Id = 1, Nombre = "Actividades Día 111", Fecha = new DateTime(2024, 01, 15), EstaActivo = true },
+            new FormularioViewModel { Id = 2, Nombre = "Caducidad y Merma - Pruebas22", Fecha  = new DateTime(2024, 03, 01), EstaActivo = false },
+            new FormularioViewModel { Id = 3, Nombre = "Check List Prueba22", Fecha = new DateTime(2024, 02, 10), EstaActivo = true }
         };
 
-        // GET: /Formularios
-        public IActionResult Index()
+        public static List<CuestionarioViewModel> _cuestionarios = new List<CuestionarioViewModel>();
+        public static List<SeccionViewModel> _secciones = new List<SeccionViewModel>();
+
+        private readonly IChecklistApiClient _apiClient;
+        private readonly ICategoryByQuestionnaireApiClient _categoryApiClient;
+        private readonly IChecklistSectionApiClient _seccionApiClient;
+        private readonly IMapper _mapper;
+        
+
+        public FormulariosController(IChecklistApiClient apiClient, ICategoryByQuestionnaireApiClient categoryApiClient, IChecklistSectionApiClient sectionApiClient, IMapper mapper)
         {
-            return View(_formularios);
+            _apiClient = apiClient;
+            _categoryApiClient = categoryApiClient;
+            _seccionApiClient = sectionApiClient;
+            _mapper = mapper;
         }
+
+    #region Checklists
+        // GET: /Checklists
+        public async Task<IActionResult> Index()
+        {
+            var apiData = await _apiClient.GetAllChecklistsAsync();
+            var dtos = _mapper.Map<List<CuestionarioDto>>(apiData);
+            _cuestionarios = _mapper.Map<List<CuestionarioViewModel>>(dtos);
+            
+            return View(_cuestionarios);
+        }
+
+        [HttpGet]
+        public JsonResult ListarFormularios()
+        {
+            var lista = _cuestionarios.Select(f => new
+            {
+                f.Id,
+                f.Nombre,
+                Fecha = f.CreadoEl.ToString("yyyy-MM-dd"),
+                Publicar = f.PublicarCuestionario
+            }).ToList();
+
+            return Json(new { success = true, formularios = lista });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GuardarCuestionario([FromBody] CuestionarioViewModel model)
+        {
+            if (model == null)
+                return Json(new { success = false, error = "Datos inválidos" });
+
+            if (model.Id == 0)
+            {                
+                var request = _mapper.Map<ChecklistRequest>(model);
+                request.ClasificacionDePuntaje = _mapper.Map<List<ChecklistScoreRatingRequest>>(ObtenerClasificacionesDePuntaje(model));
+                var id = await _apiClient.CreateAsync(request);
+                
+                model.Id = id;
+                model.CreadoEl = DateTime.Now;
+                _cuestionarios.Add(model);
+
+                return Json(new { success = true, id, message = "Checklist creado" });
+            }
+
+            var updateRequest = _mapper.Map<UpdateChecklistRequest>(model);
+            updateRequest.ClasificacionDePuntaje = _mapper.Map<List<UpdateChecklistScoreRatingRequest>>(ObtenerClasificacionesDePuntaje(model));
+            var updated = await _apiClient.UpdateAsync(updateRequest);
+            
+            if (updated)
+                return Json(new { success = true, id = model.Id, message = "Checklist actualizado" });
+
+            return Json(new { success = false, error = "No se pudo actualizar" });
+        }
+
+        [HttpPost]
+        public JsonResult EliminarFormulario(int id)
+        {
+            var cuestionario = _cuestionarios.FirstOrDefault(f => f.Id == id);
+            if (cuestionario == null)
+                return Json(new { success = false, error = "Checklist no encontrado" });
+
+            _apiClient.DeleteAsync(id);
+            _cuestionarios.Remove(cuestionario);
+
+            return Json(new { success = true });
+        }
+
+        // GET: /Formularios/ConfigurarFormulario        
+        [HttpGet]
+        public async Task<IActionResult> ConfigurarFormulario(int? id)
+        {
+            CuestionarioViewModel cuestionario;
+
+            if (id.HasValue)
+            {
+                cuestionario = _cuestionarios.FirstOrDefault(f => f.Id == id.Value);
+
+                if (cuestionario != null)
+                {
+                    //CargarListasComunes(formulario); // <-- Cargar listas al editar
+                    ViewData["Title"] = "Editar Checklist";
+                    CargarListasComunes(cuestionario); // <-- Cargar listas al editar
+                    return View(cuestionario);
+                }
+            }
+
+            cuestionario = new CuestionarioViewModel();
+
+            //CargarListasComunes(formulario); // <-- Cargar listas al crear nuevo
+            CargarListasComunes(cuestionario); // <-- Cargar listas al editar
+            ViewData["Title"] = "Crear Checklist";
+            return View(cuestionario);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ObtenerFormulario(int id)
+        {
+            var entidad = await _apiClient.GetChecklistAsync(id);
+            if (entidad == null)
+                return Json(new { success = false });
+
+            var dto = _mapper.Map<CuestionarioDto>(entidad);
+            var model = _mapper.Map<CuestionarioViewModel>(dto);
+            var r = model.ClasificacionesDePuntaje.SingleOrDefault(c => c.Etiqueta == "Insuficiente");
+            if (model.ClasificacionesDePuntaje != null)
+            {
+                model.RangoRojo = model.ClasificacionesDePuntaje.SingleOrDefault(c => c.Etiqueta == "Insuficiente")?.PuntajeMaximo;
+                model.RangoAmarillo = model.ClasificacionesDePuntaje.SingleOrDefault(c => c.Etiqueta == "Bueno")?.PuntajeMaximo;
+                model.RangoVerde = model.ClasificacionesDePuntaje.SingleOrDefault(c => c.Etiqueta == "Excelente")?.PuntajeMaximo;
+            }
+            
+            return Json(new { success = true, data = model });
+        }
+
+        private List<ClasificacionDePuntajeViewModel> ObtenerClasificacionesDePuntaje(CuestionarioViewModel model)
+        {
+            return new List<ClasificacionDePuntajeViewModel>()
+            {
+                new ClasificacionDePuntajeViewModel { PuntajeMaximo = model.RangoRojo, Etiqueta = "Insuficiente", Color = "#FF0000" },
+                new ClasificacionDePuntajeViewModel { PuntajeMaximo = model.RangoAmarillo, Etiqueta = "Bueno", Color = "#008000"  },
+                new ClasificacionDePuntajeViewModel { PuntajeMaximo = model.RangoVerde, Etiqueta = "Excelente", Color = "#008000"  }
+            };
+        }
+
+        #endregion
+
+        #region Categorias
+        [HttpGet]
+        public async Task<JsonResult> ListarCategorias()
+        {
+            var apiData = await _categoryApiClient.GetAllCategoriesAsync();
+
+            var dtos = _mapper.Map<List<CategoryByQuestionnaireDto>>(apiData);
+            var categorias = _mapper.Map<List<CategoriaCuestionarioViewModel>>(dtos);
+
+            return Json(new { success = true, data = categorias });
+        }
+        #endregion
 
         [HttpGet]
         public IActionResult ConfigurarSecciones(int id)
         {
             ViewBag.FormularioId = id;
+            cuestionarioSeleccionado = id;
             return View();
         }
 
         [HttpGet]
         public JsonResult ObtenerSeccion(int id)
         {
-            var seccion = _inMemorySections.FirstOrDefault(s => s.Id == id);
+            var seccion = _secciones.FirstOrDefault(s => s.Id == id);
             if (seccion == null)
                 return Json(new { success = false, error = "Sección no encontrada" });
 
@@ -45,65 +202,62 @@ namespace Farmacheck.Controllers
         }
 
         [HttpPost]
-        public JsonResult GuardarSeccion([FromBody] SeccionInputModel model)
+        public async Task<JsonResult> GuardarSeccion([FromBody] SeccionInputModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.Titulo))
-                return Json(new { success = false, error = "El título es obligatorio." });
+            if (string.IsNullOrWhiteSpace(model.Nombre))
+                return Json(new { success = false, error = "El nombre es obligatorio." });
 
             if (model.Id == 0)
             {
-                // Nuevo
-                model.Id = _nextSectionId++;
-                _inMemorySections.Add(model);
+                var request = _mapper.Map<ChecklistSectionRequest>(model);
+                var id = await _seccionApiClient.CreateAsync(request);
+
                 return Json(new { success = true, message = "Sección creada", id = model.Id });
             }
             else
             {
                 // Editar
-                var existente = _inMemorySections.FirstOrDefault(s => s.Id == model.Id);
+                var existente = _secciones.FirstOrDefault(s => s.Id == model.Id);
                 if (existente == null)
                     return Json(new { success = false, error = "Sección no encontrada." });
 
-                existente.Titulo = model.Titulo;
-                existente.ActivarNA = model.ActivarNA;
-                existente.Descripcion = model.Descripcion;
-                existente.RangoVerde = model.RangoVerde;
-                existente.RangoAmarillo = model.RangoAmarillo;
-                existente.RangoRojo = model.RangoRojo;
+                var seccionRequest = new UpdateChecklistSectionRequest() { CuestionarioId = model.FormularioId, SeccionId = model.Id, Nombre = model.Nombre };
+
+                await _seccionApiClient.UpdateAsync(seccionRequest);
+                _secciones.Remove(existente);
 
                 return Json(new { success = true, message = "Sección actualizada" });
             }
         }
 
         [HttpPost]
-        public JsonResult EliminarSeccion(int id)
+        public JsonResult EliminarSeccion(int formularioId, int seccionId)
         {
-            var seccion = _inMemorySections.FirstOrDefault(s => s.Id == id);
+            var cuestionarioId = ViewBag.FormulaioId;
+            var seccion = _secciones.FirstOrDefault(s => s.Id == seccionId);
             if (seccion == null)
                 return Json(new { success = false, error = "Sección no encontrada" });
 
-            _inMemorySections.Remove(seccion);
+            var seccionRequest = new RemoveChecklistSectionRequest() { CuestionarioId = formularioId, SeccionId = seccionId };
+            
+            _seccionApiClient.DeleteAsync(seccionRequest);
+            _secciones.Remove(seccion);
+
             return Json(new { success = true, message = "Sección eliminada" });
         }
 
-        public static List<FormularioViewModel> ObtenerFormularios()
+        public static List<CuestionarioViewModel> ObtenerFormularios()
         {
-            return _formularios;
+            return _cuestionarios;
         }
 
         public static SeccionInputModel? ObtenerSeccionPorId(int id)
         {
-            return _inMemorySections.FirstOrDefault(s => s.Id == id);
+            var cuestionarioId = cuestionarioSeleccionado;
+            var seccion = _secciones.FirstOrDefault(s => s.Id == id);
+            var seccionInput = new SeccionInputModel() { Id = seccion.Id, FormularioId = cuestionarioId, Nombre = seccion.Nombre };
+            return seccionInput;
         }
-
-
-
-
-
-
-
-
-
 
         // GET: /Formularios/Previsualizar/5
         public IActionResult Previsualizar(int id)
@@ -153,29 +307,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public IActionResult Construir(int id)
         {
-            var modelo = new FormularioBuilderViewModel
-            {
-                FormularioId = id,
-                NombreFormulario = "Prueba Apertura",
-                Secciones = new List<SeccionViewModel>
-                {
-                    new SeccionViewModel
-                    {
-                        Id           = 1,
-                        Titulo       = "APERTURA",
-                        ActivarNA    = false,
-                        Descripcion  = "Chequeo inicial",
-                        RangoVerde   = "0–5",
-                        RangoAmarillo= "6–10",
-                        RangoRojo    = "11–15",
-                        Preguntas = new List<PreguntaViewModel>
-                        {
-                            new PreguntaViewModel { Id = 101, Titulo = "¿La farmacia abrió a tiempo con anuncios apagados?" },
-                            new PreguntaViewModel { Id = 102, Titulo = "¿Se colocó el material POP?" }
-                        }
-                    }
-                }
-            };
+            var modelo = new FormularioBuilderViewModel();
 
             return View("ConstruirFormulario", modelo);
         }
@@ -185,20 +317,23 @@ namespace Farmacheck.Controllers
 
         // GET: /Formularios/ListarSecciones?formularioId=5
         [HttpGet]
-        public JsonResult ListarSecciones(int formularioId)
+        public async Task<JsonResult> ListarSecciones(int formularioId)
         {
-            var lista = _inMemorySections
-                .Where(s => s.FormularioId == formularioId)
-                .ToList();
-            return Json(new { success = true, secciones = lista });
+            var apiData = await _seccionApiClient.GetSectionsByChecklistAsync(formularioId);
+            apiData.Secciones = apiData.Secciones.Where(s => s.Estatus == true).ToList();
+
+            var dtos = _mapper.Map<SeccionDelCuestionarioDto>(apiData);
+            _secciones = _mapper.Map<List<SeccionViewModel>>(dtos.Secciones);
+
+            return Json(new { success = true, secciones = _secciones });
         }
 
         // POST: /Formularios/CrearSeccion
         [HttpPost]
         public JsonResult CrearSeccion([FromBody] SeccionInputModel m)
         {
-            if (string.IsNullOrWhiteSpace(m.Titulo))
-                return Json(new { success = false, error = "El título es obligatorio." });
+            if (string.IsNullOrWhiteSpace(m.Nombre))
+                return Json(new { success = false, error = "El nombre es obligatorio." });
 
             // 1) Asignar un Id simulado
             m.Id = _nextSectionId++;
@@ -210,7 +345,7 @@ namespace Farmacheck.Controllers
             return Json(new { success = true, newId = m.Id });
         }
 
-        private void CargarListasComunes(FormularioViewModel formulario)
+        private void CargarListasComunes(CuestionarioViewModel formulario)
         {
             formulario.AuditoresDisponibles = new List<SelectListItem>
             {
@@ -238,36 +373,6 @@ namespace Farmacheck.Controllers
             };
         }
 
-        // GET: /Formularios/ConfigurarFormulario        
-        [HttpGet]
-        public IActionResult ConfigurarFormulario(int? id)
-        {
-            FormularioViewModel formulario;
-
-            if (id.HasValue)
-            {
-                formulario = _formularios.FirstOrDefault(f => f.Id == id.Value);
-
-                if (formulario != null)
-                {
-                    CargarListasComunes(formulario); // <-- Cargar listas al editar
-                    ViewData["Title"] = "Editar Formulario";
-                    return View(formulario);
-                }
-            }
-
-            formulario = new FormularioViewModel
-            {
-                Fecha = DateTime.Now,
-                EstaActivo = true
-            };
-
-            CargarListasComunes(formulario); // <-- Cargar listas al crear nuevo
-            ViewData["Title"] = "Crear Formulario";
-            return View(formulario);
-        }
-
-
         // POST: /Formularios/ConfigurarFormulario
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -283,30 +388,6 @@ namespace Farmacheck.Controllers
             _formularios.Add(modelo);
 
             return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public JsonResult ListarFormularios()
-        {
-            var lista = _formularios.Select(f => new
-            {
-                f.Id,
-                f.Nombre,
-                Fecha = f.Fecha.ToString("yyyy-MM-dd"),
-                f.Publicar
-            }).ToList();
-
-            return Json(new { success = true, formularios = lista });
-        }
-
-        [HttpGet]
-        public JsonResult ObtenerFormulario(int id)
-        {
-            var formulario = _formularios.FirstOrDefault(f => f.Id == id);
-            if (formulario == null)
-                return Json(new { success = false });
-
-            return Json(new { success = true, data = formulario });
         }
 
         [HttpPost]
@@ -326,7 +407,7 @@ namespace Farmacheck.Controllers
 
             var existente = _formularios.FirstOrDefault(f => f.Id == model.Id);
             if (existente == null)
-                return Json(new { success = false, error = "Formulario no encontrado" });
+                return Json(new { success = false, error = "Checklist no encontrado" });
 
             existente.Nombre = model.Nombre;
             existente.Alias = model.Alias;
@@ -359,17 +440,6 @@ namespace Farmacheck.Controllers
             existente.EstaActivo = model.EstaActivo;
 
             return Json(new { success = true, id = model.Id, message = "Formulario actualizado" });
-        }
-
-        [HttpPost]
-        public JsonResult EliminarFormulario(int id)
-        {
-            var formulario = _formularios.FirstOrDefault(f => f.Id == id);
-            if (formulario == null)
-                return Json(new { success = false, error = "Formulario no encontrado" });
-
-            _formularios.Remove(formulario);
-            return Json(new { success = true });
         }
 
         [HttpPost]

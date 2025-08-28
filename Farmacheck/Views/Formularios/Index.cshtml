@@ -1,13 +1,13 @@
-﻿@model List<FormularioViewModel>
+﻿@model List<CuestionarioViewModel>
 @{
     ViewData["Title"] = "Formularios";
 }
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="text-dark">Formularios</h4>
+        <h4 class="text-dark">Checklists</h4>
         <a asp-controller="Formularios" asp-action="ConfigurarFormulario" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Agregar Formulario
+            <i class="bi bi-plus-circle"></i> Agregar Checklist
         </a>
     </div>
 
@@ -27,8 +27,8 @@
                 <tr>
                     <td>@f.Id</td>
                     <td>@f.Nombre</td>
-                    <td>@f.Fecha.ToString("yyyy-MM-dd")</td>
-                    <td>@(f.Publicar ? "Sí" : "No")</td>
+                    <td>@f.CreadoEl.ToString("yyyy-MM-dd")</td>
+                    <td>@(f.PublicarCuestionario ? "Si" : "No")</td>
                     <td class="text-center">
                         <div class="btn-group" role="group">
                             <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Previsualizar", "Formularios", new { id = f.Id })">
@@ -40,9 +40,9 @@
                             <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("ConfigurarSecciones", "Formularios", new { id = f.Id })">
                                 <i class="bi bi-gear"></i>
                             </a>
-                            <a class="btn btn-outline-warning btn-sm" href="@Url.Action("Configurar", "Formularios", new { id = f.Id })">
+                            <!--<a class="btn btn-outline-warning btn-sm" href="Url.Action("Configurar", "Formularios", new { id = f.Id })">
                                 <i class="bi bi-sliders"></i>
-                            </a>
+                            </a>-->
                             <button class="btn btn-outline-danger btn-sm" onclick="eliminarFormulario(@f.Id)">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -90,21 +90,18 @@
                             f.id,
                             f.nombre,
                             f.fecha,
-                            f.publicar ? 'Sí' : 'No',
+                            f.publicar ? 'Si' : 'No',
                             `<div class="btn-group" role="group">
-                                <a class="btn btn-outline-primary btn-sm" href="${urlPreview}/${f.id}">
+                                <a class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Previsualizar" href="${urlPreview}/${f.id}">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a class="btn btn-outline-success btn-sm" href="${urlFormulario}?id=${f.id}">
+                                <a class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Checklist" href="${urlFormulario}?id=${f.id}">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a class="btn btn-outline-secondary btn-sm" href="${urlSecciones}/${f.id}">
+                                <a class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Secciones" href="${urlSecciones}/${f.id}">
                                     <i class="bi bi-gear"></i>
                                 </a>
-                                <a class="btn btn-outline-warning btn-sm" href="${urlConfigurar}/${f.id}">
-                                    <i class="bi bi-sliders"></i>
-                                </a>
-                                <button class="btn btn-outline-danger btn-sm" onclick="eliminarFormulario(${f.id})">
+                                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar Sección" onclick="eliminarFormulario(${f.id})">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>`
