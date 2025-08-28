@@ -227,9 +227,7 @@
                     <input type="hidden" id="idFormularioAsignacion" />
                     <div class="mb-3">
                         <label>Rol 1</label>
-                        <select id="rolSelect1" class="form-select">
-                            <option value="">-- Seleccione --</option>
-                        </select>
+                        <select id="rolSelect1" class="form-select choices-dropdown" multiple></select>
                     </div>
                     <div class="mb-3">
                         <label>Rol 2</label>
@@ -239,9 +237,7 @@
                     </div>
                     <div class="mb-3">
                         <label>Rol 3</label>
-                        <select id="rolSelect3" class="form-select">
-                            <option value="">-- Seleccione --</option>
-                        </select>
+                        <select id="rolSelect3" class="form-select choices-dropdown" multiple></select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -255,10 +251,16 @@
 
 @section Scripts {
     <script>
+        let rol1Choices;
+        let rol3Choices;
+
         $(document).ready(function () {
             cargarCategorias();
 
-             $('#imagenArchivo').change(function () {
+            rol1Choices = new Choices('#rolSelect1', { removeItemButton: true });
+            rol3Choices = new Choices('#rolSelect3', { removeItemButton: true });
+
+            $('#imagenArchivo').change(function () {
                 const file = this.files[0];
                 $('#imagenNombre').val(file ? file.name : '');
             });
@@ -360,13 +362,15 @@
         }
         
         function cargarRolesAsignaciones() {
-            const selects = ['#rolSelect1', '#rolSelect2', '#rolSelect3'];
-            selects.forEach(s => $(s).empty().append('<option value="">-- Seleccione --</option>'));
+            rol1Choices.clearStore();
+            rol3Choices.clearStore();
+            $('#rolSelect2').empty().append('<option value="">-- Seleccione --</option>');
             $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
                 if (r.success) {
-                    selects.forEach(s => {
-                        r.data.forEach(rol => $(s).append(`<option value="${rol.id}">${rol.nombre}</option>`));
-                    });
+                    const opciones = r.data.map(rol => ({ value: rol.id, label: rol.nombre }));
+                    rol1Choices.setChoices(opciones, 'value', 'label', true);
+                    rol3Choices.setChoices(opciones, 'value', 'label', true);
+                    r.data.forEach(rol => $('#rolSelect2').append(`<option value="${rol.id}">${rol.nombre}</option>`));
                 } else {
                     showAlert(r.error || 'Error al cargar roles', 'error');
                 }
@@ -381,9 +385,9 @@
         $('#btnGuardarAsignaciones').click(function () {
             const data = {
                 FormularioId: parseInt($('#idFormularioAsignacion').val() || 0),
-                Rol1: $('#rolSelect1').val(),
+                Rol1: rol1Choices.getValue(true).map(Number),
                 Rol2: $('#rolSelect2').val(),
-                Rol3: $('#rolSelect3').val()
+                Rol3: rol3Choices.getValue(true).map(Number)
             };
 
             $.ajax({
