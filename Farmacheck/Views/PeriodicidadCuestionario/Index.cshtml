@@ -54,7 +54,8 @@
                         var formularios = ViewBag.Formularios as IEnumerable<Farmacheck.Application.Models.Checklists.ChecklistResponse>
                             ?? System.Linq.Enumerable.Empty<Farmacheck.Application.Models.Checklists.ChecklistResponse>();
                     }
-                    <select class="form-select" id="cuestionarioSelect">
+                    <select class="form-select" id="cuestionarioSelect" required>
+                        <option value="" selected disabled>Seleccione</option>
                         @foreach (var f in formularios)
                         {
                             <option value="@f.Id">@f.Nombre</option>
@@ -63,7 +64,8 @@
                 </div>
                 <div class="mb-2">
                     <label>Periodicidad</label>
-                    <select class="form-select" id="frecuenciaSelect">
+                    <select class="form-select" id="frecuenciaSelect" required>
+                        <option value="" selected disabled>Seleccione</option>
                         <option value="1">Diario</option>
                         <option value="2">Semanal</option>
                         <option value="3">Quincenal</option>
@@ -72,7 +74,7 @@
                 </div>
                 <div class="mb-2">
                     <label>Meta</label>
-                    <input type="number" class="form-control" id="metaInput" />
+                    <input type="number" class="form-control" id="metaInput" required />
                 </div>
             </div>
             <div class="modal-footer">
@@ -105,10 +107,19 @@
             $('#modalEntidad').modal('show');
         });
         $('#btnGuardar').click(function(){
+            const cuestionario = $('#cuestionarioSelect').val();
+            const frecuencia = $('#frecuenciaSelect').val();
+            const metaVal = $('#metaInput').val();
+
+            if(!cuestionario || !frecuencia || !metaVal){
+                showAlert('Debe capturar los tres campos', 'warning');
+                return;
+            }
+
             const datos = {
-                CuestionarioId: $('#cuestionarioSelect').val(),
-                Frecuencia: $('#frecuenciaSelect').val(),
-                Meta: parseInt($('#metaInput').val()) || 0
+                CuestionarioId: cuestionario,
+                Frecuencia: frecuencia,
+                Meta: parseInt(metaVal)
             };
             $.ajax({
                 url: '@Url.Action("Guardar", "PeriodicidadCuestionario")',
@@ -188,9 +199,8 @@
         });
     }
     function limpiar(){
-        const first = $('#cuestionarioSelect option:first').val();
-        $('#cuestionarioSelect').val(first).prop('disabled', false);
-        $('#frecuenciaSelect').val('1');
+        $('#cuestionarioSelect').val('').prop('disabled', false);
+        $('#frecuenciaSelect').val('');
         $('#metaInput').val('');
     }
 </script>
