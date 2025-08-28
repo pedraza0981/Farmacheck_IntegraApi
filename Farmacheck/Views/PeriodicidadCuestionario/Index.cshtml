@@ -50,16 +50,8 @@
             <div class="modal-body">
                 <div class="mb-2">
                     <label>Formulario</label>
-                    @{
-                        var formularios = ViewBag.Formularios as IEnumerable<Farmacheck.Application.Models.Checklists.ChecklistResponse>
-                            ?? System.Linq.Enumerable.Empty<Farmacheck.Application.Models.Checklists.ChecklistResponse>();
-                    }
                     <select class="form-select" id="cuestionarioSelect" required>
                         <option value="" selected disabled>Seleccione</option>
-                        @foreach (var f in formularios)
-                        {
-                            <option value="@f.Id">@f.Nombre</option>
-                        }
                     </select>
                 </div>
                 <div class="mb-2">
@@ -101,8 +93,10 @@
         tabla.on('length.dt', function (e, settings, len) {
             localStorage.setItem('periodicidadesPageLength', len);
         });
+        cargarFormularios();
         $('#btnNuevo').click(function(){
             limpiar();
+            cargarFormularios();
             $('#modalTitulo').text('Nuevo periodo');
             $('#modalEntidad').modal('show');
         });
@@ -167,6 +161,19 @@
                 });
                 nuevaTabla.on('length.dt', function (e, settings, len) {
                     localStorage.setItem('periodicidadesPageLength', len);
+                });
+                cargarFormularios();
+            }
+        });
+    }
+    function cargarFormularios(){
+        $.get('@Url.Action("FormulariosDisponibles","PeriodicidadCuestionario")', function(r){
+            if(r.success){
+                const select = $('#cuestionarioSelect');
+                select.empty();
+                select.append('<option value="" selected disabled>Seleccione</option>');
+                r.data.forEach(f => {
+                    select.append(`<option value="${f.id}">${f.nombre}</option>`);
                 });
             }
         });

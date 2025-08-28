@@ -43,8 +43,19 @@ namespace Farmacheck.Controllers
                     ? desc
                     : item.Frecuencia.ToString();
             }
-            ViewBag.Formularios = await _checklistApiClient.GetAllChecklistsAsync();
             return View(items);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> FormulariosDisponibles()
+        {
+            var periodicidades = await _apiClient.GetPeriodicitiesAsync();
+            var usados = periodicidades.Select(p => p.CuestionarioId).ToHashSet();
+            var formularios = await _checklistApiClient.GetAllChecklistsAsync();
+            var disponibles = formularios
+                .Where(f => !usados.Contains(f.Id))
+                .Select(f => new { f.Id, f.Nombre });
+            return Json(new { success = true, data = disponibles });
         }
 
         [HttpGet]
