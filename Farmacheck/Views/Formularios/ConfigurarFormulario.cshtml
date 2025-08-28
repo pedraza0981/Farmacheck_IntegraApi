@@ -5,6 +5,10 @@
     ViewData["Title"] = isEditing ? "Actualizar" : "Guardar";
 }
 
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+}
+
 <div class="container-fluid p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
@@ -252,6 +256,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function () {
             cargarCategorias();
@@ -361,7 +366,12 @@
             const multiSelects = ['#rolSelect1', '#rolSelect3'];
             const singleSelect = '#rolSelect2';
 
-            multiSelects.forEach(s => $(s).empty());
+            multiSelects.forEach(s => {
+                if ($(s).hasClass('select2-hidden-accessible')) {
+                    $(s).select2('destroy');
+                }
+                $(s).empty();
+            });
             $(singleSelect).empty().append('<option value="">-- Seleccione --</option>');
 
             $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
@@ -370,6 +380,11 @@
                         multiSelects.forEach(s => $(s).append(`<option value="${rol.id}">${rol.nombre}</option>`));
                         $(singleSelect).append(`<option value="${rol.id}">${rol.nombre}</option>`);
                     });
+
+                    multiSelects.forEach(s => $(s).select2({
+                        placeholder: '-- Seleccione --',
+                        width: '100%'
+                    }));
                 } else {
                     showAlert(r.error || 'Error al cargar roles', 'error');
                 }
