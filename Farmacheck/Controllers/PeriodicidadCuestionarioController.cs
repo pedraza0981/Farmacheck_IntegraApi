@@ -47,13 +47,13 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> FormulariosDisponibles()
+        public async Task<JsonResult> FormulariosDisponibles(int? id)
         {
             var periodicidades = await _apiClient.GetPeriodicitiesAsync();
             var usados = periodicidades.Select(p => p.CuestionarioId).ToHashSet();
             var formularios = await _checklistApiClient.GetAllChecklistsAsync();
             var disponibles = formularios
-                .Where(f => !usados.Contains(f.Id))
+                .Where(f => !usados.Contains(f.Id) || (id.HasValue && f.Id == id.Value))
                 .Select(f => new { f.Id, f.Nombre });
             return Json(new { success = true, data = disponibles });
         }
