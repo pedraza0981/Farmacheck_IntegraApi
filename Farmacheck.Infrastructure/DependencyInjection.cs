@@ -109,6 +109,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["CustomersRolesUsersApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IQuizAssignmentManagerApiClient, QuizAssignmentManagerApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["QuizAssignmentManagerApi:BaseUrl"]!);
+        });
+
         return services;
     }
 }
