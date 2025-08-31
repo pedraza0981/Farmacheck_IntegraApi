@@ -34,6 +34,9 @@ namespace Farmacheck.Controllers
         [HttpPost]
         public async Task<JsonResult> Guardar([FromBody] AsignacionCuestionarioViewModel model)
         {
+            if (model == null || model.CuestionarioId <= 0)
+                return Json(new { success = false, error = "Datos inválidos" });
+
             var request = _mapper.Map<QuizAssignmentManagerRequest>(model);
             var result = await _apiClient.CreateAsync(request);
             return Json(new { success = result });
