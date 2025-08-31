@@ -379,7 +379,7 @@
             rol1Choices.clearStore();
             rol3Choices.clearStore();
             $('#rolSelect2').empty().append('<option value="">-- Seleccione --</option>');
-            $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
+            return $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
                 if (r.success) {
                     const opciones = r.data.map(rol => ({ value: rol.id, label: rol.nombre }));
                     rol1Choices.setChoices(opciones, 'value', 'label', true);
@@ -391,12 +391,32 @@
             });
         }
 
-             $('#btnAsignaciones').click(function () {
-            cargarRolesAsignaciones();
-            $('#modalAsignaciones').modal({
-                backdrop: 'static', // No se cierra al hacer click fuera
-                keyboard: false      // No se cierra con la tecla ESC
-            }).modal('show');
+        $('#btnAsignaciones').click(function () {
+            const id = $('#idFormularioAsignacion').val();
+            cargarRolesAsignaciones().then(function () {
+                if (id) {
+                    $.get('@Url.Action("Obtener", "AsignacionCuestionario")', { cuestionarioId: id }, function (r) {
+                        if (r.success && r.data) {
+                            const a = r.data;
+                            if (a.asignacionPorAuditor && a.asignacionPorAuditor.length)
+                                rol1Choices.setChoiceByValue(a.asignacionPorAuditor.map(String));
+                            if (a.asignacionDeAuditados && a.asignacionDeAuditados.length)
+                                $('#rolSelect2').val(a.asignacionDeAuditados[0]);
+                            if (a.asignacionPorSupervisor && a.asignacionPorSupervisor.length)
+                                rol3Choices.setChoiceByValue(a.asignacionPorSupervisor.map(String));
+                        }
+                        $('#modalAsignaciones').modal({
+                            backdrop: 'static',
+                            keyboard: false
+                        }).modal('show');
+                    });
+                } else {
+                    $('#modalAsignaciones').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    }).modal('show');
+                }
+            });
         });
 
         $('#btnGuardarAsignaciones').click(function () {
