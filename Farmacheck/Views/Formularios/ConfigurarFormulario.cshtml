@@ -436,14 +436,14 @@
 
         $('#btnGuardarAsignaciones').click(function () {
             const data = {
-                FormularioId: parseInt($('#idFormularioAsignacion').val() || 0),
-                Rol1: rol1Choices.getValue(true).map(Number),
-                Rol2: $('#rolSelect2').val(),
-                Rol3: rol3Choices.getValue(true).map(Number)
+                CuestionarioId: parseInt($('#idFormularioAsignacion').val() || 0),
+                AsignacionPorAuditor: rol1Choices.getValue(true).map(Number),
+                AsignacionDeAuditados: $('#rolSelect2').val() ? [parseInt($('#rolSelect2').val())] : [],
+                AsignacionPorSupervisor: rol3Choices.getValue(true).map(Number)
             };
 
             $.ajax({
-                url: '@Url.Action("GuardarAsignaciones", "Formularios")',
+                url: '@Url.Action("Guardar", "AsignacionCuestionario")',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
