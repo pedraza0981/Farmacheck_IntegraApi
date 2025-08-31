@@ -28,6 +28,7 @@ namespace Farmacheck
                 typeof(PeriodicityByQuestionnaireProfile),
                 typeof(RoleProfile),
                 typeof(PermissionProfile),
+                typeof(QuizAssignmentManagerProfile),
                 typeof(HierarchyByRoleProfile),
                 typeof(UserProfile));
 

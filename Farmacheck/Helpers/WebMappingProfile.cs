@@ -18,6 +18,7 @@ using Farmacheck.Application.Models.ResponseFormatByQuestion;
 using Farmacheck.Application.Models.SubBrands;
 using Farmacheck.Application.Models.Users;
 using Farmacheck.Application.Models.Zones;
+using Farmacheck.Application.Models.QuizAssignmentManager;
 using Farmacheck.Models;
 using Farmacheck.Models.Inputs;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -191,6 +192,8 @@ namespace Farmacheck.Helpers
             CreateMap<UsuarioRolViewModel, UserByRoleRequest>();
             CreateMap<UsuarioRolViewModel, UpdateUserByRoleRequest>();
             CreateMap<RolPorUsuarioClientesAsignadosDto, RolPorUsuarioClientesAsignadosViewModel>().ReverseMap();
+            CreateMap<QuizAssignmentManagerDto, AsignacionCuestionarioViewModel>().ReverseMap();
+            CreateMap<AsignacionCuestionarioViewModel, QuizAssignmentManagerRequest>();
         }
     }
 }
