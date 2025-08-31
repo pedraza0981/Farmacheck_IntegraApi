@@ -25,6 +25,7 @@
            href="@Url.Action("Index", "Formularios", new { id = ViewBag.FormularioId })">
             <i class="bi bi-arrow-left"></i> Regresar
         </a>
+        <button type="button" class="btn btn-secondary" id="btnAsignaciones">Asignaciones</button>
     </div>
     <h4 class=" text-white p-3 rounded" style="background-color:#0c4c98">@(isEditing ? "Actualizar Checklist" : "Guardar Checklist")</h4>
 
@@ -228,14 +229,50 @@
         </div>
     </div>
 
-    @await Html.PartialAsync("_AsignacionesModal")
+    <!-- Modal de asignaciones -->
+    <div class="modal fade" id="modalAsignaciones" tabindex="-1" aria-labelledby="modalAsignacionesLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary_form text-white">
+                    <h5 class="modal-title" id="modalAsignacionesLabel">Asignaciones</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="idFormularioAsignacion" />
+                    <div class="mb-3">
+                        <label>Auditor</label>
+                        <select id="rolSelect1" class="form-select choices-dropdown" multiple></select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Auditado</label>
+                        <select id="rolSelect2" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Supervisor</label>
+                        <select id="rolSelect3" class="form-select choices-dropdown" multiple></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnGuardarAsignaciones">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
 @section Scripts {
     <script>
+        let rol1Choices;
+        let rol3Choices;
+
         $(document).ready(function () {
             cargarCategorias();
+
+            rol1Choices = new Choices('#rolSelect1', { removeItemButton: true });
+            rol3Choices = new Choices('#rolSelect3', { removeItemButton: true });
 
             $('#imagenArchivo').change(function () {
                 const file = this.files[0];
@@ -244,6 +281,7 @@
 
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
+            $('#idFormularioAsignacion').val(id);
             if (id) {
                 $.get('@Url.Action("ObtenerFormulario", "Formularios")', { id }, function (r) {
                     if (r.success) {
@@ -336,5 +374,56 @@
                 }
             });
         }
+        
+        function cargarRolesAsignaciones() {
+            rol1Choices.clearStore();
+            rol3Choices.clearStore();
+            $('#rolSelect2').empty().append('<option value="">-- Seleccione --</option>');
+            $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
+                if (r.success) {
+                    const opciones = r.data.map(rol => ({ value: rol.id, label: rol.nombre }));
+                    rol1Choices.setChoices(opciones, 'value', 'label', true);
+                    rol3Choices.setChoices(opciones, 'value', 'label', true);
+                    r.data.forEach(rol => $('#rolSelect2').append(`<option value="${rol.id}">${rol.nombre}</option>`));
+                } else {
+                    showAlert(r.error || 'Error al cargar roles', 'error');
+                }
+            });
+        }
+
+             $('#btnAsignaciones').click(function () {
+            cargarRolesAsignaciones();
+            $('#modalAsignaciones').modal({
+                backdrop: 'static', // No se cierra al hacer click fuera
+                keyboard: false      // No se cierra con la tecla ESC
+            }).modal('show');
+        });
+
+        $('#btnGuardarAsignaciones').click(function () {
+            const data = {
+                FormularioId: parseInt($('#idFormularioAsignacion').val() || 0),
+                Rol1: rol1Choices.getValue(true).map(Number),
+                Rol2: $('#rolSelect2').val(),
+                Rol3: rol3Choices.getValue(true).map(Number)
+            };
+
+            $.ajax({
+                url: '@Url.Action("GuardarAsignaciones", "Formularios")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (r) {
+                    if (r.success) {
+                        showAlert(r.message || 'Asignaciones guardadas correctamente', 'success');
+                        $('#modalAsignaciones').modal('hide');
+                    } else {
+                        showAlert(r.error || 'Error al guardar asignaciones', 'error');
+                    }
+                },
+                error: function () {
+                    showAlert('Error en la petición', 'error');
+                }
+            });
+        });
     </script>
 }
