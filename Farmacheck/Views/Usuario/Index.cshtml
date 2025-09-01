@@ -268,10 +268,12 @@
                 localStorage.setItem('usuariosPageLength', len);
             });
 
-            cargarRolesModal();
+            cargarRolesModal($('#unidadDeNegocioSelect').val());
             cargarUnidadesNegocio();
             $('#unidadDeNegocioSelect').change(function () {
-                cargarMarcas($(this).val());
+                const unidadId = $(this).val();
+                cargarMarcas(unidadId);
+                cargarRolesModal(unidadId);
             });
             $('#modalGestionRol').on('show.bs.modal', function (e) {
                 if (!usuarioGuardado) {
@@ -280,7 +282,8 @@
                     return;
                 }
                 clientesSeleccionados = [];
-                cargarRolesModal();
+                const unidadId = $('#unidadDeNegocioSelect').val();
+                cargarRolesModal(unidadId);
             });
 
             $('#btnGestionarRoles').click(function () {
@@ -584,14 +587,16 @@
             }
         }
 
-        function cargarRolesModal() {
+        function cargarRolesModal(unidadId, rolSeleccionado = null) {
             const select = $('#rolSelectModal');
             select.empty();
             select.append('<option value="">-- Selecciona un rol --</option>');
-            $.get('@Url.Action("ListarGestion", "Rol")', function (r) {
+            if (!unidadId) return;
+            $.get('@Url.Action("ListarPorUnidadNegocio", "Rol")', { unidadId }, function (r) {
                 if (r.success) {
                     r.data.forEach(rol => {
-                        select.append(`<option value="${rol.id}">${rol.nombre}</option>`);
+                        const selected = rolSeleccionado && rol.id === rolSeleccionado ? 'selected' : '';
+                        select.append(`<option value="${rol.id}" ${selected}>${rol.nombre}</option>`);
                     });
                 }
             });
@@ -1001,7 +1006,7 @@
 
         function limpiarModalGestionRol() {
             $('#idRolPorUsuario').val('');
-            $('#rolSelectModal').val('').prop('disabled', false);
+            $('#rolSelectModal').empty().append('<option value="">-- Selecciona un rol --</option>').prop('disabled', false);
             $('#unidadDeNegocioSelect').val('').prop('disabled', false);
             $('#checkAllMarcas').prop('checked', false);
             $('#checkAllSubMarcas').prop('checked', false);
@@ -1043,8 +1048,9 @@
             $.get('@Url.Action("ObtenerClientesPorRolPorUsuario", "Usuario")', { id }, function (r) {
                 if (r.success) {
                     clientesSeleccionados = r.data.clienteIds || [];
-                    $('#rolSelectModal').val(r.data.rolId).prop('disabled', true);
                     $('#unidadDeNegocioSelect').val(r.data.unidadDeNegocioId).prop('disabled', true);
+                    cargarRolesModal(r.data.unidadDeNegocioId, r.data.rolId);
+                    $('#rolSelectModal').prop('disabled', true);
                     cargarMarcas(r.data.unidadDeNegocioId, r.data.marcaIds || [], r.data.submarcaIds || [], r.data.zonaIds || []);
                 } else {
                     showAlert(r.error || 'Error al obtener datos', 'error');
