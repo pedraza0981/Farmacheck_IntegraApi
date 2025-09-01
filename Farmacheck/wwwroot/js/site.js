@@ -2,6 +2,17 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+$(function () {
+    const $btnAsignaciones = $("#btnAsignaciones");
+
+    $("#btnAgregarChecklist").on("click", function () {
+        $btnAsignaciones.hide();
+    });
+
+    $("#btnEditarChecklist").on("click", function () {
+        $btnAsignaciones.show();
+    });
+});
 function showAlert(message, type = 'info') {
     return Swal.fire({ text: message, icon: type });
 }
