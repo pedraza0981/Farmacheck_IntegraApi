@@ -56,9 +56,17 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<string> CreateAsync(CustomerRolUserRequest request)
         {
-            var response = await _http.PostAsJsonAsync("api/v1/Customers_RolesUsers", request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/v1/Customers_RolesUsers", request);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
 
         public async Task<bool> UpdateAsync(UpdateCustomerRolUserRequest request)
@@ -99,7 +107,7 @@ namespace Farmacheck.Infrastructure.Services
                 // Espera que el backend devuelva un bool puro en JSON
                 var result = await response.Content.ReadFromJsonAsync<bool>();
                 return result;
-            }            
+            }
             catch (Exception ex)
             {
                 // Cualquier otro error inesperado
