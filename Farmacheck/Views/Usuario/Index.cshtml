@@ -291,9 +291,7 @@
                     showAlert('Primero guarda el usuario', 'warning');
                     return;
                 }
-                $('#idRolPorUsuario').val('');
-                $('#rolSelectModal').prop('disabled', false);
-                $('#unidadDeNegocioSelect').prop('disabled', false);
+                limpiarModalGestionRol();
             });
 
             $('#collapseRoles').on('show.bs.collapse', function (e) {
@@ -1016,6 +1014,8 @@
             $('#contenedorMarcas').empty();
             $('#contenedorSubMarcas').empty();
             $('#contenedorClientes').empty();
+            $('#countMarcas').text('(0)');
+            $('#countSubMarcas').text('(0)');
             clientesSeleccionados = [];
             cargarZonas();
         }
