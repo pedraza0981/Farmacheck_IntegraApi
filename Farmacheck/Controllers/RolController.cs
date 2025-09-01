@@ -73,6 +73,23 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
+        public async Task<JsonResult> ListarPorUnidadNegocio(int unidadId)
+        {
+            var apiData = await _apiClient.GetRolesByBusinessUnitAsync((byte)unidadId);
+            var dtos = _mapper.Map<List<RoleDto>>(apiData);
+            var roles = _mapper.Map<List<RolViewModel>>(dtos);
+
+            var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
+            foreach (var r in roles)
+            {
+                var u = unidadesApi.FirstOrDefault(b => b.Id == r.UnidadDeNegocioId);
+                r.UnidadDeNegocioNombre = u?.Nombre;
+            }
+
+            return Json(new { success = true, data = roles });
+        }
+
+        [HttpGet]
         public async Task<JsonResult> ListarGestion()
         {
             var apiData = await _apiClient.GetRolesAsync();

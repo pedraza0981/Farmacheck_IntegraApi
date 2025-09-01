@@ -6,6 +6,7 @@ namespace Farmacheck.Application.Interfaces
     public interface IRoleApiClient
     {
         Task<IEnumerable<RoleResponse>> GetAllRolesAsync();
+        Task<IEnumerable<RoleResponse>> GetRolesByBusinessUnitAsync(byte businessUnitId);
         Task<List<RoleResponse>> GetRolesAsync();
         Task<PaginatedResponse<RoleResponse>> GetRolesByPageAsync(int page, int items);
         Task<RoleResponse?> GetRoleAsync(byte id);
