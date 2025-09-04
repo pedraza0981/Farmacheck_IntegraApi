@@ -10,7 +10,7 @@ namespace Farmacheck.Application.Models.OptionsByQuestion
 
         public bool RequiereInformacionExtra { get; set; }
 
-        public decimal Ponderacion { get; set; }
+        public decimal? Ponderacion { get; set; }
 
         public IEnumerable<OptionsComplementByQuestionRequest>? OpcionesComplemento { get; set; }
     }

@@ -16,8 +16,10 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<IEnumerable<ChecklistResponse>> GetAllChecklistsAsync()
         {
-            return await _http.GetFromJsonAsync<IEnumerable<ChecklistResponse>>("api/v1/checklists")
+            var checklists = await _http.GetFromJsonAsync<IEnumerable<ChecklistResponse>>("api/v1/checklists")
                    ?? Enumerable.Empty<ChecklistResponse>();
+
+            return checklists.OrderBy(c => c.Nombre);
         }
 
         public async Task DeleteAsync(int id)

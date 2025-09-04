@@ -7,7 +7,7 @@
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="text-dark">Secciones del Checklist</h4>        
+        <h4 class="text-dark">Secciones del Checklist</h4>
         <button id="btnNuevaSeccion" class="btn mb-3" style="background-color: #00ab8e; color:white;">
             <i class="bi bi-plus-circle"></i> Nueva sección
         </button>
@@ -92,8 +92,6 @@
             });
         });
 
-
-
         function cargarSecciones() {
             $.get('@Url.Action("ListarSecciones", "Formularios")', { formularioId: @ViewBag.FormularioId ?? 1 }, function (r) {
                 if (r.success) {
@@ -102,7 +100,7 @@
                         tabla.DataTable().destroy();
                     }
 
-                   const tbody = tabla.find('tbody');
+                    const tbody = tabla.find('tbody');
                     tbody.empty();
                     r.secciones.forEach(s => {
                         tbody.append(`
@@ -136,6 +134,7 @@
                         info: true,
                         lengthMenu: [5, 10, 25, 50],
                         pageLength: 5,
+                        order: [[1, 'asc']],
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                         }

@@ -30,6 +30,11 @@ namespace Farmacheck.Application.Models.Questions
 
         public bool RequiereEvidencia { get; set; }
 
+        public int? EtiquetaId { get; set; }
+
+        public decimal? Ponderacion { get; set; }
+
+
         public bool? Estatus { get; set; }
 
         public ResponseFormatByQuestionRequest FormatoDeRespuesta { get; set; } = null!;

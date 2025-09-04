@@ -4,6 +4,7 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Checklists;
 using Farmacheck.Application.Models.ChecklistScoreRating;
 using Farmacheck.Application.Models.ChecklistSections;
+using Farmacheck.Application.Models.GroupingTags;
 using Farmacheck.Infrastructure.Services;
 using Farmacheck.Models;
 using Farmacheck.Models.Inputs;
@@ -36,7 +37,10 @@ namespace Farmacheck.Controllers
         private readonly IMapper _mapper;
         
 
-        public FormulariosController(IChecklistApiClient apiClient, ICategoryByQuestionnaireApiClient categoryApiClient, IChecklistSectionApiClient sectionApiClient, IMapper mapper)
+        public FormulariosController(
+            IChecklistApiClient apiClient, 
+            ICategoryByQuestionnaireApiClient categoryApiClient, 
+            IChecklistSectionApiClient sectionApiClient, IMapper mapper)
         {
             _apiClient = apiClient;
             _categoryApiClient = categoryApiClient;
@@ -64,7 +68,7 @@ namespace Farmacheck.Controllers
                 f.Nombre,
                 Fecha = f.CreadoEl.ToString("yyyy-MM-dd"),
                 Publicar = f.PublicarCuestionario
-            }).ToList();
+            }).OrderBy(c => c.Nombre).ToList();
 
             return Json(new { success = true, formularios = lista });
         }
@@ -210,23 +214,35 @@ namespace Farmacheck.Controllers
             if (model.Id == 0)
             {
                 var request = _mapper.Map<ChecklistSectionRequest>(model);
-                var id = await _seccionApiClient.CreateAsync(request);
+                var response = await _seccionApiClient.CreateAsync(request);
+                if (response.Id is null)
+                {
+                    return Json(new { success = false, error = response.Message });
+                }
 
+                var id = response.Id;
                 return Json(new { success = true, message = "Sección creada", id = model.Id });
             }
             else
             {
-                // Editar
                 var existente = _secciones.FirstOrDefault(s => s.Id == model.Id);
                 if (existente == null)
                     return Json(new { success = false, error = "Sección no encontrada." });
 
+                if (existente.Nombre == model.Nombre)
+                {
+                    return Json(new { success = true, message = "Sección actualizada" });
+                }
+
                 var seccionRequest = new UpdateChecklistSectionRequest() { CuestionarioId = model.FormularioId, SeccionId = model.Id, Nombre = model.Nombre };
+                var response = await _seccionApiClient.UpdateAsync(seccionRequest);
+                if (!response.Updated)
+                {
+                    return Json(new { success = false, error = response.Message });
+                }
 
-                await _seccionApiClient.UpdateAsync(seccionRequest);
                 _secciones.Remove(existente);
-
-                return Json(new { success = true, message = "Sección actualizada" });
+                return Json(new { success = true, message = "Sección actualizada" }); 
             }
         }
 
@@ -320,7 +336,7 @@ namespace Farmacheck.Controllers
         public async Task<JsonResult> ListarSecciones(int formularioId)
         {
             var apiData = await _seccionApiClient.GetSectionsByChecklistAsync(formularioId);
-            apiData.Secciones = apiData.Secciones.Where(s => s.Estatus == true).ToList();
+            apiData.Secciones = apiData?.Secciones?.Where(s => s.Estatus == true).OrderBy(s => s.Nombre).ToList();
 
             var dtos = _mapper.Map<SeccionDelCuestionarioDto>(apiData);
             _secciones = _mapper.Map<List<SeccionViewModel>>(dtos.Secciones);

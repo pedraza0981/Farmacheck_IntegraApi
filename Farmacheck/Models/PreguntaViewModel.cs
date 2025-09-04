@@ -30,12 +30,18 @@
 
         public bool? RequiereEvidencia { get; set; }
 
+        public int? EtiquetaId { get; set; }
+
+        public string? EtiquetaNombre { get; set; }
+
+        public decimal? Ponderacion { get; set; }
+
         public bool? Estatus { get; set; }
 
         public FormatoDeRespuestaPorPreguntaViewModel FormatoDeRespuesta { get; set; } = null!;
 
         public List<OpcionesPorPreguntaViewModel>? OpcionesPorPregunta { get; set; }
 
-        //public IEnumerable<EtiquetasPorEscalaNumericaDto>? EtiquetasPorEscalaNumerica { get; set; }
+        public List<EtiquetasPorEscalaNumericaViewModel>? EtiquetasPorEscalaNumerica { get; set; }
     }
 }

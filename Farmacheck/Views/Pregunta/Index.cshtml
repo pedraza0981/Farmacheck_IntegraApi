@@ -20,17 +20,23 @@
            href="@Url.Action("ConfigurarSecciones", "Formularios", new { id = ViewBag.FormularioId })">
             <i class="bi bi-arrow-left"></i> Regresar
         </a>
-        <a href="#" id="btnNuevaPregunta" class="btn" style="background-color: #00ab8e; color:white;"> 
-            <i class="bi bi-plus-circle"></i> Nueva pregunta
-        </a>
+        <div>
+            <a href="#" id="btnNuevaEtiqueta" class="btn" style="background-color: #0c4c98; color:white;">
+                <i class="bi bi-plus-circle"></i> Nueva Etiqueta
+            </a>
+            <a href="#" id="btnNuevaPregunta" class="btn" style="background-color: #00ab8e; color:white;">
+                <i class="bi bi-plus-circle"></i> Nueva pregunta
+            </a>
+        </div>
     </div>
 
     <table class="table table-bordered custom-table">
         <thead>
             <tr>
-                <th style="width: 20%">Id</th>
-                <th style="width: 30%">Nombre</th>
-                <th class="text-center" style="width: 50%">Acciones</th>
+                <th style="width: 10%">Id</th>
+                <th style="width: 30%">Etiqueta de Agrupación</th>
+                <th style="width: 30%">Pregunta</th>
+                <th class="text-center" style="width: 30%">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -38,11 +44,9 @@
             {
                 <tr>
                     <td>@p.Id</td>
+                    <td>@p.EtiquetaNombre</td>
                     <td>@p.Nombre</td>
                     <td class="text-center">
-                        <a class="btn btn-outline-primary btn-sm" asp-action="Visualizar" asp-route-id="@p.Id">
-                            <i class="bi bi-eye"></i> Visualizar
-                        </a>
                         <button class="btn btn-outline-success btn-sm" onclick="editarPregunta(@p.Id)">
                             <i class="bi bi-pencil"></i> Editar Pregunta
                         </button>
@@ -96,35 +100,46 @@
                     </div>
 
                     <div class="mb-3 mt-3 row">
-                        <div class="col-md-12">
+                        <div class="col-md-8">
                             <label>Tipo de pregunta</label>
-                            <select class="form-select" id="tipoPregunta">
-                                @foreach (var tipo in ViewBag.TiposPregunta as List<SelectListItem>)
+                            <select class="form-select" id="tipoPregunta" onchange="elegirOpciones(this, false)">
+                                @foreach (var tipo in ViewBag.TiposPregunta as List<FormatoDeRespuestaCatViewModel>)
                                 {
-                                    <option value="@tipo.Value">@tipo.Text</option>
+                                    <option value="@tipo.Id">@tipo.Nombre</option>
                                 }
                             </select>
                         </div>
-                    </div>
 
-                    <div class="mb-2 row">
                         <div class="col-md-4 d-flex align-items-end">
-                            <div class="form-check ms-3">
+                            <div class="form-check ms-3" id="checkMutipleSeleccion">
                                 <input type="checkbox" class="form-check-input" id="multipleSeleccion" />
                                 <label class="form-check-label" for="multipleSeleccion">Múltiple selección</label>
                             </div>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
+                    </div>
+
+                    <div class="mb-2 row" id="grupoPonderacion">
+                        <div class="col-md-4 mb-3 d-flex align-items-end">
                             <div class="form-check ms-3">
-                                <input class="form-check-input" type="checkbox" id="esRequerido">
-                                <label class="form-check-label" for="esRequerido">Requerido</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <div class="form-check ms-3">
-                                <input class="form-check-input" type="checkbox" id="conPonderacion">
+                                <input type="checkbox" class="form-check-input" id="conPonderacion" onchange="mostrarPonderacion(this.checked)">
                                 <label class="form-check-label" for="conPonderacion">Con Ponderación</label>
                             </div>
+                        </div>
+                        <div class="col-md-4 mb-2" id="inputPonderacion">
+                            <label>Ponderación</label>
+                            <input type="number" class="form-control" id="ponderacion" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-3 row">
+                        <div class="col-md-12">
+                            <label>Etiqueta de Agrupación</label>
+                            <select class="form-select" id="etiquetaDeAgrupacion" onchange="elegirEtiqueta(this)">
+                                @foreach (var et in ViewBag.Etiquetas as List<EtiquetaDeAgrupacionViewModel>)
+                                {
+                                    <option value="@et.Id">@et.Etiqueta</option>
+                                }
+                            </select>
                         </div>
                     </div>
 
@@ -143,17 +158,14 @@
                             <label>Evidencias obligatorias</label>
                             <input type="number" class="form-control" id="numeroDeEvidenciasObligatorias" autocomplete="off" />
                         </div>
-                    </div>                    
+                    </div>
 
                     <hr />
                     <div>
                         <div class="mb-2">
                             <h6 class="text-primary">Lista de Opciones y Puntuaciones</h6>
                         </div>
-                        
-                            <div id="opcionesContainer"></div>
-                    
-                        <button class="btn btn-outline-dark btn-sm mt-2" type="button" onclick="agregarOpcion()">+ Agregar opción</button>
+                        <div id="contenedor"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -200,9 +212,34 @@
     </div>
 </div>
 
+<!-- Modal Nueva/Editar Etiqueta -->
+<div class="modal fade" id="modalEtiqueta" tabindex="-1" aria-labelledby="modalEtiquetaTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalEtiquetaTitulo">Nueva Etiqueta de Agrupación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="seccionId" />
+                <div class="mb-2">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" id="tituloEtiqueta" placeholder="Nombre de la etiqueta" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardarEtiqueta" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        $('.table').DataTable();
+        var formatos = @Html.Raw(ViewBag.Formatos);
+
+        $('.table').DataTable({order: [[1, 'asc']],});
         $('#btnNuevaPregunta').click(function (e) {
             e.preventDefault(); // evita navegación si es <a>
             limpiarModalPregunta(); // ← si tienes una función para limpiar campos
@@ -210,8 +247,19 @@
             $('#modalPregunta').modal('show');
         });
 
+         $('#btnNuevaEtiqueta').click(function () {
+             limpiarModalEtiqueta();
+             $('#modalEtiquetaTitulo').text("Nueva Etiqueta de Agrupación");
+             $('#modalEtiqueta').modal('show');
+         });
+
+        function limpiarModalEtiqueta() {
+            $('#tituloEtiqueta').val('');
+        }
+
         function abrirModalPregunta() {
             limpiarModalPregunta();
+
             $('#modalPregunta').modal('show');
         }
 
@@ -220,63 +268,183 @@
             $('#modalPregunta').modal('hide');
         }
 
-
         function limpiarModalPregunta() {
             $('#preguntaId').val('');
             $('#titulo').val('');
             $('#descripcion').val('');
             $('#tipoPregunta').val('');
-            $('#esRequerido').prop('checked', false);
+            $('#etiquetaDeAgrupacion').val('');
+            $('#requiereEvidencia').val('false');
+            $('#ponderacion').val('');
             $('#prioridad').val('');
             $('#hipervinculo').val('');
             $('#agregarComentario').val('false');
             $('#agregarImagen').val('false');
             $('#agregarCamposExtras').val('false');
             $('#opcionesContainer').empty();
+            $('#multipleSeleccion').val('false');
+            $('#conPonderacion').val('false');
+            $('#grupoPonderacion').hide();
+            //$('#ponderacion').hide();
+            $('#inputPonderacion').hide();
+            $('#checkMutipleSeleccion').hide();
+        }
+
+        $('#btnGuardarEtiqueta').click(function () {
+            const datos = {
+                SeccionId: parseInt($('#seccionId').val() || 0),
+                CuestionarioId: parseInt($('#cuestionarioId').val() || 0),
+                Etiqueta: $('#tituloEtiqueta').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("GuardarEtiqueta", "Pregunta")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function (r) {
+                    if (r.success) {
+                        $('#modalEtiqueta').modal('hide');
+                        $("#modalGuardadoLabel").text("Etiqueta");
+                        mostrarModalGuardado();
+                    } else {
+                        showAlert(r.error || "Error al guardar", 'error');
+                    }
+                }
+            });
+        });
+
+        function elegirEtiqueta(selectElement){
+            console.log(selectElement);
+        }
+
+        function elegirOpciones(selectElement, isEdit){
+            var selectedId = 0;
+
+            if (!isEdit) {
+                var selectedOption = selectElement.options[selectElement.selectedIndex];
+                selectedId = selectedOption.value;
+            } else {
+                selectedId = selectElement;
+            }
+
+            const formato = formatos.find(ft => ft.Id == selectedId);
+            const esFormatoPorEscalaNumerica = formato.BasadoEnEscalaNumerica;
+
+            if (formato.Formato == 'opcionMultiple') {
+                $('#checkMutipleSeleccion').show();
+            } else {
+                $('#checkMutipleSeleccion').hide();
+            }
+
+            if (formato.Formato == 'textoCorto' || formato.Formato == 'textoLargo') {
+                $('#grupoPonderacion').show();
+            } else {
+                $('#grupoPonderacion').hide();
+            }
+
+            $('#contenedor').empty();
+            if (esFormatoPorEscalaNumerica) {
+                $('#contenedor').append(`
+                    <fieldset class="border p-3 mb-1 rounded">
+                        <div class="opcion-item">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Límite Inferior</label>
+                                    <input type="number" class="form-control" id="limiteInferior" autocomplete="off" />
+                                </div>
+                                <div class="col-8">
+                                    <label></label> 
+                                    <input type="text" class="form-control" placeholder="Etiqueta" id="etiquetaLimiteInferior" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Límite Superior</label>
+                                    <input type="number" class="form-control" id="limiteSuperior" autocomplete="off" />
+                                </div>
+                                <div class="col-8">
+                                    <label></label>
+                                    <input type="text" class="form-control" placeholder="Etiqueta" id="etiquetaLimiteSuperior" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                `);
+            } else {
+                $('#contenedor').append(`
+                    <div id="opcionesContainer"></div>
+                    <button class="btn btn-outline-dark btn-sm mt-2" type="button" onclick="agregarOpcion()">+ Agregar opción</button>
+                `);
+            }
         }
 
         function agregarOpcion() {
             const index = $('#opcionesContainer .opcion-item').length;
             $('#opcionesContainer').append(`
-                <fieldset class="border p-3 mb-1 rounded">
-                <div class="opcion-item" id="item-contenedor${index}">
-                    <div class="row">
-                        <div class="col-3">
-                            <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${index}].Texto" autocomplete="off"/>
+                <div class="opcion-item">
+                    <fieldset class="border p-3 mb-1 rounded">
+                        <div id="item-contenedor${index}">
+                            <div class="row">
+                                <div class="col-3">
+                                    <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${index}].Texto" autocomplete="off"/>
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" class="form-control" placeholder="Valor" id="opcionPonderacion" name="opciones[${index}].Valor" autocomplete="off" />
+                                </div>
+                                <div class="col-3">
+                                    <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" onchange="agregarComplemento(this.checked, ${index}, null)"/>
+                                    <label class="form-check-label" for="reqInformacionExtra">Información Extra</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" />
+                                    <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
+                                </div>
+                                <div class="col-1">
+                                    <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-2">
-                            <input type="number" class="form-control" placeholder="Valor" id="opcionPonderacion" name="opciones[${index}].Valor" autocomplete="off" />
-                        </div>
-                        <div class="col-3">
-                            <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" onchange="agregarComplemento(this.checked, ${index}, null)"/>
-                            <label class="form-check-label" for="reqInformacionExtra">Información Extra</label>
-                        </div>
-                        <div class="col-3">
-                            <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" />
-                            <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
-                        </div> 
-                        <div class="col-1">
-                            <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
-                        </div>
-                    </div>
+                    </fieldset>
                 </div>
-                </fieldset>
             `);
+        }
+
+        function mostrarPonderacion(isChecked) {
+            $('#ponderacion').val('');
+            if (isChecked) {
+               $('#inputPonderacion').show();
+            } else {
+                $('#inputPonderacion').hide();
+            }
         }
 
         function agregarComplemento(isChecked, index, complemento) {
             const idIndex = 'item-contenedor' + index;
             const nombre = complemento != null ? complemento.nombre : '';
             const lista = complemento != null ? complemento.listaDeOpcionesPredefinidas : '';
+            
+            /*
+            <div class="col-4">
+                <input type="text" class="form-control" id="complementoListaDeOpciones" placeholder="Lista de Opciones" value="${lista}" autocomplete="off" />
+            </div>
+            */
             if (isChecked) {
                 $('#' + idIndex).append(`
                     <div class="row" id="complemento${index}">
-                        <div class="col-5 "></div>
-                        <div class="col-3">
-                            <input type="text" class="form-control" id="complementoNombre" placeholder="Nombre" value="${nombre}" autocomplete="off"/>
+                        <div class="row mb-2">
+                            <div class="col-5"></div>
+                            <div class="col-7">
+                                <input type="text" class="form-control" id="complementoNombre" placeholder="Indique qué información extra desea preguntarle al usuario" value="${nombre}" autocomplete="off"/>
+                            </div>
                         </div>
-                        <div class="col-4">
-                            <input type="text" class="form-control" id="complementoListaDeOpciones" placeholder="Lista de Opciones" value="${lista}" autocomplete="off" />
+                        <div class="row">
+                            <div class="col-5"></div>
+                            <div class="col-6">
+                                <label class="form-check-label">Lista de Opciones</label>
+                                <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="agregarItem('complemento${index}-contenedor-opciones')"><i class="bi bi-plus-square"></i></button>
+                                <div id="complemento${index}-contenedor-opciones"></div>
+                            </div>
                         </div>
                     </div>
             `);
@@ -286,6 +454,26 @@
             }
         }
 
+        function agregarItem(contenedorId) {
+            const index = $('#' + contenedorId + ' .opcion-listado-item').length;
+            const opcionIndex = index + 1;
+
+            $('#' + contenedorId).append(`
+                <div class="opcion-listado-item">
+                    <div id="listado-item-contenedor${index}">
+                        <div class="row mt-1" id="contenedorItem">
+                            <div class="row mb-2">
+                                <div class="col-12">
+                                    <input type="text" class="form-control" id="agregarItem" placeholder="Opción ${opcionIndex}" autocomplete="off"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+
         function guardarPregunta() {
             const data = {
                 Id: parseInt($('#preguntaId').val() || 0),
@@ -293,7 +481,7 @@
                 CuestionarioId: parseInt($('#cuestionarioId').val() || 0),
                 Nombre: $('#titulo').val(),
                 Descripcion: $('#descripcion').val(),
-                EsPreguntaObligatoria: $('#esRequerido').is(':checked'),
+                EsPreguntaObligatoria: true,
                 EsPreguntaConPonderacion: $('#conPonderacion').is(':checked'),
                 NumeroDeEvidenciasLimitadasA: $('#limiteDeEvidencias').val() || 0,
                 NumeroDeEvidenciasObligatorias: $('#numeroDeEvidenciasObligatorias').val() || 0,
@@ -306,34 +494,69 @@
                 AgregarImagen: $('#agregarImagen').val() === "true",
                 AgregarCamposExtras: $('#agregarCamposExtras').val() === "true",
                 SeccionId: parseInt($('#seccionId').val()),
+                EtiquetaId: parseInt($('#etiquetaDeAgrupacion').val()),
                 OpcionesPorPregunta: []
             };
-             
-            $('#opcionesContainer .opcion-item').each(function () {
-                const etiqueta = $(this).find("#opcionEtiqueta").val();
-                const ponderacion = $(this).find("#opcionPonderacion").val();
-                const reqEvidencia = $(this).find("#requiereEvidenciaOpcion").is(':checked');
-                const reqInfoExtra = $(this).find("#requiereInformacionExtra").is(':checked');
-                const complementoNombre = $(this).find("#complementoNombre").val();
-                const listaDeOpciones = $(this).find("#complementoListaDeOpciones").val();
 
-                const opciones = {
-                    Etiqueta: etiqueta,
-                    Ponderacion: ponderacion,
-                    RequiereEvidencia: reqEvidencia,
-                    RequiereInformacionExtra: reqInfoExtra
-                };
+            data.Ponderacion = data.EsPreguntaConPonderacion ? parseFloat($('#ponderacion').val()) : null;
 
-                if (reqInfoExtra ==  true) {
-                    opciones.OpcionesComplemento = [{
-                        EtiquetaId: etiqueta,
-                        Nombre: complementoNombre,
-                        ListaDeOpcionesPredefinidas: listaDeOpciones
-                    }];
-                }
+            const formatoId = data.FormatoDeRespuesta.FormatoId;
+            const formato = formatos.find(ft => ft.Id == formatoId);
+            const esFormatoPorEscalaNumerica = formato.BasadoEnEscalaNumerica;
 
-                data.OpcionesPorPregunta.push(opciones);
-            });
+            if (esFormatoPorEscalaNumerica)
+            {
+                data.EtiquetasPorEscalaNumerica = [{
+                    limiteInferior: $('#limiteInferior').val() || 0,
+                    limiteSuperior: $('#limiteSuperior').val() || 0,
+                    etiquetaParaEscalaInferior: $('#etiquetaLimiteInferior').val(),
+                    etiquetaParaEscalaSuperior: $('#etiquetaLimiteSuperior').val()
+                }];
+            } 
+            else 
+            {
+                $('#opcionesContainer .opcion-item').each(function (index, element) {
+                    console.log("Element " + (index));
+                    const etiqueta = $(this).find("#opcionEtiqueta").val();
+                    const ponderacionValor = $(this).find("#opcionPonderacion").val();
+                    const ponderacion = esNumero(ponderacionValor) ? ponderacionValor : null;
+                    const reqEvidencia = $(this).find("#requiereEvidenciaOpcion").is(':checked');
+                    const reqInfoExtra = $(this).find("#requiereInformacionExtra").is(':checked');
+                    const complementoNombre = $(this).find("#complementoNombre").val();
+                    const listaDeOpciones = 'valores1,valores2';//$(this).find("#complementoListaDeOpciones").val();
+
+                    const opciones = {
+                        Etiqueta: etiqueta,
+                        Ponderacion: ponderacion,
+                        RequiereEvidencia: reqEvidencia,
+                        RequiereInformacionExtra: reqInfoExtra,
+                        Estatus: true
+                    };
+
+                    if (reqInfoExtra ==  true) {
+                        let listado = '';
+                        let primerElemento = true;
+                        const complementoId = 'complemento' + index + '-contenedor-opciones';
+
+                        $('#' + complementoId + ' .opcion-listado-item').each(function (complementIndex, complementElement) {
+                            const opcionItem = $(this).find("#agregarItem").val();
+                            if (primerElemento) {
+                                listado = opcionItem;
+                            } else {
+                                listado = listado + ',' + opcionItem;
+                            }
+                            primerElemento = false;
+                        });
+                        opciones.OpcionesComplemento = [{
+                            EtiquetaId: etiqueta,
+                            Nombre: complementoNombre,
+                            ListaDeOpcionesPredefinidas: listado
+                        }];
+                    }
+
+                    data.OpcionesPorPregunta.push(opciones);
+                });
+            }
 
             fetch('@Url.Action("Guardar", "Pregunta")', {
                 method: 'POST',
@@ -362,44 +585,59 @@
                     $('#titulo').val(p.nombre);
                     $('#descripcion').val(p.descripcion);
                     $('#tipoPregunta').val(p.formatoDeRespuesta.formatoId);
+                    $('#etiquetaDeAgrupacion').val(p.etiquetaId);
+                    $('#ponderacion').val(p.ponderacion);
                     $('#multipleSeleccion').prop('checked', p.formatoDeRespuesta.permiteMultipleSeleccion);
-                    $('#esRequerido').prop('checked', p.esPreguntaObligatoria);
-                    $('#conPonderacion').prop('checked', p.esPreguntaConPonderacion);
+                    //$('#esRequerido').prop('checked', p.esPreguntaObligatoria);
+                    $('#conPonderacion').prop('checked', (p.esPreguntaConPonderacion));
                     $('#limiteDeEvidencias').val(p.numeroDeEvidenciasLimitadasA);
                     $('#numeroDeEvidenciasObligatorias').val(p.numeroDeEvidenciasObligatorias.toString());
                     $('#requiereEvidencia').prop('checked', p.requiereEvidencia);
-                    
+
+                    elegirOpciones(p.formatoDeRespuesta.formatoId, true);
+
                     $('#opcionesContainer').empty();
+                    if (p.etiquetasPorEscalaNumerica != null && p.etiquetasPorEscalaNumerica.length > 0)
+                    {
+                        const e = p.etiquetasPorEscalaNumerica[0];
+                        $('#limiteInferior').val(e.limiteInferior);
+                        $('#limiteSuperior').val(e.limiteSuperior);
+                        $('#etiquetaLimiteInferior').val(e.etiquetaParaEscalaInferior);
+                        $('#etiquetaLimiteSuperior').val(e.etiquetaParaEscalaSuperior);
+                    }
+
                     if (p.opcionesPorPregunta) {
                         p.opcionesPorPregunta.forEach((o, idx) => {
                             const evidenciaChecked = o.requiereEvidencia ? 'checked' : '';
                             const infoExtraChecked = o.requiereInformacionExtra ? 'checked' : '';
+                            const ponderacion = o.ponderacion !== null ? o.ponderacion : 'NA';
 
-                            console.log('infoExtraChecked: ' +  infoExtraChecked)
                             $('#opcionesContainer').append(`
+                            <div class="opcion-item">
                                 <fieldset class="border p-3 mb-1 rounded">
-                                <div class="opcion-item" id="item-contenedor${idx}">
-                                    <div class="row mb-1">
-                                        <div class="col-3">
-                                            <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${idx}].Texto" value="${o.etiqueta}" autocomplete="off"/>
-                                        </div>
-                                        <div class="col-2">
-                                            <input type="number" class="form-control" placeholder="Ponderación" id="opcionPonderacion" name="opciones[${idx}].Valor" value="${o.ponderacion}" autocomplete="off"/>
-                                        </div>
-                                        <div class="col-3">
-                                            <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" value="${p.requiereInformacionExtra}" ${infoExtraChecked} onchange="agregarComplemento(this.checked, ${idx}, null)"/>
-                                            <label class="form-check-label" for="reqInformacionExtra">Informacion Extra</label>
-                                        </div>
-                                        <div class="col-3">
-                                            <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" value="${p.requiereEvidencia}" ${evidenciaChecked} />
-                                            <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
-                                        </div>
-                                        <div class="col-1">
-                                            <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
-                                        </div>
+                                    <div id="item-contenedor${idx}">
+                                            <div class="row mb-1">
+                                                <div class="col-3">
+                                                    <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${idx}].Texto" value="${o.etiqueta}" autocomplete="off"/>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="text" class="form-control" placeholder="Ponderación" id="opcionPonderacion" name="opciones[${idx}].Valor" value="${ponderacion}" autocomplete="off"/>
+                                                </div>
+                                                <div class="col-3">
+                                                    <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" value="${p.requiereInformacionExtra}" ${infoExtraChecked} onchange="agregarComplemento(this.checked, ${idx}, null)"/>
+                                                    <label class="form-check-label" for="reqInformacionExtra">Informacion Extra</label>
+                                                </div>
+                                                <div class="col-3">
+                                                    <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" value="${p.requiereEvidencia}" ${evidenciaChecked} />
+                                                    <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
+                                                </div>
+                                                <div class="col-1">
+                                                    <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
+                                                </div>
+                                            </div>
                                     </div>
-                                </div>
                                 </fieldset>
+                            </div>
                             `);
 
                             if (infoExtraChecked) {
@@ -414,6 +652,10 @@
             });
         }
 
+        function esNumero(value) {
+            return /^\d+$/.test(value);
+        }
+
         function mostrarModalGuardado() {
             $('#mensajeGuardado').text('Guardado correctamente');
             $('#modalGuardado').modal('show');
@@ -421,6 +663,7 @@
 
         function recargarPreguntas() {
             $('#modalGuardado').modal('hide');
+            $('#modalEtiqueta').modal('hide');
             location.reload();
         }
 

@@ -8,9 +8,11 @@
 
         public bool RequiereInformacionExtra { get; set; }
 
-        public decimal Ponderacion { get; set; }
+        public decimal? Ponderacion { get; set; }
 
         public bool RequiereEvidencia { get; set; }
+
+        public bool? Estatus { get; set; }
 
         public List<OpcionesComplementoPorPreguntaViewModel>? OpcionesComplemento { get; set; }
     }

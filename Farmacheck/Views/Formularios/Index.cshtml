@@ -72,7 +72,9 @@
             let tabla;
 
             $(document).ready(function () {
-                   tabla = $('#tablaFormularios').DataTable();
+                   tabla = $('#tablaFormularios').DataTable({
+                        order: [[1, 'asc']],
+                    });
                    cargarFormularios();
 
                    const params = new URLSearchParams(window.location.search);
@@ -108,6 +110,7 @@
                         ]);
                     });
                     tabla.draw();
+                    
                 }
             });
         }

@@ -6,9 +6,9 @@ namespace Farmacheck.Application.Models.ChecklistSections
     {
         public int Id { get; set; }
 
-        public string Nombre { get; set; } = null!;
+        public string? Nombre { get; set; }
 
-        public bool Estatus { get; set; }
+        public bool? Estatus { get; set; }
 
         public List<QuestionResponse>? Preguntas { get; set; }
     }

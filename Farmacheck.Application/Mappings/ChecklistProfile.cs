@@ -3,6 +3,7 @@ using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.Checklists;
 using Farmacheck.Application.Models.ChecklistScoreRating;
 using Farmacheck.Application.Models.ChecklistSections;
+using Farmacheck.Application.Models.GroupingTags;
 using Farmacheck.Application.Models.LabelsByNumericalScale;
 using Farmacheck.Application.Models.OptionsByQuestion;
 using Farmacheck.Application.Models.OptionsComplementByQuestion;
@@ -22,6 +23,7 @@ namespace Farmacheck.Application.Mappings
 
             CreateMap<ChecklistSectionResponse, SeccionDelCuestionarioDto>();
             CreateMap<SectionResponse, SeccionDto>();
+            CreateMap<GroupingTagResponse, EtiquetaDeAgrupacionDto>();
 
             CreateMap<QuestionsBySectionResponse, PreguntasPorSeccionDto>();
             CreateMap<QuestionResponse, PreguntaDto>();

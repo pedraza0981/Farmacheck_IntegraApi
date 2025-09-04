@@ -39,9 +39,19 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["ChecklistApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IResponseFormatCatApiClient, ResponseFormatCatApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["ResponseFormatCatApi:BaseUrl"]!);
+        });
+
         services.AddHttpClient<IChecklistSectionApiClient, ChecklistSectionApiClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["ChecklistSectionApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<IGroupingTagApiClient, GroupingTagApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["GroupingTagApi:BaseUrl"]!);
         });
 
         services.AddHttpClient<IQuestionApiClient, QuestionApiClient>(client =>

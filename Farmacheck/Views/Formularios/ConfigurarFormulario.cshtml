@@ -45,7 +45,7 @@
                     <input asp-for="Alias" class="form-control form-control-ajustada" />
                 </div>
                 <div class="col-md-4">
-                    <label>Categoría</label>
+                    <label>Área</label>
                     <select class="form-select" id="categoria"></select>
                 </div>
             </div>
@@ -63,29 +63,6 @@
                         <input type="text" class="form-control mt-2" id="imagenNombre" readonly />
                         <input type="hidden" id="imagenBase64" />
                     </div>
-                </div>
-            </div>
-        </fieldset>
-
-        <!-- Fila: Auditor - Auditado - Supervisor - Unidad de Negocio -->
-        <fieldset class="border p-3 mb-4 rounded">
-            <legend class="w-auto px-2 text-secondary">Asignación del formulario</legend>
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label>Auditor</label>
-                    @Html.DropDownListFor(m => m.Auditor, Model.AuditoresDisponibles, "-- Seleccione --", new { @class = "form-control form-control-ajustada" })
-                </div>
-                <div class="col-md-3">
-                    <label>Auditado</label>
-                    @Html.DropDownListFor(m => m.Auditado, Model.AuditadosDisponibles, "-- Seleccione --", new { @class = "form-control form-control-ajustada" })
-                </div>
-                <div class="col-md-3">
-                    <label>Supervisor</label>
-                    @Html.DropDownListFor(m => m.Supervisor, Model.SupervisoresDisponibles, "-- Seleccione --", new { @class = "form-control form-control-ajustada" })
-                </div>
-                <div class="col-md-3">
-                    <label>Unidad de Negocio</label>
-                    @Html.DropDownListFor(m => m.UnidadNegocio, Model.UnidadesDisponibles, "-- Seleccione --", new { @class = "form-control form-control-ajustada" })
                 </div>
             </div>
         </fieldset>

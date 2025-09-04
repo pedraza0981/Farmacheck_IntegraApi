@@ -1,6 +1,7 @@
 ﻿using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Checklists;
 using Farmacheck.Application.Models.ChecklistSections;
+using Farmacheck.Application.Models.GenericResponse;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http.Json;
@@ -30,6 +31,14 @@ namespace Farmacheck.Infrastructure.Services
                    ?? new QuestionsBySectionResponse();
         }
 
+        public async Task<QuestionsBySectionResponse> GetSectionByNameAsync(int cuestionarioId, string nombre)
+        {
+            var response = await _http.GetFromJsonAsync<QuestionsBySectionResponse>($"api/v1/sections/filters?checklistId={cuestionarioId}&sectionName={nombre}")
+                   ?? new QuestionsBySectionResponse();
+
+            return response;
+        }
+
         public async Task DeleteAsync(RemoveChecklistSectionRequest removeRequest)
         {
             string jsonContent = JsonConvert.SerializeObject(removeRequest);
@@ -41,21 +50,46 @@ namespace Farmacheck.Infrastructure.Services
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task<int> CreateAsync(ChecklistSectionRequest request)
+        public async Task<RegisterResponse> CreateAsync(ChecklistSectionRequest request)
         {
+            var registerResponse = new RegisterResponse();
             var response = await _http.PostAsJsonAsync("api/v1/sections", request);
-            response.EnsureSuccessStatusCode();
 
-            var id = await response.Content.ReadFromJsonAsync<int>();
-            return id;
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                registerResponse.Message = "Ya existe un registro con el mismo nombre";
+                return registerResponse;
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                registerResponse.Id = await response.Content.ReadFromJsonAsync<int>();
+                return registerResponse;
+            }
+
+            registerResponse.Message = "Hubo un error al guardar";
+            return registerResponse;
         }
 
-        public async Task<bool> UpdateAsync(UpdateChecklistSectionRequest request)
+        public async Task<UpdateResponse> UpdateAsync(UpdateChecklistSectionRequest request)
         {
+            var updateResponse = new UpdateResponse();
             var response = await _http.PutAsJsonAsync("api/v1/sections", request);
-            response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<bool>();
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                updateResponse.Message = "Ya existe un registro con el mismo nombre";
+                return updateResponse;
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                updateResponse.Updated = await response.Content.ReadFromJsonAsync<bool>();
+                return updateResponse;
+            }
+
+            updateResponse.Message = "Hubo un error al guardar";
+            return updateResponse;
         }
 
         public async Task<ChecklistSectionResponse?> GetSectionAsync(int cuestionarioId, int seccionId)

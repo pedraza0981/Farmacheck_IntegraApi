@@ -23,6 +23,8 @@ using Farmacheck.Models;
 using Farmacheck.Models.Inputs;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
+using Farmacheck.Application.Models.LabelsByNumericalScale;
+using Farmacheck.Application.Models.GroupingTags;
 
 namespace Farmacheck.Helpers
 {
@@ -40,6 +42,7 @@ namespace Farmacheck.Helpers
             CreateMap<SeccionDto, SeccionViewModel>();
 
             CreateMap<ClasificacionDePuntajeDto, ClasificacionDePuntajeViewModel>();
+            CreateMap<EtiquetasPorEscalaNumericaDto, EtiquetasPorEscalaNumericaViewModel>();
 
             CreateMap<BusinessUnitDto, UnidadDeNegocio>()
             .ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.Ignore()) // No viene del DTO
@@ -81,6 +84,12 @@ namespace Farmacheck.Helpers
             CreateMap<OpcionesPorPreguntaViewModel, OptionsByQuestionRequest>();
             CreateMap<OpcionesComplementoPorPreguntaViewModel, OptionsComplementByQuestionRequest>();
 
+            CreateMap<FormatoDeRespuestaCatDto, FormatoDeRespuestaCatViewModel>();
+
+            CreateMap<EtiquetaDeAgrupacionDto, EtiquetaDeAgrupacionViewModel>();
+            CreateMap<EtiquetaDeAgrupacionViewModel, UpdateGroupingTagRequest>();
+            CreateMap<EtiquetaDeAgrupacionViewModel, GroupingTagRequest>();
+
             CreateMap<PreguntaDto, PreguntaViewModel>();
             CreateMap<FormatoDeRespuestaPorPreguntaDto, FormatoDeRespuestaPorPreguntaViewModel>();
 
@@ -94,7 +103,9 @@ namespace Farmacheck.Helpers
             CreateMap<FormatoDeRespuestaPorPreguntaViewModel, UpdateResponseFormatByQuestionRequest>();
             CreateMap<OpcionesPorPreguntaViewModel, UpdateOptionsByQuestionRequest>();
             CreateMap<OpcionesComplementoPorPreguntaViewModel, UpdateOptionsComplementByQuestionRequest>();
-            //CreateMap<EtiquetasDeEscalaNumericaViewModel, UpdateLabelsByNumericalScaleRequest>();
+            
+            CreateMap<EtiquetasPorEscalaNumericaViewModel, LabelsByNumericalScaleRequest>();
+            CreateMap<EtiquetasPorEscalaNumericaViewModel, UpdateLabelsByNumericalScaleRequest>();
 
             CreateMap<CustomerDto, ClienteEstructuraViewModel>()
              .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
