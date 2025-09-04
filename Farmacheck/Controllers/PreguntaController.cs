@@ -8,8 +8,6 @@ using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
-using static System.Collections.Specialized.BitVector32;
-
 
 namespace Farmacheck.Controllers
 {
@@ -103,10 +101,12 @@ namespace Farmacheck.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> Guardar([FromBody] PreguntaViewModel model)
+        public async Task<JsonResult> Guardar([FromForm] string data, [FromForm] IFormFile? archivo)
         {
-            if (string.IsNullOrWhiteSpace(model.Nombre))
-                return Json(new { success = false, error = "El título es obligatorio." });
+            if (string.IsNullOrEmpty(data))
+                return Json(new { success = false, error = "Capture información de la pregunta" });
+
+            PreguntaViewModel model = JsonConvert.DeserializeObject<PreguntaViewModel>(data);
 
             if (model.Id == 0)
             {

@@ -12,6 +12,8 @@
 
         public string NombreDelArchivoConLaImagen { get; set; } = null!;
 
+        public string ImagenArchivo { get; set; } = null!;
+
         public string Alias { get; set; } = null!;
 
         public DateTime CreadoEl { get; set; }

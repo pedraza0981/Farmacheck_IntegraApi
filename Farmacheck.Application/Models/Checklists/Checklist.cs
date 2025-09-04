@@ -1,4 +1,4 @@
-﻿namespace Farmacheck.Application.Models.Checklists
+﻿namespace Farmacheck.Aplication.Models.Checklists
 {
     public class Checklist
     {
@@ -11,6 +11,8 @@
         public byte CategoriaId { get; set; }
 
         public string NombreDelArchivoConLaImagen { get; set; } = null!;
+
+        public string ImagenArchivo { get; set; } = null!;
 
         public string Alias { get; set; } = null!;
 

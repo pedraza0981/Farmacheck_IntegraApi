@@ -1,4 +1,6 @@
-﻿namespace Farmacheck.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Farmacheck.Models
 {
     public class PreguntaViewModel
     {
@@ -13,6 +15,8 @@
         public string? Descripcion { get; set; }
 
         public string? ImagenDeReferencia { get; set; }
+
+        public string? ImagenArchivo { get; set; }
 
         public int Secuencia { get; set; }
 

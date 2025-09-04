@@ -17,6 +17,8 @@ namespace Farmacheck.Models
 
         public string NombreDelArchivoConLaImagen { get; set; } = null!;
 
+        public string Archivo { get; set; } = null!;
+
         public bool Estatus { get; set; }
 
         [Display(Name = "Alias del formulario")]

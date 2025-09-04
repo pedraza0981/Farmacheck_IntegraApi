@@ -94,6 +94,7 @@
                             </div>
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="imagenNombre" readonly />
+                                <input type="hidden" id="imagenBase64" />
                             </div>
                         </div>
                         <input type="hidden" id="imagenBase64" />
@@ -101,7 +102,7 @@
 
                     <div class="mb-3 mt-3 row">
                         <div class="col-md-8">
-                            <label>Tipo de pregunta</label>
+                            <label>Tipo de Pregunta</label>
                             <select class="form-select" id="tipoPregunta" onchange="elegirOpciones(this, false)">
                                 @foreach (var tipo in ViewBag.TiposPregunta as List<FormatoDeRespuestaCatViewModel>)
                                 {
@@ -253,6 +254,11 @@
              $('#modalEtiqueta').modal('show');
          });
 
+        $('#imagenArchivo').change(function () {
+            const file = this.files[0];
+            $('#imagenNombre').val(file ? file.name : '');
+        });
+
         function limpiarModalEtiqueta() {
             $('#tituloEtiqueta').val('');
         }
@@ -274,18 +280,17 @@
             $('#descripcion').val('');
             $('#tipoPregunta').val('');
             $('#etiquetaDeAgrupacion').val('');
-            $('#requiereEvidencia').val('false');
+            $('#requiereEvidencia').prop('checked', (false));
             $('#ponderacion').val('');
-            $('#prioridad').val('');
-            $('#hipervinculo').val('');
-            $('#agregarComentario').val('false');
             $('#agregarImagen').val('false');
             $('#agregarCamposExtras').val('false');
             $('#opcionesContainer').empty();
-            $('#multipleSeleccion').val('false');
-            $('#conPonderacion').val('false');
+            $('#limiteDeEvidencias').val('');
+            $('#imagenNombre').val('');
+            $('#numeroDeEvidenciasObligatorias').val('');
+            $('#multipleSeleccion').prop('checked', (false));
+            $('#conPonderacion').prop('checked', (false));
             $('#grupoPonderacion').hide();
-            //$('#ponderacion').hide();
             $('#inputPonderacion').hide();
             $('#checkMutipleSeleccion').hide();
         }
@@ -330,6 +335,10 @@
 
             const formato = formatos.find(ft => ft.Id == selectedId);
             const esFormatoPorEscalaNumerica = formato.BasadoEnEscalaNumerica;
+
+            $('#conPonderacion').prop('checked', (false));
+            $('#multipleSeleccion').prop('checked', (false));
+            $('#ponderacion').val('');
 
             if (formato.Formato == 'opcionMultiple') {
                 $('#checkMutipleSeleccion').show();
@@ -423,12 +432,8 @@
             const idIndex = 'item-contenedor' + index;
             const nombre = complemento != null ? complemento.nombre : '';
             const lista = complemento != null ? complemento.listaDeOpcionesPredefinidas : '';
-            
-            /*
-            <div class="col-4">
-                <input type="text" class="form-control" id="complementoListaDeOpciones" placeholder="Lista de Opciones" value="${lista}" autocomplete="off" />
-            </div>
-            */
+            const listaArray = lista.split(';');
+
             if (isChecked) {
                 $('#' + idIndex).append(`
                     <div class="row" id="complemento${index}">
@@ -442,12 +447,32 @@
                             <div class="col-5"></div>
                             <div class="col-6">
                                 <label class="form-check-label">Lista de Opciones</label>
-                                <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="agregarItem('complemento${index}-contenedor-opciones')"><i class="bi bi-plus-square"></i></button>
+                                <button class="btn btn-sm" style="background-color:#0c4c98; color:white;" onclick="agregarItem('complemento${index}-contenedor-opciones')"><i class="bi bi-plus"></i></button>
                                 <div id="complemento${index}-contenedor-opciones"></div>
                             </div>
                         </div>
                     </div>
-            `);
+                `);
+
+                 listaArray.forEach((opcion, indice) => {
+                    console.log('Indice: ' + indice + ' Valor: ' + opcion);
+                    $('#complemento' + index + '-contenedor-opciones').append(`
+                        <div class="opcion-listado-item">
+                            <div id="listado-item-contenedor${indice}">
+                                <div class="row mt-1" id="contenedorItem">
+                                    <div class="row mb-2">
+                                        <div class="col-11">
+                                            <input type="text" class="form-control" id="agregarItem" placeholder="Agregar opción" value="${opcion}" autocomplete="off"/>
+                                        </div>
+                                        <div class="col-1">
+                                            <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-listado-item').remove()">-</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                 });
             } else {
                 const idIndexRemove = 'complemento' + index;
                 $('#' + idIndexRemove).remove();
@@ -463,8 +488,11 @@
                     <div id="listado-item-contenedor${index}">
                         <div class="row mt-1" id="contenedorItem">
                             <div class="row mb-2">
-                                <div class="col-12">
-                                    <input type="text" class="form-control" id="agregarItem" placeholder="Opción ${opcionIndex}" autocomplete="off"/>
+                                <div class="col-11">
+                                    <input type="text" class="form-control" id="agregarItem" placeholder="Agregar opción" autocomplete="off"/>
+                                </div>
+                                <div class="col-1">
+                                    <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-listado-item').remove()">-</button>
                                 </div>
                             </div>
                         </div>
@@ -473,13 +501,31 @@
             `);
         }
 
+        function isNullOrEmptyOrWhitespace(value) {
+          return value === null || value === undefined || (typeof value === 'string' && value.trim() === "");
+        }
 
         function guardarPregunta() {
+            const nombre = $('#titulo').val();
+            const tipoPregunta = parseInt($('#tipoPregunta').val());
+
+            if (isNullOrEmptyOrWhitespace(nombre)) {
+                showAlert("El nombre es obligatorio", 'error');
+                return;
+            }
+
+            if (isNaN(tipoPregunta)) {
+                showAlert("El tipo de pregunta es obligatorio", 'error');
+                return;
+            }
+
+            const formData = new FormData();
             const data = {
                 Id: parseInt($('#preguntaId').val() || 0),
                 SeccionDelCuestionarioId: parseInt($('#seccionId').val() || 0),
                 CuestionarioId: parseInt($('#cuestionarioId').val() || 0),
                 Nombre: $('#titulo').val(),
+                ImagenDeReferencia: $('#imagenNombre').val(),
                 Descripcion: $('#descripcion').val(),
                 EsPreguntaObligatoria: true,
                 EsPreguntaConPonderacion: $('#conPonderacion').is(':checked'),
@@ -497,7 +543,6 @@
                 EtiquetaId: parseInt($('#etiquetaDeAgrupacion').val()),
                 OpcionesPorPregunta: []
             };
-
             data.Ponderacion = data.EsPreguntaConPonderacion ? parseFloat($('#ponderacion').val()) : null;
 
             const formatoId = data.FormatoDeRespuesta.FormatoId;
@@ -516,14 +561,12 @@
             else 
             {
                 $('#opcionesContainer .opcion-item').each(function (index, element) {
-                    console.log("Element " + (index));
                     const etiqueta = $(this).find("#opcionEtiqueta").val();
                     const ponderacionValor = $(this).find("#opcionPonderacion").val();
                     const ponderacion = esNumero(ponderacionValor) ? ponderacionValor : null;
                     const reqEvidencia = $(this).find("#requiereEvidenciaOpcion").is(':checked');
                     const reqInfoExtra = $(this).find("#requiereInformacionExtra").is(':checked');
                     const complementoNombre = $(this).find("#complementoNombre").val();
-                    const listaDeOpciones = 'valores1,valores2';//$(this).find("#complementoListaDeOpciones").val();
 
                     const opciones = {
                         Etiqueta: etiqueta,
@@ -543,7 +586,7 @@
                             if (primerElemento) {
                                 listado = opcionItem;
                             } else {
-                                listado = listado + ',' + opcionItem;
+                                listado = listado + ';' + opcionItem;
                             }
                             primerElemento = false;
                         });
@@ -558,22 +601,28 @@
                 });
             }
 
+            formData.append('data', JSON.stringify(data));
+
+            const file = $('#imagenArchivo')[0].files[0];
+            if (file) {
+                formData.append('archivo', file);
+            }
+            
             fetch('@Url.Action("Guardar", "Pregunta")', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: formData,
+                processData: false,
+                contentType: false,
             })
             .then(res => res.json())
             .then(r => {
                 if (r.success) {
                     $('#modalPregunta').modal('hide');
                     mostrarModalGuardado();
-                    //location.reload();
                 } else {
                     showAlert(r.error || "Error al guardar la pregunta", 'error');
                 }
             });
-
         }
 
         function editarPregunta(id) {
@@ -586,15 +635,16 @@
                     $('#descripcion').val(p.descripcion);
                     $('#tipoPregunta').val(p.formatoDeRespuesta.formatoId);
                     $('#etiquetaDeAgrupacion').val(p.etiquetaId);
-                    $('#ponderacion').val(p.ponderacion);
-                    $('#multipleSeleccion').prop('checked', p.formatoDeRespuesta.permiteMultipleSeleccion);
-                    //$('#esRequerido').prop('checked', p.esPreguntaObligatoria);
-                    $('#conPonderacion').prop('checked', (p.esPreguntaConPonderacion));
+                    $('#imagenNombre').val(p.imagenDeReferencia);
                     $('#limiteDeEvidencias').val(p.numeroDeEvidenciasLimitadasA);
                     $('#numeroDeEvidenciasObligatorias').val(p.numeroDeEvidenciasObligatorias.toString());
                     $('#requiereEvidencia').prop('checked', p.requiereEvidencia);
 
                     elegirOpciones(p.formatoDeRespuesta.formatoId, true);
+
+                    $('#conPonderacion').prop('checked', (p.esPreguntaConPonderacion));
+                    $('#ponderacion').val(p.ponderacion);
+                    $('#multipleSeleccion').prop('checked', p.formatoDeRespuesta.permiteMultipleSeleccion);
 
                     $('#opcionesContainer').empty();
                     if (p.etiquetasPorEscalaNumerica != null && p.etiquetasPorEscalaNumerica.length > 0)
@@ -621,7 +671,7 @@
                                                     <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${idx}].Texto" value="${o.etiqueta}" autocomplete="off"/>
                                                 </div>
                                                 <div class="col-2">
-                                                    <input type="text" class="form-control" placeholder="Ponderación" id="opcionPonderacion" name="opciones[${idx}].Valor" value="${ponderacion}" autocomplete="off"/>
+                                                    <input type="text" class="form-control" placeholder="Valor" id="opcionPonderacion" name="opciones[${idx}].Valor" value="${ponderacion}" autocomplete="off"/>
                                                 </div>
                                                 <div class="col-3">
                                                     <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" value="${p.requiereInformacionExtra}" ${infoExtraChecked} onchange="agregarComplemento(this.checked, ${idx}, null)"/>
