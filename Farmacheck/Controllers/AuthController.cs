@@ -57,6 +57,11 @@ public class AuthController : Controller
             var dto = _mapper.Map<TokenDto>(response);
             var vm = _mapper.Map<TokenViewModel>(dto);
 
+            if (string.IsNullOrEmpty(vm?.Token))
+            {
+                return Json(new { success = false, error = "Credenciales incorrectas, favor de verificar." });
+            }
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
