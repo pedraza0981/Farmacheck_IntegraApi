@@ -69,6 +69,10 @@
 
             const result = await response.json();
             if (response.ok && result.success) {
+                localStorage.setItem('username', email);
+                if (result.data && result.data.token) {
+                    localStorage.setItem('token', result.data.token);
+                }
                 window.location.href = '@Url.Action("Index", "Formularios")';
             } else {
                 alert(result.error || 'Error al iniciar sesión');
