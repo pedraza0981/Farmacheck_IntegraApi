@@ -165,6 +165,18 @@ a[onclick^="eliminar"],
     color: white !important;
 }
 
+.btn-outline-brand {
+    color: #004a99 !important;
+    border-color: #004a99 !important;
+}
+
+.btn-outline-brand:hover,
+.btn-outline-brand:focus {
+    color: #fff !important;
+    background-color: #004a99 !important;
+    border-color: #004a99 !important;
+}
+
 .backdrop-oscuro .modal-backdrop {
     background-color: #000;
 }
