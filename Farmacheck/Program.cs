@@ -30,7 +30,8 @@ namespace Farmacheck
                 typeof(PermissionProfile),
                 typeof(QuizAssignmentManagerProfile),
                 typeof(HierarchyByRoleProfile),
-                typeof(UserProfile));
+                typeof(UserProfile),
+                typeof(AuthProfile));
 
             builder.Services.AddInfrastructure(builder.Configuration);
 

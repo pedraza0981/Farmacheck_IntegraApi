@@ -205,6 +205,9 @@ namespace Farmacheck.Helpers
             CreateMap<RolPorUsuarioClientesAsignadosDto, RolPorUsuarioClientesAsignadosViewModel>().ReverseMap();
             CreateMap<QuizAssignmentManagerDto, AsignacionCuestionarioViewModel>().ReverseMap();
             CreateMap<AsignacionCuestionarioViewModel, QuizAssignmentManagerRequest>();
+
+            CreateMap<TokenDto, TokenViewModel>().ReverseMap();
+            CreateMap<UserInfoDto, UserInfoViewModel>().ReverseMap();
         }
     }
 }
