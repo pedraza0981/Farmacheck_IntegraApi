@@ -4,6 +4,7 @@ using Farmacheck.Application.Models.Security;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Linq;
 
 namespace Farmacheck.Controllers;
@@ -55,6 +56,17 @@ public class AuthController : Controller
             var response = await _apiClient.LoginAsync(model);
             var dto = _mapper.Map<TokenDto>(response);
             var vm = _mapper.Map<TokenViewModel>(dto);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = vm.Expiration
+            };
+
+            Response.Cookies.Append("AuthToken", vm.Token, cookieOptions);
+
             return Json(new { success = true, data = vm });
         }
         catch (Exception ex)
