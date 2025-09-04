@@ -124,6 +124,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["QuizAssignmentManagerApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["AuthApi:BaseUrl"]!);
+        });
+
         return services;
     }
 }
