@@ -70,24 +70,20 @@
             <div class="container-fluid d-flex align-items-center justify-content-between">
                 <button class="menu-toggle d-md-none me-2" aria-label="Abrir menú lateral" onclick="toggleSidebar()">☰</button>
                 <img src="~/images/Logo_HeaderBlank.png" style="height: 55px;" />
-                <button class="btn p-0 ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#userOffcanvas" aria-label="Usuario">
-                    <i class="bi bi-person-circle" style="font-size: 1.8rem;"></i>
-                </button>
+                <div class="dropdown ms-2">
+                    <button class="btn p-0" id="userDropdownBtn" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                        <i class="bi bi-person-circle" style="font-size: 1.8rem;"></i>
+                    </button>
+                    <div id="userDropdownMenu" class="dropdown-menu dropdown-menu-end shadow rounded-3 p-3" style="width: 360px;">
+                        <h6 class="mb-3">Usuario</h6>
+                        <button id="logoutBtn" class="btn btn-outline-danger w-100 mb-2">Cerrar sesión</button>
+                        <div id="userNameDisplay" class="small text-muted"></div>
+                    </div>
+                </div>
             </div>
             <img src="~/images/linea_header.png" style="width: 100%; height: auto; display: block; margin-top: 5px;" />
         </nav>
     </header>
-
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="userOffcanvas" aria-labelledby="userOffcanvasLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="userOffcanvasLabel">Usuario</h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-        </div>
-        <div class="offcanvas-body">
-            <button id="logoutBtn" class="btn btn-outline-danger w-100 mb-3">Cerrar sesión</button>
-            <div id="userNameDisplay" class="fw-bold"></div>
-        </div>
-    </div>
 
     <!-- Contenido principal -->
     <div class="main-content" style="margin-left: 240px; padding: 20px;">
@@ -140,6 +136,24 @@
                     localStorage.removeItem('username');
                     window.location.href = '/Security/Login';
                 });
+            }
+
+            const dropdownBtn = document.getElementById('userDropdownBtn');
+            const dropdownMenu = document.getElementById('userDropdownMenu');
+            if (dropdownBtn && dropdownMenu) {
+                const dropdown = new bootstrap.Dropdown(dropdownBtn, { autoClose: true });
+                let hideTimeout;
+                const showDropdown = () => {
+                    clearTimeout(hideTimeout);
+                    dropdown.show();
+                };
+                const hideDropdown = () => {
+                    hideTimeout = setTimeout(() => dropdown.hide(), 200);
+                };
+                dropdownBtn.addEventListener('mouseenter', showDropdown);
+                dropdownBtn.addEventListener('mouseleave', hideDropdown);
+                dropdownMenu.addEventListener('mouseenter', showDropdown);
+                dropdownMenu.addEventListener('mouseleave', hideDropdown);
             }
         });
     </script>
