@@ -30,26 +30,21 @@
                 @* <img src="images/farmacheck_logo_trazado.svg" alt="Farmacheck" style="height: 60px;"> *@
                 <h4 style="color: #004080; margin-top: 1rem;">Iniciar sesión</h4>
             </div>
-            <form method="post" action="/login">
+            <form id="loginForm">
                 <div style="margin-bottom: 1rem;">
                     <label for="email" style="font-weight: bold;">Correo electrónico</label>
                     <input type="email" id="email" name="email" placeholder="usuario@dominio.com"
-                           style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                           style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
                 </div>
                 <div style="margin-bottom: 1.5rem;">
                     <label for="password" style="font-weight: bold;">Contraseña</label>
                     <input type="password" id="password" name="password" placeholder="••••••••"
-                           style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                           style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
                 </div>
                 <div>
-                    
-                    <button type="button"
-                            onclick="location.href='@Url.Action("Index", "Formularios")'"
-                            style="width: 100%; background-color: #007bff; color: white; border: none; padding: 0.6rem; border-radius: 4px;">
+                    <button type="submit" style="width: 100%; background-color: #007bff; color: white; border: none; padding: 0.6rem; border-radius: 4px;">
                         Entrar
                     </button>
-
-
                 </div>
             </form>
             <div style="text-align: center; margin-top: 1rem;">
@@ -57,6 +52,28 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
+            const response = await fetch('/Auth/Login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ email: email, password: password })
+            });
+
+            const result = await response.json();
+            if (response.ok && result.success) {
+                window.location.href = '@Url.Action("Index", "Formularios")';
+            } else {
+                alert(result.error || 'Error al iniciar sesión');
+            }
+        });
+    </script>
 </body>
 </html>
