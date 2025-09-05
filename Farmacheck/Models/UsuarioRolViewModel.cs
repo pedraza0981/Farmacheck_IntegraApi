@@ -12,5 +12,6 @@ namespace Farmacheck.Models
         public string? UnidadDeNegocioNombre { get; set; }
         public int TotalClientesAsignados { get; set; }
         public List<long> ClienteIds { get; set; } = new();
+        public bool GeolocalizacionActiva { get; set; }
     }
 }

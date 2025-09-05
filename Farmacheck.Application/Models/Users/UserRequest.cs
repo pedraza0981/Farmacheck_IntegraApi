@@ -8,5 +8,6 @@ namespace Farmacheck.Application.Models.Users
         public string Email { get; set; }
         public long? NumeroDeTelefono { get; set; }
         public bool Estatus { get; set; }
+        public bool GeolocalizacionActiva { get; set; }
     }
 }
