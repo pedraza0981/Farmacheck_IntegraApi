@@ -156,7 +156,7 @@ namespace Farmacheck.Controllers
                             {
                                 RolPorUsuarioId = model.Id,
                                 Clientes = nuevos,
-                                GeolocalizacionActiva = true
+                                GeolocalizacionActiva = model.GeolocalizacionActiva
                             };
                             await _customersRolesUsersApiClient.CreateAsync(addRequest);
                         }
@@ -193,7 +193,7 @@ namespace Farmacheck.Controllers
                 {
                     RolPorUsuarioId = userRoleId,
                     Clientes = model.ClienteIds ?? new List<long>(),
-                    GeolocalizacionActiva = true
+                    GeolocalizacionActiva = model.GeolocalizacionActiva
                 };
 
                 customerRolUserResult = await _customersRolesUsersApiClient.CreateAsync(customerRolUserRequest);

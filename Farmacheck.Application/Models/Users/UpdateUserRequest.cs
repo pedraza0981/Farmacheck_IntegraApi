@@ -7,5 +7,6 @@ namespace Farmacheck.Application.Models.Users
         [Required]
         public int Id { get; set; }
         public bool Estatus { get; set; }
+        public bool GeolocalizacionActiva { get; set; }
     }
 }

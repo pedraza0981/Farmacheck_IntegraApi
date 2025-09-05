@@ -86,6 +86,12 @@
                             <label class="form-check-label" for="estatusCheck">Habilitado</label>
                         </div>
                     </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="geolocalizacionCheck">
+                            <label class="form-check-label" for="geolocalizacionCheck">Geolocalización activa</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Botones de acción -->
@@ -442,7 +448,8 @@
                     ApellidoMaterno: $('#apellidoMaterno').val(),
                     Email: $('#email').val(),
                     NumeroDeTelefono: $('#telefono').val(),
-                    Estatus: $('#estatusCheck').prop('checked')
+                    Estatus: $('#estatusCheck').prop('checked'),
+                    GeolocalizacionActiva: $('#geolocalizacionCheck').prop('checked')
                 };
 
                 $.ajax({
@@ -481,7 +488,8 @@
                 if (idRolPorUsuario) {
                     const datosUpdate = {
                         Id: parseInt(idRolPorUsuario),
-                        ClienteIds: clienteIds
+                        ClienteIds: clienteIds,
+                        GeolocalizacionActiva: $('#geolocalizacionCheck').prop('checked')
                     };
 
                     const ejecutar = function () {
@@ -535,7 +543,8 @@
                     RolId: parseInt(rolId),
                     UnidadDeNegocioId: parseInt(unidadId),
                     AsignadoPor: 1,
-                    ClienteIds: clienteIds
+                    ClienteIds: clienteIds,
+                    GeolocalizacionActiva: $('#geolocalizacionCheck').prop('checked')
                 };
 
                 $.ajax({
@@ -938,6 +947,7 @@
                     $('#email').val(u.email);
                     $('#telefono').val(u.numeroDeTelefono);
                     $('#estatusCheck').prop('checked', u.estatus);
+                    $('#geolocalizacionCheck').prop('checked', u.geolocalizacionActiva);
 
                     cargarSelectorRoles();
                     usuarioGuardado = true;
@@ -973,6 +983,7 @@
             $('#email').val('');
             $('#telefono').val('');
             $('#estatusCheck').prop('checked', true);
+            $('#geolocalizacionCheck').prop('checked', true);
 
             // Limpiar select de rol
             const selectRol = $('#selectRol');
