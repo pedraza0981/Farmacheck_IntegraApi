@@ -2,6 +2,7 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Mappings;
 using Farmacheck.Helpers;
 using Farmacheck.Infrastructure;
+using Farmacheck.Middleware;
 namespace Farmacheck
 {
     public class Program
@@ -47,6 +48,8 @@ namespace Farmacheck
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseAuthToken();
 
             app.UseRouting();
 
