@@ -60,10 +60,11 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            const response = await fetch('/Auth/Login', {
+            const response = await fetch('@Url.Action("Login", "Auth")', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -78,7 +79,10 @@
                 localStorage.setItem('token', result.data.token);
                 window.location.href = '@Url.Action("Index", "Formularios")';
             } else {
-                const message = (response.ok && result.success) ? 'Autenticación incorrecta verificar mail o contraseña' : (result.error || 'Error al iniciar sesión');
+                const message = (response.ok && result.success)
+                    ? 'Autenticación incorrecta, verificar mail o contraseña'
+                    : (result.error || 'Error al iniciar sesión');
+
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
