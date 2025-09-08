@@ -100,12 +100,24 @@ public class AuthController : Controller
     public async Task<JsonResult> Logout()
     {
         Request.Headers.TryGetValue("Authorization", out var authorizationHeader);
+
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/"
+        };
+
         if (!string.IsNullOrEmpty(authorizationHeader))
         {
             var token = authorizationHeader.First().Replace("Bearer ", string.Empty);
             var result = await _apiClient.LogoutAsync(token);
+            Response.Cookies.Delete("AuthToken", cookieOptions);
             return Json(new { success = true, data = result });
         }
+
+        Response.Cookies.Delete("AuthToken", cookieOptions);
         return Json(new { success = false, error = "Token not provided" });
     }
 }
