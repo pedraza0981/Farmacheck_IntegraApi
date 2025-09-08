@@ -234,7 +234,6 @@ namespace Farmacheck.Controllers
                     return Json(new { success = false, error = "El nombre es obligatorio." });
 
                 var request = _mapper.Map<UserRequest>(model);
-                request.Estatus = model.Estatus;
 
                 if (model.Id == 0)
                 {
@@ -244,7 +243,6 @@ namespace Farmacheck.Controllers
                 else
                 {
                     var updateRequest = _mapper.Map<UpdateUserRequest>(model);
-                    updateRequest.Estatus = model.Estatus;
                     var updated = await _apiClient.UpdateAsync(updateRequest);
                     if (updated)
                         return Json(new { success = true, id = model.Id });
