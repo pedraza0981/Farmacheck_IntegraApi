@@ -124,7 +124,7 @@
                 logoutBtn.addEventListener('click', async () => {
                     const token = localStorage.getItem('token');
                     try {
-                        await fetch('/Auth/Logout', {
+                        await fetch('@Url.Action("Logout", "Auth")', {
                             method: 'DELETE',
                             headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                             credentials: 'include'
@@ -134,7 +134,7 @@
                     }
                     localStorage.removeItem('token');
                     localStorage.removeItem('username');
-                    window.location.href = '/Security/Login';
+                    window.location.href = '@Url.Action("Login", "Security")';
                 });
             }
 
