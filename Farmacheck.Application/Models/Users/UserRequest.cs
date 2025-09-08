@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Farmacheck.Application.Models.Users
 {
     public class UserRequest
@@ -7,7 +9,8 @@ namespace Farmacheck.Application.Models.Users
         public string? ApellidoMaterno { get; set; }
         public string Email { get; set; }
         public long? NumeroDeTelefono { get; set; }
-        public bool Estatus { get; set; }
+        public List<int>? Roles { get; set; }
+        public int AsignadoPor { get; set; }
         public bool GeolocalizacionActiva { get; set; }
     }
 }
