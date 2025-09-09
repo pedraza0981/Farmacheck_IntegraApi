@@ -120,22 +120,21 @@
             }
 
             const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async () => {
-                    const token = localStorage.getItem('token');
-                    try {
-                        await fetch('@Url.Action("Logout", "Auth")', {
-                            method: 'DELETE',
-                            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                            credentials: 'include'
-                        });
-                    } catch (err) {
-                        // ignore errors
-                    }
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('username');
-                    window.location.href = '@Url.Action("Login", "Security")';
-                });
+           if (logoutBtn) {
+              logoutBtn.addEventListener('click', async () => {
+                const token = localStorage.getItem('token');
+                try {
+                  await fetch('@Url.Content("~/Auth/Logout")', { 
+                    method: 'DELETE',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    credentials: 'include'
+                  });
+                } catch (err) { /* ignore */ }
+
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = '@Url.Content("~/Security/Login")'; 
+              });
             }
 
             const dropdownBtn = document.getElementById('userDropdownBtn');
