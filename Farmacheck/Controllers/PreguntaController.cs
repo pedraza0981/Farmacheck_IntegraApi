@@ -8,6 +8,8 @@ using Farmacheck.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
+using System.Reflection;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Farmacheck.Controllers
 {
@@ -100,13 +102,32 @@ namespace Farmacheck.Controllers
             return View();
         }
 
+        private async Task<string> ObtenerArchivoBase64(IFormFile? archivo)
+        {
+            var archivoBase64 = "";
+
+            if (archivo != null && archivo.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await archivo.CopyToAsync(ms);
+                archivoBase64 = Convert.ToBase64String(ms.ToArray());
+            }
+
+            return archivoBase64;
+        }
+
         [HttpPost]
         public async Task<JsonResult> Guardar([FromForm] string data, [FromForm] IFormFile? archivo)
         {
-            if (string.IsNullOrEmpty(data))
+            if (data is null)
                 return Json(new { success = false, error = "Capture información de la pregunta" });
 
             PreguntaViewModel model = JsonConvert.DeserializeObject<PreguntaViewModel>(data);
+
+            if (model is null)
+                return Json(new { success = false, error = "Hubo un error al guardar la pregunta" });
+
+            model.ArchivoImagen = await ObtenerArchivoBase64(archivo);
 
             if (model.Id == 0)
             {
@@ -124,59 +145,66 @@ namespace Farmacheck.Controllers
                 if (existente == null)
                     return Json(new { success = false, error = "No se encontró la pregunta a editar." });
 
-                if (_preguntaseleccionada.FormatoDeRespuesta.FormatoId != model.FormatoDeRespuesta.FormatoId)
-                {
-                    var opciones = model.OpcionesPorPregunta != null ? model.OpcionesPorPregunta : Enumerable.Empty<OpcionesPorPreguntaViewModel>();
-                    var etiquetas = model.EtiquetasPorEscalaNumerica != null ? model.EtiquetasPorEscalaNumerica : Enumerable.Empty<EtiquetasPorEscalaNumericaViewModel>();
-
-                    if (_preguntaseleccionada.OpcionesPorPregunta != null)
-                    {
-                        model.OpcionesPorPregunta = new();
-                        foreach (var op in _preguntaseleccionada.OpcionesPorPregunta)
-                        {
-                            op.Estatus = false;
-                            model.OpcionesPorPregunta.Add(op);
-                        }
-                    }
-
-                    if (_preguntaseleccionada.EtiquetasPorEscalaNumerica != null)
-                    {
-                        model.EtiquetasPorEscalaNumerica = new();
-                        foreach (var et in _preguntaseleccionada.EtiquetasPorEscalaNumerica)
-                        {
-                            et.Estatus = false;
-                            model.EtiquetasPorEscalaNumerica.Add(et);
-                        }
-                    }
-
-                    model.OpcionesPorPregunta?.AddRange(opciones);
-                    model.EtiquetasPorEscalaNumerica?.AddRange(etiquetas);
-                } else
-                {
-                    if (model.EtiquetasPorEscalaNumerica != null && CatalogosStaticos.PreguntasPorEscala.Exists(ft => ft.Value == _preguntaseleccionada.FormatoDeRespuesta.FormatoId.ToString()))
-                    {
-                        model.EtiquetasPorEscalaNumerica[0].Id = _preguntaseleccionada.EtiquetasPorEscalaNumerica[0].Id;
-                    }
-                }
-
-                if (_preguntaseleccionada.OpcionesPorPregunta != null)
-                {
-                    foreach (var opcion in _preguntaseleccionada?.OpcionesPorPregunta ?? Enumerable.Empty<OpcionesPorPreguntaViewModel>())
-                    {
-                        var op = model?.OpcionesPorPregunta?.SingleOrDefault(op => op.Etiqueta == opcion.Etiqueta);
-                        if (op is null)
-                        {
-                            opcion.Estatus = false;
-                            model?.OpcionesPorPregunta?.Add(opcion);
-                        }
-                    }
-                }
-
-                var request = _mapper.Map<UpdateQuestionRequest>(model);
+                var pregunta = AplicarValidationesAPropiedades(_preguntaseleccionada, model);
+                var request = _mapper.Map<UpdateQuestionRequest>(pregunta);
                 var result = await _questionApiClient.UpdateAsync(request);
 
                 return Json(new { success = true, message = "Checklist actualizado" });
             }
+        }
+
+        private PreguntaViewModel AplicarValidationesAPropiedades(PreguntaViewModel preguntaSeleccionada, PreguntaViewModel pregunta)
+        {
+            if (preguntaSeleccionada.FormatoDeRespuesta.FormatoId != pregunta.FormatoDeRespuesta.FormatoId)
+            {
+                var opciones = pregunta.OpcionesPorPregunta != null ? pregunta.OpcionesPorPregunta : Enumerable.Empty<OpcionesPorPreguntaViewModel>();
+                var etiquetas = pregunta.EtiquetasPorEscalaNumerica != null ? pregunta.EtiquetasPorEscalaNumerica : Enumerable.Empty<EtiquetasPorEscalaNumericaViewModel>();
+
+                if (preguntaSeleccionada.OpcionesPorPregunta != null)
+                {
+                    pregunta.OpcionesPorPregunta = new();
+                    foreach (var op in preguntaSeleccionada.OpcionesPorPregunta)
+                    {
+                        op.Estatus = false;
+                        pregunta.OpcionesPorPregunta.Add(op);
+                    }
+                }
+
+                if (preguntaSeleccionada.EtiquetasPorEscalaNumerica != null)
+                {
+                    pregunta.EtiquetasPorEscalaNumerica = new();
+                    foreach (var et in preguntaSeleccionada.EtiquetasPorEscalaNumerica)
+                    {
+                        et.Estatus = false;
+                        pregunta.EtiquetasPorEscalaNumerica.Add(et);
+                    }
+                }
+
+                pregunta.OpcionesPorPregunta?.AddRange(opciones);
+                pregunta.EtiquetasPorEscalaNumerica?.AddRange(etiquetas);
+            }
+            else
+            {
+                if (pregunta.EtiquetasPorEscalaNumerica != null && CatalogosStaticos.PreguntasPorEscala.Exists(ft => ft.Value == preguntaSeleccionada.FormatoDeRespuesta.FormatoId.ToString()))
+                {
+                    pregunta.EtiquetasPorEscalaNumerica[0].Id = preguntaSeleccionada.EtiquetasPorEscalaNumerica[0].Id;
+                }
+            }
+
+            if (preguntaSeleccionada.OpcionesPorPregunta != null)
+            {
+                foreach (var opcion in preguntaSeleccionada?.OpcionesPorPregunta ?? Enumerable.Empty<OpcionesPorPreguntaViewModel>())
+                {
+                    var op = pregunta?.OpcionesPorPregunta?.SingleOrDefault(op => op.Etiqueta == opcion.Etiqueta);
+                    if (op is null)
+                    {
+                        opcion.Estatus = false;
+                        pregunta?.OpcionesPorPregunta?.Add(opcion);
+                    }
+                }
+            }
+
+            return pregunta;
         }
 
         [HttpPost]

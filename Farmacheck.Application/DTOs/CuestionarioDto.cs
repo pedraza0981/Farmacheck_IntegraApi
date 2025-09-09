@@ -12,7 +12,7 @@
 
         public string NombreDelArchivoConLaImagen { get; set; } = null!;
 
-        public string ImagenArchivo { get; set; } = null!;
+        public string ArchivoImagen { get; set; } = null!;
 
         public string Alias { get; set; } = null!;
 

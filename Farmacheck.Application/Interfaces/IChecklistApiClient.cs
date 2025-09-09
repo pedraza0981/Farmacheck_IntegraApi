@@ -14,5 +14,7 @@ namespace Farmacheck.Application.Interfaces
         Task<bool> UpdateAsync(UpdateChecklistRequest request);
 
         Task<ChecklistResponse?> GetChecklistAsync(int? id);
+
+        Task<string> GetReport(int checklistId);
     }
 }

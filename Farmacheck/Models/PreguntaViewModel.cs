@@ -16,7 +16,7 @@ namespace Farmacheck.Models
 
         public string? ImagenDeReferencia { get; set; }
 
-        public string? ImagenArchivo { get; set; }
+        public string ArchivoImagen { get; set; } = null!;
 
         public int Secuencia { get; set; }
 

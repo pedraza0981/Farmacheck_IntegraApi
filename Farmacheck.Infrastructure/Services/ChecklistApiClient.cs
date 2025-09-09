@@ -49,5 +49,12 @@ namespace Farmacheck.Infrastructure.Services
         {
             return await _http.GetFromJsonAsync<ChecklistResponse>($"api/v1/checklists/{id}");
         }
+
+        public async Task<string> GetReport(int checklistId)
+        {
+            var response = await _http.GetAsync("api/v1/checklists/report?checklistId="+checklistId);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
     }
 }

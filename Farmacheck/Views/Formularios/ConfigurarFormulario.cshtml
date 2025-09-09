@@ -293,6 +293,8 @@
         });
 
         $('#btnGuardarFormulario').click(function () {
+            const formData = new FormData();
+
             const data = {
                 Id: parseInt($('#Id').val() || 0),
                 Nombre: $('#Nombre').val(),
@@ -319,18 +321,25 @@
                 Estatus: true
             };
 
-            $.ajax({
-                url: '@Url.Action("GuardarCuestionario", "Formularios")',
+            formData.append('data', JSON.stringify(data));
+            const file = $('#imagenArchivo')[0].files[0];
+            if (file) {
+                formData.append('archivo', file);
+            }
+            
+            fetch('@Url.Action("GuardarCuestionario", "Formularios")', {
                 method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function (r) {
-                    if (r.success) {
-                        $('#mensajeGuardado').text(r.message);
-                        $('#modalGuardado').modal('show');
-                    } else {
-                        showAlert(r.error || 'Error al guardar', 'error');
-                    }
+                body: formData,
+                processData: false,
+                contentType: false
+            })
+            .then(res => res.json())
+            .then(r => {
+                if (r.success) {
+                    $('#mensajeGuardado').text(r.message);
+                    $('#modalGuardado').modal('show');
+                } else {
+                    showAlert(r.error || 'Error al guardar', 'error');
                 }
             });
         });

@@ -17,7 +17,7 @@ namespace Farmacheck.Models
 
         public string NombreDelArchivoConLaImagen { get; set; } = null!;
 
-        public string Archivo { get; set; } = null!;
+        public string ArchivoImagen { get; set; } = null!;
 
         public bool Estatus { get; set; }
 

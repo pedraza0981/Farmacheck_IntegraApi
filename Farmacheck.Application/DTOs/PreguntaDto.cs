@@ -14,6 +14,8 @@
 
         public string? ImagenDeReferencia { get; set; }
 
+        public string ArchivoImagen { get; set; } = null!;
+
         public int Secuencia { get; set; }
 
         public bool? EsPreguntaObligatoria { get; set; }

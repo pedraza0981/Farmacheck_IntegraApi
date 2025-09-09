@@ -10,6 +10,7 @@ using Farmacheck.Models;
 using Farmacheck.Models.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 using System.Reflection;
 using static System.Collections.Specialized.BitVector32;
 
@@ -73,11 +74,32 @@ namespace Farmacheck.Controllers
             return Json(new { success = true, formularios = lista });
         }
 
-        [HttpPost]
-        public async Task<JsonResult> GuardarCuestionario([FromBody] CuestionarioViewModel model)
+        private async Task<string> ObtenerArchivoBase64(IFormFile? archivo)
         {
-            if (model == null)
-                return Json(new { success = false, error = "Datos inválidos" });
+            var archivoBase64 = "";
+
+            if (archivo != null && archivo.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await archivo.CopyToAsync(ms);
+                archivoBase64 = Convert.ToBase64String(ms.ToArray());
+            }
+
+            return archivoBase64;
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GuardarCuestionario([FromForm] string data, [FromForm] IFormFile? archivo)
+        {
+            if (data is null)
+                return Json(new { success = false, error = "Capture información del checklist" });
+
+            CuestionarioViewModel model = JsonConvert.DeserializeObject<CuestionarioViewModel>(data);
+
+            if (model is null)
+                return Json(new { success = false, error = "Hubo un error al guardar el checklist" });
+
+            model.ArchivoImagen = await ObtenerArchivoBase64(archivo);
 
             if (model.Id == 0)
             {                
@@ -359,6 +381,14 @@ namespace Farmacheck.Controllers
 
             // 3) Devolver el Id recién asignado
             return Json(new { success = true, newId = m.Id });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DescargarReporte(int id)
+        {
+            var base64 = await _apiClient.GetReport(id);
+            var bytes = Convert.FromBase64String(base64);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteChecklist.xlsx");
         }
 
         private void CargarListasComunes(CuestionarioViewModel formulario)

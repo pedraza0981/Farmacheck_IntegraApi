@@ -4,7 +4,7 @@ using Farmacheck.Application.Models.ResponseFormatByQuestion;
 
 namespace Farmacheck.Application.Models.Questions
 {
-    public class QuestionRequest
+    public class  QuestionRequest
     {
         public int PreguntaId { get; set; }
 
@@ -19,6 +19,8 @@ namespace Farmacheck.Application.Models.Questions
         public int Secuencia { get; set; }
 
         public string? ImagenDeReferencia { get; set; }
+
+        public string ArchivoImagen { get; set; } = null!;
 
         public bool EsPreguntaObligatoria { get; set; }
 
