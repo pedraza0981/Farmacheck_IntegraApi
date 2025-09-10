@@ -2,26 +2,46 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.BusinessStructures;
 using Farmacheck.Application.Models.Common;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http.Headers;
 
 namespace Farmacheck.Infrastructure.Services
 {
     public class BusinessStructureApiClient : IBusinessStructureApiClient
     {
         private readonly HttpClient _http;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BusinessStructureApiClient(HttpClient http)
+        public BusinessStructureApiClient(HttpClient http, IHttpContextAccessor httpContextAccessor)
         {
             _http = http;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private void AddBearerToken()
+        {
+            if (_http.DefaultRequestHeaders.Authorization != null)
+            {
+                return;
+            }
+
+            var token = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task<List<BusinessStructureResponse>> GetBusinessStructuresAsync()
         {
+            AddBearerToken();
             return await _http.GetFromJsonAsync<List<BusinessStructureResponse>>("api/v1/BusinessStructure")
                    ?? new List<BusinessStructureResponse>();
         }
 
         public async Task<PaginatedResponse<BusinessStructureResponse>> GetBusinessStructuresByPageAsync(int page, int items)
         {
+            AddBearerToken();
             var url = $"api/v1/BusinessStructure/pages?page={page}&items={items}";
             var res = await _http.GetFromJsonAsync<PaginatedResponse<BusinessStructureResponse>>(url)
                       ?? new PaginatedResponse<BusinessStructureResponse>();
@@ -31,6 +51,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<BusinessStructureResponse?> GetBusinessStructureAsync(int id)
         {
+            AddBearerToken();
             return await _http.GetFromJsonAsync<BusinessStructureResponse>($"api/v1/BusinessStructure/{id}");
         }
 
@@ -39,6 +60,7 @@ namespace Farmacheck.Infrastructure.Services
         IEnumerable<int>? subbrand,
         IEnumerable<int>? zone)
         {
+            AddBearerToken();
             var query = new List<string>();
 
             if (brand != null && brand.Any())
@@ -61,6 +83,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<IEnumerable<BusinessStructureResponse>?> GetBusinessStructureByCustomerAsync(long customerId)
         {
+            AddBearerToken();
             try
             {
                 var url = $"api/v1/BusinessStructure/customer/{customerId}";
@@ -76,6 +99,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<int> CreateAsync(BusinessStructureRequest request)
         {
+            AddBearerToken();
             var response = await _http.PostAsJsonAsync("api/v1/BusinessStructure", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<int>();
@@ -83,6 +107,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<bool> UpdateAsync(UpdateBusinessStructureRequest request)
         {
+            AddBearerToken();
             var response = await _http.PutAsJsonAsync("api/v1/BusinessStructure", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
@@ -90,6 +115,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task DeleteAsync(int id)
         {
+            AddBearerToken();
             var response = await _http.DeleteAsync($"api/v1/BusinessStructure/{id}");
             response.EnsureSuccessStatusCode();
         }
