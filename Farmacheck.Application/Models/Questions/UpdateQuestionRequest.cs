@@ -20,6 +20,8 @@ namespace Farmacheck.Application.Models.Questions
 
         public string? ImagenDeReferencia { get; set; }
 
+        public string ArchivoImagen { get; set; } = null!;
+
         public bool? EsPreguntaObligatoria { get; set; }
 
         public bool? EsPreguntaConPonderacion { get; set; }
