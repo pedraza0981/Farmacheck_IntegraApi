@@ -102,7 +102,7 @@
                 </div>
                 <div class="col-md-7">
                     <label class="mb-1">Con notificaciones por correo adicionales a:</label>
-                    <input asp-for="ListadoDeCorreosParaNotifiacionAlFinalizarAdicionales" class="form-control form-control-ajustada" />
+                    <input asp-for="ListadoDeCorreosParaNotifiacionAlFinalizarAdicionales" class="form-control form-control-ajustada" id="correosAdicionales" autocomplete="off" />
                 </div>
             </div>
         </fieldset>
@@ -244,9 +244,11 @@
     <script>
         let rol1Choices;
         let rol3Choices;
+        let correos;
 
         $(document).ready(function () {
             cargarCategorias();
+            correos = UseBootstrapTag(document.getElementById('correosAdicionales'))
 
             rol1Choices = new Choices('#rolSelect1', { removeItemButton: true });
             rol3Choices = new Choices('#rolSelect3', { removeItemButton: true });
@@ -274,13 +276,15 @@
                         $('#EtiquetaDeFirma1').val(f.etiquetaDeFirma1);
                         $('#EtiquetaDeFirma2').val(f.etiquetaDeFirma2);
                         $('#NotificacionesPorCorreoAlFinalizarRevision').prop('checked', f.notificacionesPorCorreoAlFinalizarRevision);
-                        $('#ListadoDeCorreosParaNotifiacionAlFinalizarAdicionales').val(f.listadoDeCorreosParaNotifiacionAlFinalizarAdicionales);
+                        if (f.listadoDeCorreosParaNotifiacionAlFinalizarAdicionales) {
+                            correos.addValue(f.listadoDeCorreosParaNotifiacionAlFinalizarAdicionales);
+                        }
                         $('#PersonalizarFirmasAdicionales').prop('checked', f.personalizarFirmasAdicionales);
                         $('#SustituirLogoEnPDF').prop('checked', f.sustituirLogoEnPDF);
                         $('#SustituirLogoEnEmpresa').prop('checked', f.sustituirLogoEnEmpresa);
                         $('#OcultarTareasPendientes').prop('checked', f.ocultarTareasPendientes);
                         $('#EsconderCalificacion').prop('checked', f.esconderCalificacion);
-                        $('#ActivarGeolocalizacionEnCuestionario').prop('checked', f.esconderCalificacion);
+                        $('#ActivarGeolocalizacionEnCuestionario').prop('checked', f.activarGeolocalizacionEnCuestionario);
                         $('#PublicarCuestionario').prop('checked', f.publicarCuestionario);
                         $('#RangoVerde').val(f.rangoVerde);
                         $('#RangoAmarillo').val(f.rangoAmarillo);
@@ -294,6 +298,7 @@
 
         $('#btnGuardarFormulario').click(function () {
             const formData = new FormData();
+            const correosAdicionales = correos.getValue() ? correos.getValue() : "";
 
             const data = {
                 Id: parseInt($('#Id').val() || 0),
@@ -307,7 +312,7 @@
                 EtiquetaDeFirma1: $('#EtiquetaDeFirma1').val(),
                 EtiquetaDeFirma2: $('#EtiquetaDeFirma2').val(),
                 NotificacionesPorCorreoAlFinalizarRevision: $('#NotificacionesPorCorreoAlFinalizarRevision').is(':checked'),
-                ListadoDeCorreosParaNotifiacionAlFinalizarAdicionales: $('#ListadoDeCorreosParaNotifiacionAlFinalizarAdicionales').val(),
+                ListadoDeCorreosParaNotifiacionAlFinalizarAdicionales: correosAdicionales,
                 PersonalizarFirmasAdicionales: $('#PersonalizarFirmasAdicionales').is(':checked'),
                 SustituirLogoEnPDF: $('#SustituirLogoEnPDF').is(':checked'),
                 SustituirLogoEnEmpresa: $('#SustituirLogoEnEmpresa').is(':checked'),
