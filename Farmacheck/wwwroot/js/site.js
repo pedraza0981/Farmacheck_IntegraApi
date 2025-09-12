@@ -14,7 +14,13 @@ $(function () {
     });
 });
 function showAlert(message, type = 'info') {
-    return Swal.fire({ text: message, icon: type });
+    return Swal.fire({ text: message, icon: type }).then(result => {
+        const modal = $('#processingModal');
+        if (modal.length) {
+            modal.modal('hide');
+        }
+        return result;
+    });
 }
 
 function confirmAction(message) {
