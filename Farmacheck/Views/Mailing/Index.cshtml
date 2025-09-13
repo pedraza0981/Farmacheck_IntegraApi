@@ -1,0 +1,908 @@
+﻿@model MailingProgramacionIndexVM
+@{
+    ViewData["Title"] = "Mailing Programación";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">@ViewBag.Title</h4>
+        <div>
+            <button id="btnNuevo" class="btn" style="background-color:#00ab8e; color:white;">
+                <i class="bi bi-plus-circle"></i> Programar Envio
+            </button>
+        </div>
+    </div>
+
+    <table class="table table-bordered custom-table" id="tablaDatos">
+        <thead>
+            <tr>
+                <th>Tipo Reporte</th>
+                <th>Periodicidad</th>
+                <th>Hora Envio</th>
+                <th>Zona Horaria</th>
+                <th>Unidad Negocior</th>
+                <th>Cuestionario</th>
+                <th>Rol</th>
+                <th style="width:140px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model.Programaciones)
+            {
+                <tr>
+                    <td>@u.TipoReporteNombre</td>
+                    <td>@u.PeriodicidadDescripcion</td>
+                    <td>@u.HoraEnvio</td>
+                    <td>@u.ZonaHorariaIana</td>
+                    <td>@u.UnidadDeNegocioNombre</td>
+                    <td>@u.CuestionarioNombre</td>
+                    <td>@u.RolNombre</td>
+                    
+                    <td class="text-center">
+                        <button class="btn btn-sm" style="background-color:#17a2b8; color:white;" id="btnEliminar_@u.ProgramacionId" onclick="eliminarMailing(@u.ProgramacionId)"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalTitulo">Nueva marca</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formMailing" novalidate>
+                    <input type="hidden" id="entidadId" name="entidadId" />
+
+                    <div class="mb-2">
+                        <label class="form-label">*Tipo de Reporte</label>
+                        <select class="form-select" id="tipoReporte" name="tipoReporte"></select>
+                        <div class="invalid-feedback">Selecciona un tipo de reporte.</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">*Periodicidad</label>
+                        <select class="form-select" id="periodicidad" name="periodicidad"></select>
+                        <div class="invalid-feedback">Selecciona la periodicidad.</div>
+                    </div>
+
+                    <div class="mb-2" id="divDiaSemana" hidden>
+                        <label class="form-label">*Un día específico de la semana</label>
+                        <select class="form-select" id="diaSemana" name="diaSemana">
+                            <option value="">-- Selecciona un día de la semana --</option>
+                            <option value="1">Lunes</option>
+                            <option value="2">Martes</option>
+                            <option value="3">Mi&eacute;rcoles</option>
+                            <option value="4">Jueves</option>
+                            <option value="5">Viernes</option>
+                            <option value="6">S&aacute;bado</option>
+                            <option value="7">Domingo</option>
+                        </select>
+                        <div class="invalid-feedback">Selecciona un día de la semana.</div>
+                    </div>
+
+                    <div class="mb-2" id="divDiaMes" hidden>
+                        <label class="form-label">*Un día específico del mes</label>
+                        <select class="form-select" id="diames" name="diames">
+                            <option value="">-- Selecciona un día específico del mes --</option>
+                            @for (var i = 1; i <= 31; i++)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                        <div class="invalid-feedback">Selecciona un día del mes.</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">*Hora envío</label>
+                        @Html.TextBox("horaEnvio", null, new {
+                        @type = "time",
+                            @class = "form-control",
+                            min = "00:00",
+                            max = "23:59",
+                            id = "horaEnvio",
+                            name = "horaEnvio"
+                         })
+                        <div class="invalid-feedback">Indica la hora de envío (HH:mm).</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">*Zona horaria</label>
+                        <select class="form-select" id="zonaHorario" name="zonaHorario"></select>
+                        <div class="invalid-feedback">Selecciona una zona horaria.</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">*Unidad de negocio</label>
+                        <select class="form-select" id="unidadNegocio" name="unidadNegocio"></select>
+                        <div class="invalid-feedback">Selecciona una unidad de negocio.</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">*Formulario</label>
+                        <select class="form-select" id="cuestionarioSelect" name="cuestionarioSelect"></select>
+                        <div class="invalid-feedback">Selecciona un formulario.</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" id="rol" name="rol">
+                            <option value="">-- Selecciona un rol --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">*Destinatario</label>
+                        <select id="destinatarioSelect" name="destinatarioSelect" class="form-control" multiple="multiple" style="width:100%;"></select>
+                        <div class="invalid-feedback">Selecciona al menos un destinatario.</div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+
+    /* Dentro del modal (ajusta #modalEntidad si tu id es otro) */
+    #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        position: relative;
+        display: inline-block;
+        background-color: #0d3b66;
+        color: #fff;
+        border: 0;
+        border-radius: 9999px;
+        padding: 4px 28px 4px 10px; /* espacio para la X a la derecha */
+        margin: 6px 6px 0 0;
+        font-weight: 600;
+    }
+
+    #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        position: absolute;
+        right: 8px; /* mueve la X a la derecha */
+        left: auto !important;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fff !important;
+        border: 0;
+        padding: 0;
+        margin: 0;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+        background-color: #0c345a;
+    }
+
+    #modalEntidad .select2-container,
+    #modalEntidad .select2-container .select2-dropdown {
+        z-index: 1065 !important; /* por encima del modal */
+    }
+
+    #modalEntidad .modal-body {
+        overflow: visible;
+    }
+
+    /* Escopa al modal; cambia #modalEntidad si tu id es otro */
+    #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        background: transparent !important; /* sin fondo por defecto */
+        color: #fff !important; /* X blanca */
+        border: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+        /* Hover/focus/active: fondo transparente */
+        #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover,
+        #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus,
+        #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:active {
+            background: transparent !important; /* ← clave */
+            color: #ffd166 !important; /* opcional: color de hover */
+        }
+
+    /* Si estás usando la X a la derecha con posición absoluta, mantén esto: */
+    #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        position: relative;
+        padding: 4px 28px 4px 10px; /* espacio para la X */
+    }
+
+    #modalEntidad .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+
+</style>
+
+
+@section Scripts {
+    <script>
+        // Rutas centralizadas
+        const routes = {
+            unidades: '@Url.Action("ListarUnidadesNegocio", "Marca")',
+            formularios: '@Url.Action("FormulariosDisponibles", "PeriodicidadCuestionario")',
+            roles: '@Url.Action("ListarPorUnidadNegocio", "Rol")',
+            usuariosUnidad: '@Url.Action("Index", "Usuario")',
+            zonaHorario: '@Url.Action("ZonaHorario", "Mailing")',
+            periodicidad: '@Url.Action("Periodicidad", "Mailing")',
+            tipoReporte: '@Url.Action("TipoReporte", "Mailing")',
+
+            usuario: '@Url.Action("ListarUsuario", "Mailing")',
+
+            eliminar: '@Url.Action("Delete", "Mailing")',
+            listar: '@Url.Action("Listar", "Mailing")',
+            guardar: '@Url.Action("Create", "Mailing")',
+        };
+
+        function getJson(url, data) {
+            return $.ajax({
+                url,
+                method: 'GET',
+                data,
+                dataType: 'json'
+            });
+        }
+
+        function postForm(url, data) {
+            const headers = {};
+            const token = antiForgery();
+            if (token) headers['RequestVerificationToken'] = token;
+
+            return $.ajax({
+                url,
+                method: 'POST',
+                data,                      // x-www-form-urlencoded por defecto
+                headers,
+                dataType: 'json'
+            });
+        }
+
+        let tabla;
+
+        $(document).ready(function () {
+            // DataTable
+            tabla = $('#tablaDatos').DataTable();
+
+            const $form = $('#formMailing');
+
+            const validator = $form.validate({
+              ignore: [], // importante para validar select2 (oculta el select original)
+              errorElement: 'div',
+              errorClass: 'invalid-feedback',
+              highlight: function (element) {
+                const $el = $(element);
+                if ($el.hasClass('select2-hidden-accessible')) {
+                  $el.next('.select2').find('.select2-selection').addClass('is-invalid');
+                } else {
+                  $el.addClass('is-invalid');
+                }
+              },
+              unhighlight: function (element) {
+                const $el = $(element);
+                if ($el.hasClass('select2-hidden-accessible')) {
+                  $el.next('.select2').find('.select2-selection').removeClass('is-invalid');
+                } else {
+                  $el.removeClass('is-invalid');
+                }
+              },
+              errorPlacement: function (error, element) {
+                if (element.hasClass('select2-hidden-accessible')) {
+                  // Colocar error después del contenedor select2
+                  error.insertAfter(element.next('.select2'));
+                } else {
+                  // Para inputs/selects normales
+                  if (element.parent('.input-group').length) {
+                    error.insertAfter(element.parent()); // input-group
+                  } else {
+                    error.insertAfter(element);
+                  }
+                }
+              },
+              rules: {
+                tipoReporte: { required: true },
+                periodicidad: { required: true },
+                diaSemana: {
+                  required: {
+                    depends: function () {
+                      return $('#periodicidad').val() === '3'; // Semanal
+                    }
+                  }
+                },
+                diames: {
+                  required: {
+                    depends: function () {
+                      return $('#periodicidad').val() === '4'; // Mensual
+                    }
+                  }
+                },
+                horaEnvio: { required: true },
+                zonaHorario: { required: true },
+                unidadNegocio: { required: true },
+                cuestionarioSelect: { required: true },
+                destinatarioSelect: {
+                  required: function () {
+                    const v = $('#destinatarioSelect').val();
+                    return !v || v.length === 0;
+                  }
+                }
+              },
+              messages: {
+                tipoReporte: 'Selecciona un tipo de reporte.',
+                periodicidad: 'Selecciona la periodicidad.',
+                diaSemana: 'Selecciona un día de la semana.',
+                diames: 'Selecciona un día del mes.',
+                horaEnvio: 'Indica la hora de envío.',
+                zonaHorario: 'Selecciona una zona horaria.',
+                unidadNegocio: 'Selecciona una unidad de negocio.',
+                cuestionarioSelect: 'Selecciona un formulario.',
+                destinatarioSelect: 'Selecciona al menos un destinatario.'
+              }
+            });
+
+            // Revalidar cuando cambien controles/Select2
+            $('#periodicidad, #tipoReporte, #diaSemana, #diames, #horaEnvio, #zonaHorario, #unidadNegocio, #cuestionarioSelect, #rol')
+              .on('change', function () { $(this).valid(); });
+
+            $('#destinatarioSelect').on('change.select2', function () {
+              $(this).valid();
+            });
+
+            $('#btnNuevo').on('click', async function () {
+                try {
+                    // bloquea UI mínima
+                    $('#btnNuevo').prop('disabled', true);
+
+                    await cargarTipoReporte();
+                    await cargarUnidades();
+                    await cargarPeriodicidad();
+                    await cargarFormularios(null);
+                    await cargarZonaHorario();
+                    //await Usuario();
+
+                    initSupervisoresSelect();
+                    
+
+                    $('#modalTitulo').text('Nueva Mailing Programación');
+                    $('#modalEntidad').modal('show');
+                } catch (e) {
+                    console.error(e);
+                    alert('Ocurrió un error al preparar el modal.');
+                } finally {
+                    $('#btnNuevo').prop('disabled', false);
+                }
+            });
+
+            $('#unidadNegocio').on('change', async function () {
+                const valorSeleccionado = $(this).val();
+                await cargarRoles(valorSeleccionado);
+                await cargarListarUnidadesNegocioUsuario(valorSeleccionado);
+            });
+
+            $("#periodicidad").on('change', function () {
+              const valor = $(this).val();
+
+              if (valor === "3") { // semanal
+                $("#divDiaSemana").prop("hidden", false);
+                $("#divDiaMes").prop("hidden", true);
+                $('#diames').val('').trigger('change'); // limpia selección
+                $('#diaSemana').valid(); // dispara validación
+              } else if (valor === "4") { // mensual
+                $("#divDiaMes").prop("hidden", false);
+                $("#divDiaSemana").prop("hidden", true);
+                $('#diaSemana').val('').trigger('change');
+                $('#diames').valid();
+              } else {
+                $("#divDiaSemana, #divDiaMes").prop("hidden", true);
+                $('#diaSemana, #diames').val('').trigger('change');
+              }
+
+              $(this).valid();
+            });
+
+            $('#btnGuardar').off('click').on('click', async function () {
+              const $btn = $(this).prop('disabled', true);
+
+              try {
+                // 1) Valida el formulario con jQuery Validate + Bootstrap
+                if (!$form.valid()) {
+                  // focus en el primer error
+                  const $firstError = $form.find('.is-invalid').first();
+                  if ($firstError.length) { $firstError.focus(); }
+                  return;
+                }
+
+                // 2) Construye payload (usa los name/ids del form)
+                const periodicidad = $('#periodicidad').val();
+
+                const payload = {
+                  TipoReporte_id:        parseInt($('#tipoReporte').val(), 10),
+                  Periodicidad_id:       parseInt(periodicidad, 10),
+                  DiaSemana:             $('#divDiaSemana').is(':visible') ? parseInt($('#diaSemana').val(), 10) : null,
+                  DiaMes:                $('#divDiaMes').is(':visible') ? parseInt($('#diames').val(), 10) : null,
+                  HoraEnvio:             $('#horaEnvio').val(), // "HH:mm"
+                  ZonaHoraria_id:        parseInt($('#zonaHorario').val(), 10),
+                  UnidadDeNegocio_id:    parseInt($('#unidadNegocio').val(), 10),
+                  Cuestionario_id:       parseInt($('#cuestionarioSelect').val(), 10),
+                  Rol_id:                $('#rol').val() ? parseInt($('#rol').val(), 10) : 0,
+                  Destinatarios:         ($('#destinatarioSelect').val() || []).map(Number)
+                };
+
+                // 3) POST JSON (tu endpoint)
+                const r = await $.ajax({
+                  url: routes.guardar,
+                  type: 'POST',
+                  data: JSON.stringify(payload),
+                  contentType: 'application/json; charset=utf-8',
+                  dataType: 'json'
+                });
+
+                if (r?.success) {
+                  showAlert(r.message || 'Guardado correctamente', 'success');
+                  $('#modalEntidad').modal('hide');
+                  cargar(); // recarga tabla
+                  $form[0].reset();
+                  $form.find('.is-invalid').removeClass('is-invalid');
+                  $('#destinatarioSelect').val(null).trigger('change');
+                } else {
+                  if (r?.errors) {
+                    Object.keys(r.errors).forEach(k => {
+                      const $el = $form.find(`[name="${k}"]`);
+                      const msg = Array.isArray(r.errors[k]) ? r.errors[k][0] : r.errors[k];
+                      if ($el.length) {
+                        // Inyecta el error en Bootstrap
+                        $el.addClass('is-invalid');
+                        let $err = $el.siblings('.invalid-feedback');
+                        if (!$err.length) {
+                          $err = $('<div class="invalid-feedback"></div>').insertAfter($el);
+                        }
+                        $err.text(msg);
+                      } else {
+                        showAlert(msg, 'error');
+                      }
+                    });
+                  } else {
+                    showAlert(r?.message || 'No se pudo guardar.', 'error');
+                  }
+                }
+              } catch (e) {
+                console.error(e);
+                showAlert('Error al guardar.', 'error');
+              } finally {
+                $btn.prop('disabled', false);
+              }
+            });
+
+            $('#modalEntidad').on('hidden.bs.modal', function () {
+              resetMailingForm();
+            });
+        });
+
+        // =======================
+        //  CARGAS ASÍNCRONAS
+        // =======================
+
+        function cargar() {
+          $.get(routes.listar)
+            .done(function (r) {
+              if (!r || !r.success) {
+                showAlert((r && (r.message || r.error)) || 'No fue posible listar los datos.', 'error');
+                return;
+              }
+
+              console.log(r);
+
+              const $tabla = $('#tablaDatos');
+              let pageLength = 10; // por defecto en primera carga
+
+              // Si ya existe DataTable, conserva pageLength actual y destruye
+              if ($.fn.DataTable.isDataTable($tabla)) {
+                const dt = $tabla.DataTable();
+                pageLength = dt.page.len();
+                dt.destroy();
+              }
+
+              // Rellenar tbody
+              const $tbody = $tabla.find('tbody');
+              $tbody.empty();
+
+              r.data.forEach(u => {
+                // OJO: si tus campos pueden traer HTML, considera sanitizar/escapar
+                $tbody.append(`
+                  <tr>
+                    <td>${u.tipoReporteNombre}</td>
+                    <td>${u.periodicidadDescripcion}</td>
+                    <td>${u.horaEnvio}</td>
+                    <td>${u.zonaHorariaIana}</td>
+                    <td>${u.unidadDeNegocioNombre}</td>
+                    <td>${u.cuestionarioNombre}</td>
+                    <td>${u.rolNombre}</td>
+                    
+                    <td class="text-center">
+                      <button class="btn btn-sm" style="background-color:#17a2b8; color:white;"
+                              id="btnEliminar_${u.programacionId}"
+                              onclick="eliminarMailing(${u.programacionId})">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `);
+              });
+
+              // Re-inicializar DataTable
+              const dtNew = $tabla.DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: pageLength,
+                language: {
+                  url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                }
+                // deferRender: true, // opcional si la data crece mucho
+              });
+
+              // Si deseas guardar el pageLength del usuario
+              // dtNew.on('length.dt', function (e, settings, len) {
+              //   localStorage.setItem('usuariosPageLength', String(len));
+              // });
+
+            })
+            .fail(function (xhr, status, err) {
+              console.error(err || status, xhr);
+              showAlert('Error al cargar los datos.', 'error');
+            });
+        }
+
+        async function cargarUnidades() {
+            const $select = $('#unidadNegocio');
+            // Estado de carga
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando unidades...</option>');
+
+            try {
+                const r = await getJson(routes.unidades);
+                $select.empty().append('<option value="">-- Selecciona una Unidad de Negocio --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(u => {
+                        $select.append(`<option value="${u.id}">${u.nombre}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron unidades</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando unidades</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        async function cargarFormularios(idSeleccionado = null) {
+            const $select = $('#cuestionarioSelect');
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando formularios...</option>');
+
+            try {
+                const r = await getJson(routes.formularios, { id: idSeleccionado });
+                $select.empty().append('<option value="">-- Selecciona un Formulario --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(f => {
+                        $select.append(`<option value="${f.id}">${f.nombre}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron formularios</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando formularios</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        async function cargarRoles(unidadId, rolSeleccionado = null) {
+            const $select = $('#rol');
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando roles...</option>');
+
+            if (!unidadId) {
+                $select.empty().append('<option value="">-- Selecciona un Rol --</option>');
+                $select.prop('disabled', false);
+                return;
+            }
+
+            try {
+                const r = await getJson(routes.roles, { unidadId });
+                $select.empty().append('<option value="">-- Selecciona un Rol --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(rol => {
+                        const selected = rolSeleccionado && String(rolSeleccionado) === String(rol.id) ? 'selected' : '';
+                        $select.append(`<option value="${rol.id}" ${selected}>${rol.nombre}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron roles</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando roles</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        async function cargarListarUnidadesNegocioUsuario(unidadId) {
+            if(!unidadId) return
+
+            const $select = $('#destinatarioSelect');
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando usuarios...</option>');
+
+            try {
+                const r = await getJson(routes.usuariosUnidad, { id: unidadId });
+                $select.empty().append('<option value="">-- Selecciona un Usuarios --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(f => {
+                        $select.append(`<option value="${f.id}">${f.nombre} ${f.apellidoPaterno} ${f.apellidoMaterno}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron Usuarios</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando Usuarios</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        // Zonas horarias
+        async function cargarZonaHorario() {
+            const $select = $('#zonaHorario');
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando zonas horarias...</option>');
+
+            try {
+                const r = await getJson(routes.zonaHorario, {});
+                $select.empty().append('<option value="">-- Selecciona un zonas horarias --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(z => {
+                        // usamos z.id y z.ianaName según el JSON de arriba
+                        $select.append(`<option value="${z.id}">${z.ianaName}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron zonas horarias</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando zonas horarias</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        // Periodicidad
+        async function cargarPeriodicidad() {
+            const $select = $('#periodicidad');
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando Periodicidad...</option>');
+
+            try {
+                const r = await getJson(routes.periodicidad, {});
+                $select.empty().append('<option value="">-- Selecciona un Periodicidad --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(z => {
+                        // usamos z.id y z.ianaName según el JSON de arriba
+                        $select.append(`<option value="${z.id}">${z.descripcion}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron Periodicidades</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando Periodicidad</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        // TipoReporte
+        async function cargarTipoReporte() {
+            const $select = $('#tipoReporte');
+            $select.prop('disabled', true)
+                   .empty()
+                   .append('<option value="">Cargando Tipo Reporte...</option>');
+
+            try {
+                const r = await getJson(routes.tipoReporte, {});
+                $select.empty().append('<option value="">-- Selecciona un Tipo Reporte --</option>');
+
+                if (r?.success && Array.isArray(r.data)) {
+                    r.data.forEach(z => {
+                        // usamos z.id y z.ianaName según el JSON de arriba
+                        $select.append(`<option value="${z.id}">${z.descripcion}</option>`);
+                    });
+                } else {
+                    $select.append('<option value="">No se encontraron Tipo Reporte</option>');
+                }
+            } catch (e) {
+                console.error(e);
+                $select.empty().append('<option value="">Error cargando Tipo Reporte</option>');
+            } finally {
+                $select.prop('disabled', false);
+            }
+        }
+
+        async function eliminarMailing(programacionId) {
+          const btnSel = `#btnEliminar_${programacionId}`;
+          const $btn = $(btnSel);
+
+          try {
+            const ok = await confirmAction('¿Deseas eliminar este mailing?');
+            if (!ok) return;
+
+            $btn.prop('disabled', true);
+
+            const resp = await $.ajax({
+              url: `${routes.eliminar}/${programacionId}`,
+              type: 'DELETE',
+              dataType: 'json'
+            });
+
+            if (resp && resp.success) {
+              showAlert(resp.message || 'Mailing eliminado correctamente', 'success');
+              cargar();
+            } else {
+              showAlert((resp?.error || resp?.message) ?? 'Error al eliminar', 'error');
+            }
+          } catch (e) {
+            console.error(e);
+            showAlert('Ocurrió un error al eliminar.', 'error');
+          } finally {
+            $btn.prop('disabled', false);
+          }
+        }
+
+        async function Usuario() {
+            const $container = $('#divUsuario');
+            try {
+                $container.empty().append('<label class="list-group-item">-- Cargando usuarios --</label>');
+
+                const r = await getJson(routes.usuario);
+                console.log(r);
+
+                $container.empty();
+
+                if (r?.success && Array.isArray(r.data) && r.data.length > 0) {
+                    $container.empty();
+                    r.data.forEach(u => {
+                        $container.append(`
+                          <label class="list-group-item">
+                            <input class="form-check-input me-1" type="checkbox" value="${u.email}">
+                            ${u.nombre} ${u.apellidoPaterno} ${u.apellidoMaterno}
+                          </label>
+                        `);
+                    });
+                } else {
+                    $container.append('<label class="list-group-item">No se encontraron usuarios</label>');
+                }
+            } catch (e) {
+                console.error(e);
+                $container.empty().append('<label class="list-group-item">Error cargando usuarios</label>');
+            }
+        }
+
+        function guarda(url, obj) {
+          const headers = {};
+          const token = antiForgery();
+          if (token) headers['RequestVerificationToken'] = token;
+
+          return $.ajax({
+            url,
+            method: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify(obj),
+            headers
+          });
+        }
+
+        // abreel select con datos vía AJAX
+        function initSupervisoresSelect(preseleccion = []) {
+          const $el = $('#destinatarioSelect');
+
+          if ($el.data('select2')) $el.select2('destroy');
+
+          $el.select2({
+            placeholder: 'Seleccione usuario...',
+            width: '100%',
+            closeOnSelect: false,
+            multiple: true,
+            allowClear: true,
+            dropdownParent: $('#modalEntidad'),
+            ajax: {
+              url: routes.usuario,
+              dataType: 'json',
+              delay: 250,
+              data: params => ({ q: params.term }),
+              processResults: data => ({
+                results: (data?.data ?? []).map(u => ({
+                  id: u.id,
+                  text: `${u.nombre} ${u.apellidoPaterno ?? ''} ${u.apellidoMaterno ?? ''}`.trim()
+                }))
+              }),
+              cache: true
+            }
+          })
+          .on('change', function () {
+              // Revalida el campo al cambiar
+              $(this).valid();
+          });
+
+
+          preseleccion.forEach(it => {
+            const opt = new Option(it.text, it.id, true, true);
+            $el.append(opt).trigger('change');
+          });
+        }
+
+        // ===== Limpia formulario y validaciones del modal =====
+        function resetMailingForm() {
+          const $form = $('#formMailing');
+
+          // 1) Reset nativo del form (inputs, selects estándar, time, etc.)
+          if ($form.length && $form[0]) $form[0].reset();
+
+          // 2) Limpiar selects estándar + disparar UI
+          $('#tipoReporte, #periodicidad, #diaSemana, #diames, #zonaHorario, #unidadNegocio, #cuestionarioSelect, #rol')
+            .val('')
+            .trigger('change');
+
+          // 3) Limpiar Select2 múltiple (destinatarios)
+          $('#destinatarioSelect').val(null).trigger('change');
+
+          // 4) Ocultar secciones condicionales
+          $('#divDiaSemana, #divDiaMes').prop('hidden', true);
+
+          // 5) Resetear jQuery Validate (mensajes y estado interno)
+          const validator = $form.data('validator'); // o $form.validate() si ya fue inicializado
+          if (validator && typeof validator.resetForm === 'function') {
+            validator.resetForm(); // quita mensajes y errores de plugin
+          }
+
+          // 6) Quitar clases visuales de error de Bootstrap y de Select2
+          $form.find('.is-invalid').removeClass('is-invalid');
+          $form.find('.select2-selection').removeClass('is-invalid');
+        }
+        
+    </script>
+}

@@ -129,6 +129,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["AuthApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<IMailingProgramacionClient, MailingProgramacionClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["MailingProgramacionApi:BaseUrl"]!);
+        });
+
         return services;
     }
 }

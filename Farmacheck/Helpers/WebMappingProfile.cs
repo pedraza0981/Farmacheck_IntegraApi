@@ -25,6 +25,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 using Farmacheck.Application.Models.LabelsByNumericalScale;
 using Farmacheck.Application.Models.GroupingTags;
+using Farmacheck.Application.Models.MailingProgramacion;
+using Farmacheck.Application.Models.ZonaHorario;
 
 namespace Farmacheck.Helpers
 {
@@ -205,6 +207,11 @@ namespace Farmacheck.Helpers
             CreateMap<RolPorUsuarioClientesAsignadosDto, RolPorUsuarioClientesAsignadosViewModel>().ReverseMap();
             CreateMap<QuizAssignmentManagerDto, AsignacionCuestionarioViewModel>().ReverseMap();
             CreateMap<AsignacionCuestionarioViewModel, QuizAssignmentManagerRequest>();
+
+            CreateMap<vMailingProgramacionDestinatarioModel, vMailingProgramacionWebRequest>().ReverseMap();
+            CreateMap<ZonaHorarioModel, ZonaHorarioRequest>().ReverseMap();
+
+
 
             CreateMap<TokenDto, TokenViewModel>().ReverseMap();
             CreateMap<UserInfoDto, UserInfoViewModel>().ReverseMap();

@@ -33,7 +33,9 @@ namespace Farmacheck
                 typeof(QuizAssignmentManagerProfile),
                 typeof(HierarchyByRoleProfile),
                 typeof(UserProfile),
-                typeof(AuthProfile));
+                typeof(AuthProfile),
+                typeof(MailingProgramacionProfile),
+                typeof(UserProfile));
 
             builder.Services.AddInfrastructure(builder.Configuration);
 
