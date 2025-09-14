@@ -113,8 +113,8 @@ namespace Farmacheck.Infrastructure.Services
             try
             {
                 AddBearerToken();
-                var query = string.Join("&", ids.Select(id => $"ids={id}"));
-                var url = $"api/v1/Customers_RolesUsers/customer?{query}&customer={customer}";
+                var idsParam = string.Join(",", ids);
+                var url = $"api/v1/Customers_RolesUsers/customer?ids={idsParam}&customer={customer}";
 
                 var response = await _http.DeleteAsync(url);
 
