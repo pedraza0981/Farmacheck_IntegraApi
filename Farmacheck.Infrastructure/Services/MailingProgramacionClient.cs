@@ -39,6 +39,17 @@ namespace Farmacheck.Infrastructure.Services
             return await response.Content.ReadFromJsonAsync<bool>() ? true : false;
         }
 
+        public async Task<bool> EditarAsync(MailingProgramacionRequest request, long id)
+        {
+            using var response = await _http.PutAsJsonAsync($"api/v1/MailingProgramacion/Update/{id}", request);
+
+            if (!response.IsSuccessStatusCode)
+                return false;
+
+            // Si el body es solo el ID: 123
+            return await response.Content.ReadFromJsonAsync<bool>();
+        }
+
         public async Task<IEnumerable<vMailingProgramacionWebResponse>> GetAllAsync()
         {
             return await _http.GetFromJsonAsync<IEnumerable<vMailingProgramacionWebResponse>>("api/v1/MailingProgramacion/View/Programacion/All")
@@ -56,20 +67,35 @@ namespace Farmacheck.Infrastructure.Services
             return await _http.GetFromJsonAsync<IEnumerable<ZonaHorarioResponse>>("api/v1/ZonaHoraria")
                    ?? Enumerable.Empty<ZonaHorarioResponse>();
         }
+
         public async Task<IEnumerable<TipoReporteResponse>> GetTipoReporteAsync()
         {
             return await _http.GetFromJsonAsync<IEnumerable<TipoReporteResponse>>("api/v1/TipoReporte")
                    ?? Enumerable.Empty<TipoReporteResponse>();
         }
 
-        public Task<vMailingProgramacionWebResponse?> GetAsync(int id)
+        public async Task<vMailingProgramacionWebResponse?> GetAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _http.GetFromJsonAsync<vMailingProgramacionWebResponse>($"api/v1/MailingProgramacion/{id}")
+                   ?? new vMailingProgramacionWebResponse();
         }
 
         public Task<PaginatedResponse<vMailingProgramacionWebResponse>> GetByPageAsync(int page, int items)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<MailingProgramacionRequest> Details(int id)
+        {
+            return await _http.GetFromJsonAsync<MailingProgramacionRequest>($"api/v1/MailingProgramacion/Details/{id}")
+                   ?? new MailingProgramacionRequest();
+        }
+
+        public async Task<IEnumerable<MailingProgramacionDestinatarioResponse>> DestinatarioProgramacion(long id)
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<MailingProgramacionDestinatarioResponse>>($"api/v1/MailingProgramacion/View/Destinatario/Programacion/{id}")
+                ?? Enumerable.Empty<MailingProgramacionDestinatarioResponse>();
+
         }
     }
 }

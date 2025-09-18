@@ -12,8 +12,11 @@ namespace Farmacheck.Application.Interfaces
         Task<vMailingProgramacionWebResponse?> GetAsync(int id);
         Task<int> CreateAsync(MailingProgramacionRequest request);
         Task<bool> DeleteAsync(int id);
+        Task<MailingProgramacionRequest> Details(int id);
+        Task<bool> EditarAsync(MailingProgramacionRequest request, long id);
         Task<IEnumerable<ZonaHorarioResponse>> GetZonaHorarioAsync();
         Task<IEnumerable<PeriodicidadResponse>> GetPeriodicidadAsync();
-        Task<IEnumerable<TipoReporteResponse>> GetTipoReporteAsync(); 
+        Task<IEnumerable<TipoReporteResponse>> GetTipoReporteAsync();
+        Task<IEnumerable<MailingProgramacionDestinatarioResponse>> DestinatarioProgramacion(long id);
     }
 }

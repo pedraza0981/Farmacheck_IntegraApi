@@ -71,15 +71,32 @@
             let tabla;
 
             $(document).ready(function () {
-                   tabla = $('#tablaFormularios').DataTable({
-                        order: [[0, 'asc']],
-                    });
-                   cargarFormularios();
+                const storedLength = localStorage.getItem('checklistsPageLength');
+                const initialPageLength = storedLength ? parseInt(storedLength) : 10;
 
-                   const params = new URLSearchParams(window.location.search);
-                   if (params.get('mensaje') === 'guardado') {
-                       showAlert('Formulario guardado correctamente', 'success');
-                   }
+                tabla = $('#tablaFormularios').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    info: true,
+                    lengthMenu: [5, 10, 25, 50],
+                    pageLength: initialPageLength,
+                    order: [[0, 'asc']],
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    }
+                });
+
+                tabla.on('length.dt', function (e, settings, len) {
+                    localStorage.setItem('checklistsPageLength', len);
+                });
+
+                cargarFormularios();
+
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('mensaje') === 'guardado') {
+                    showAlert('Formulario guardado correctamente', 'success');
+                }
             });
 
             function descargarReporte(id, nombre) {
@@ -102,6 +119,7 @@
             $.get('@Url.Action("ListarFormularios", "Formularios")', function (r) {
                 if (r.success) {
                     tabla.clear();
+                    
                     r.formularios.forEach(f => {
                         tabla.row.add([
                             f.id,
@@ -128,7 +146,6 @@
                         ]);
                     });
                     tabla.draw();
-                    
                 }
             });
         }

@@ -1,7 +1,12 @@
-﻿
-namespace Farmacheck.Application.Models.MailingProgramacion
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Farmacheck.Application.DTOs
 {
-    public class MailingProgramacionDestinatarioResponse
+    public class MailingProgramacionDestinatarioDto
     {
         public long ProgramacionId { get; set; }
 
@@ -12,6 +17,5 @@ namespace Farmacheck.Application.Models.MailingProgramacion
         public string Email { get; set; }
 
         public string UsuarioNombre { get; set; }
-
     }
 }

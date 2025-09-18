@@ -3,7 +3,6 @@ using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.MailingProgramacion;
 using Farmacheck.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -12,7 +11,7 @@ namespace Farmacheck.Controllers
     public class MailingController : Controller
     {
         private readonly IMailingProgramacionClient _mailingClient;
-            private readonly IUserApiClient _apiClient;
+        private readonly IUserApiClient _apiClient;
         private readonly IMapper _mapper;
 
         public MailingController(IMailingProgramacionClient mailingClient, IUserApiClient apiClient, IMapper mapper)
@@ -76,6 +75,16 @@ namespace Farmacheck.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<JsonResult> DestinatarioProgramacion(long id)
+        {
+            var apiData = await _mailingClient.DestinatarioProgramacion(id);
+
+            var model = apiData.Where(x => x.UsuarioId == null || x.UsuarioId == 0).ToList();
+
+            return Json(new { success = true, data = model });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(MailingProgramacionIndexVM model)
@@ -98,7 +107,7 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> Listar()
         {
-            var apiData = await _mailingClient.GetAllAsync();           
+            var apiData = await _mailingClient.GetAllAsync();
             var mailingl = _mapper.Map<List<vMailingProgramacionWebDto>>(apiData);
 
             return Json(new { success = true, data = mailingl });
@@ -106,9 +115,13 @@ namespace Farmacheck.Controllers
 
         // GET: MailingController/Details/5
         [HttpGet]
-        public ActionResult Details(int id)
+        [Produces("application/json")]
+        public async Task<IActionResult> Details(int id)
         {
-            return View();
+            var apiData = await _mailingClient.Details(id);
+            var mailingl = _mapper.Map<MailingProgramacionRequest>(apiData);
+
+            return Json(new { success = true, data = mailingl });
         }
 
         [HttpPost]
@@ -150,7 +163,8 @@ namespace Farmacheck.Controllers
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            try { 
+            try
+            {
                 var apiData = await _mailingClient.DeleteAsync(id);
                 return Json(new { success = apiData });
             }
@@ -205,7 +219,20 @@ namespace Farmacheck.Controllers
             return Json(new { success = true, data });
         }
 
-
+        [HttpPut]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Update([FromBody] MailingProgramacionRequest model, int id)
+        {
+            try
+            {
+                var apiData = await _mailingClient.EditarAsync(model, id);
+                return Json(new { success = apiData });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = "Error al actualizar el rol: " + ex.Message });
+            }
+        }
 
     }
 }

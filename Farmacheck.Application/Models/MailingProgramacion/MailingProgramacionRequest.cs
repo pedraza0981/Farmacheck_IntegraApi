@@ -22,13 +22,15 @@ namespace Farmacheck.Application.Models.MailingProgramacion
 
         [Required]
         public int Cuestionario_id { get; set; }
-        public int Rol_id { get; set; }
+
+        public int? Rol_id { get; set; }
 
         public byte? DiaSemana { get; set; }
+
         public byte? DiaMes { get; set; }
 
         public string? CronExpresion { get; set; } = null;
 
-        public List<int>? Destinatarios { get; set; } = new();
+        public List<string>? Destinatarios { get; set; } = new();
     }
 }

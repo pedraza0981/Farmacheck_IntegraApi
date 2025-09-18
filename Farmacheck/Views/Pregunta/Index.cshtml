@@ -13,7 +13,7 @@
 
 <div class="container py-4">
     <div class="d-flex justify-content-center mb-2">
-        <h4 class="text-dark text-center">Sección de preguntas - @ViewBag.NombreFormulario</h4>
+        <h4 class="text-dark text-center">@ViewBag.NombreFormulario - @ViewBag.NombreSeccion - Preguntas</h4>
     </div>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <table class="table table-bordered custom-table">
+    <table class="table table-bordered custom-table" id="tablaPreguntas">
         <thead>
             <tr>
                 <th style="width: 10%">Id</th>
@@ -135,7 +135,7 @@
                     <div class="mb-3 mt-3 row">
                         <div class="col-md-12">
                             <label>Etiqueta de Agrupación</label>
-                            <select class="form-select" id="etiquetaDeAgrupacion" onchange="elegirEtiqueta(this)">
+                            <select class="form-select" id="etiquetaDeAgrupacion">
                                 @foreach (var et in ViewBag.Etiquetas as List<EtiquetaDeAgrupacionViewModel>)
                                 {
                                     <option value="@et.Id">@et.Etiqueta</option>
@@ -240,7 +240,26 @@
     <script>
         var formatos = @Html.Raw(ViewBag.Formatos);
 
-        $('.table').DataTable({order: [[1, 'asc']],});
+        const storedLength = localStorage.getItem('questionsPageLength');
+        const initialPageLength = storedLength ? parseInt(storedLength) : 10;
+
+        const tabla = $('#tablaPreguntas').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            lengthMenu: [5, 10, 25, 50],
+            pageLength: initialPageLength,
+            order: [[1, 'asc']],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+            }
+        });
+
+        tabla.on('length.dt', function (e, settings, len) {
+            localStorage.setItem('questionsPageLength', len);
+        });
+
         $('#btnNuevaPregunta').click(function (e) {
             e.preventDefault(); // evita navegación si es <a>
             limpiarModalPregunta(); // ← si tienes una función para limpiar campos
@@ -318,10 +337,6 @@
                 }
             });
         });
-
-        function elegirEtiqueta(selectElement){
-            console.log(selectElement);
-        }
 
         function elegirOpciones(selectElement, isEdit){
             var selectedId = 0;
@@ -455,7 +470,6 @@
                 `);
 
                  listaArray.forEach((opcion, indice) => {
-                    console.log('Indice: ' + indice + ' Valor: ' + opcion);
                     $('#complemento' + index + '-contenedor-opciones').append(`
                         <div class="opcion-listado-item">
                             <div id="listado-item-contenedor${indice}">

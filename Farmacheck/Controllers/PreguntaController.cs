@@ -76,6 +76,7 @@ namespace Farmacheck.Controllers
 
             ViewBag.FormularioId = formulario.Id;
             ViewBag.SeccionId = seccion.Id;
+            ViewBag.NombreSeccion = seccion.Nombre;
             ViewBag.NombreFormulario = formulario.Nombre;
             ViewBag.TiposPregunta = _formatos;
             ViewBag.Formatos = JsonConvert.SerializeObject(_formatos);

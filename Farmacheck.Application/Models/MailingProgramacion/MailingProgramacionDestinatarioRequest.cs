@@ -9,7 +9,7 @@ namespace Farmacheck.Application.Models.MailingProgramacion
 
         public int? Usuario_id { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
     }
 }

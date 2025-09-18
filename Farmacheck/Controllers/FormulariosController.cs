@@ -212,7 +212,9 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public IActionResult ConfigurarSecciones(int id)
         {
+            var formulario = _cuestionarios.FirstOrDefault(f => f.Id == id);
             ViewBag.FormularioId = id;
+            ViewBag.NombreFormulario = formulario?.Nombre;
             cuestionarioSeleccionado = id;
             return View();
         }
