@@ -1,6 +1,7 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.CustomersRolesUsers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Linq;
@@ -110,29 +111,19 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<bool> RemoveByCustomerAsync(List<int> ids, long customer)
         {
-            try
-            {
-                AddBearerToken();
-                var idsParam = string.Join(",", ids);
-                var url = $"api/v1/Customers_RolesUsers/customer?ids={idsParam}&customer={customer}";
+            AddBearerToken();
 
-                var response = await _http.DeleteAsync(url);
+            var query = ids
+                .Select(id => new KeyValuePair<string, string?>("ids", id.ToString()))
+                .ToList();
+            query.Add(new KeyValuePair<string, string?>("customer", customer.ToString()));
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Error al eliminar: {response.StatusCode} - {errorMessage}");
-                    return false;
-                }
+            var url = QueryHelpers.AddQueryString("api/v1/Customers_RolesUsers/customer", query);
 
-                var result = await response.Content.ReadFromJsonAsync<bool>();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error inesperado: {ex.Message}");
-                return false;
-            }
+            var response = await _http.DeleteAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
     }
 }
