@@ -101,7 +101,7 @@
                 <option value="@i">@i</option>
               }
             </select>
-            <div class="invalid-feedback">Selecciona un día del mes.</div>
+            <div class="invalid-feedback"></div>
           </div>
 
           <div class="mb-2">
@@ -152,10 +152,10 @@
           <div class="mb-2">
             <label class="form-label">Otros correos</label>
             <input type="text" class="form-control" id="multiEmail" name="multiEmail" aria-describedby="emailHelp">
-                        <small id="emailHelp" class="form-text text-muted">
-                            Ingresa uno o varios correos electrónicos separados por punto y coma (<code>;</code>).<br>
-                            <strong>Ejemplo:</strong> juan@gmail.com; maria@hotmail.com; pedro@empresa.com
-                        </small>
+            <small id="emailHelp" class="form-text text-muted">
+              Ingresa uno o varios correos electrónicos separados por punto y coma (<code>;</code>).<br>
+              <strong>Ejemplo:</strong> juan@gmail.com; maria@hotmail.com; pedro@empresa.com
+            </small>
           </div>
 
         </form>
@@ -260,12 +260,11 @@
       unidades: '@Url.Action("ListarUnidadesNegocio", "Marca")',
       formularios: '@Url.Action("FormulariosDisponibles", "PeriodicidadCuestionario")',
       roles: '@Url.Action("ListarPorUnidadNegocio", "Rol")',
-      usuariosUnidad: '@Url.Action("Index", "Usuario")',
       zonaHorario: '@Url.Action("ZonaHorario", "Mailing")',
       periodicidad: '@Url.Action("Periodicidad", "Mailing")',
       tipoReporte: '@Url.Action("TipoReporte", "Mailing")',
 
-      usuario: '@Url.Action("ListarUsuario", "Mailing")',
+      usuario: '@Url.Action("Listar", "Usuario")',
       editar: '@Url.Action("Details", "Mailing")',
       usuarioId: '@Url.Action("Obtener", "Usuario")',
       destinatarios: '@Url.Action("DestinatarioProgramacion", "Mailing")',
@@ -453,12 +452,10 @@
             cargarUnidades(),
             cargarPeriodicidad(),
             cargarZonaHorario(),
-            Usuario()
+            Usuario(),
+            cargarFormularios(null),
+            initSupervisoresSelect()
           ]);
-
-          await cargarFormularios(null);
-
-          await initSupervisoresSelect();
 
           $("#programacionId").val(0);
           $('#modalTitulo').text('Nueva Mailing Programación');
@@ -514,7 +511,6 @@
         }
       });
 
-
       $('#modalEntidad').on('hidden.bs.modal', function () {
         resetMailingForm();
         $('#btnNuevo').prop('disabled', false);
@@ -532,8 +528,6 @@
             return;
           }
 
-          console.log(r);
-
           const $tabla = $('#tablaDatos');
           let pageLength = 10; // por defecto en primera carga
 
@@ -550,26 +544,26 @@
 
           r.data.forEach(u => {
             $tbody.append(`
-                              <tr>
-                                <td>${u.tipoReporteNombre}</td>
-                                <td>${u.periodicidadDescripcion}</td>
-                                <td>${u.horaEnvio}</td>
-                                <td>${u.zonaHorariaIana}</td>
-                                <td>${u.unidadDeNegocioNombre}</td>
-                                <td>${u.cuestionarioNombre}</td>
-                                <td>${u.rolNombre}</td>
+                                    <tr>
+                                      <td>${u.tipoReporteNombre}</td>
+                                      <td>${u.periodicidadDescripcion}</td>
+                                      <td>${u.horaEnvio}</td>
+                                      <td>${u.zonaHorariaIana}</td>
+                                      <td>${u.unidadDeNegocioNombre}</td>
+                                      <td>${u.cuestionarioNombre}</td>
+                                      <td>${u.rolNombre}</td>
                     
-                                <td class="text-center">
-                                <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" id="btnEditar_${u.programacionId}"
-                                    name="btnEditar" onclick="editarMailing(${u.programacionId})"><i class="bi bi-pencil"></i></button>
-                                  <button class="btn btn-sm" style="background-color:#17a2b8; color:white;"
-                                          id="btnEliminar_${u.programacionId}"
-                                          onclick="eliminarMailing(${u.programacionId})">
-                                    <i class="bi bi-trash"></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            `);
+                                      <td class="text-center">
+                                      <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" id="btnEditar_${u.programacionId}"
+                                          name="btnEditar" onclick="editarMailing(${u.programacionId})"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm" style="background-color:#17a2b8; color:white;"
+                                                id="btnEliminar_${u.programacionId}"
+                                                onclick="eliminarMailing(${u.programacionId})">
+                                          <i class="bi bi-trash"></i>
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  `);
           });
 
           // Re-inicializar DataTable
@@ -591,8 +585,6 @@
           showAlert('Error al cargar los datos.', 'error');
         });
     }
-
-
 
     async function cargarUnidades() {
       const $select = $('#unidadNegocio');
@@ -620,8 +612,6 @@
       }
     }
 
-
-
     async function cargarFormularios(idSeleccionado = null) {
       const $select = $('#cuestionarioSelect');
       $select.prop('disabled', true)
@@ -646,8 +636,6 @@
         $select.prop('disabled', false);
       }
     }
-
-
 
     async function cargarRoles(unidadId, rolSeleccionado = null) {
       const $select = $('#rol');
@@ -686,34 +674,6 @@
       }
     }
 
-
-
-    async function cargarListarUnidadesNegocioUsuario() {
-      const $select = $('#destinatarioSelect');
-      $select.prop('disabled', true)
-        .empty()
-        .append('<option value="">Cargando usuarios...</option>');
-
-      try {
-        const r = await getJsonAsync(routes.usuariosUnidad);
-        $select.empty().append('<option value="">-- Selecciona un Usuarios --</option>');
-
-        if (r?.success && Array.isArray(r.data)) {
-          r.data.forEach(f => {
-            $select.append(`<option value="${f.id}">${f.nombre} ${f.apellidoPaterno} ${f.apellidoMaterno}</option>`);
-          });
-        } else {
-          $select.append('<option value="">No se encontraron Usuarios</option>');
-        }
-      } catch (e) {
-        console.error(e);
-        $select.empty().append('<option value="">Error cargando Usuarios</option>');
-      } finally {
-        $select.prop('disabled', false);
-      }
-    }
-
-
     // Zonas horarias
     async function cargarZonaHorario() {
       const $select = $('#zonaHorario');
@@ -740,7 +700,6 @@
         $select.prop('disabled', false);
       }
     }
-
 
     // Periodicidad
     async function cargarPeriodicidad() {
@@ -769,7 +728,6 @@
       }
     }
 
-
     // TipoReporte
     async function cargarTipoReporte() {
       const $select = $('#tipoReporte');
@@ -796,7 +754,6 @@
         $select.prop('disabled', false);
       }
     }
-
 
     async function eliminarMailing(programacionId) {
       const btnSel = `#btnEliminar_${programacionId}`;
@@ -828,7 +785,6 @@
       }
     }
 
-
     async function Usuario() {
       const $container = $('#divUsuario');
       try {
@@ -842,11 +798,11 @@
           $container.empty();
           r.data.forEach(u => {
             $container.append(`
-                                      <label class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="${u.id}">
-                                        ${u.nombre} ${u.apellidoPaterno} ${u.apellidoMaterno}
-                                      </label>
-                                    `);
+                                            <label class="list-group-item">
+                                              <input class="form-check-input me-1" type="checkbox" value="${u.id}">
+                                              ${u.nombre} ${u.apellidoPaterno} ${u.apellidoMaterno}
+                                            </label>
+                                          `);
           });
         } else {
           $container.append('<label class="list-group-item">No se encontraron usuarios</label>');
@@ -856,7 +812,6 @@
         $container.empty().append('<label class="list-group-item">Error cargando usuarios</label>');
       }
     }
-
 
     function guarda(url, obj) {
       const headers = {};
@@ -873,80 +828,79 @@
       });
     }
 
+    async function initSupervisoresSelect(preseleccion = []) {
+      const $el = $('#destinatarioSelect');
 
+      if ($el.data('select2')) $el.select2('destroy');
+      $el.empty();
 
-   async function initSupervisoresSelect(preseleccion = []) {
-        const $el = $('#destinatarioSelect');
+      const nombreDe = u => {
+        const parts = [u?.nombre, u?.apellidoPaterno, u?.apellidoMaterno].filter(Boolean);
+        const t = parts.join(' ').trim();
+        return t.length ? t : null;
+      };
 
-        if ($el.data('select2')) $el.select2('destroy');
-        $el.empty();
+      $el.select2({
+        placeholder: 'Busca usuario...',
+        width: '100%',
+        closeOnSelect: false,
+        multiple: true,
+        allowClear: true,
+        dropdownParent: $('#modalEntidad'),
+        tags: false,
+        minimumInputLength: 2,
+        ajax: {
+          url: routes.usuario,
+          dataType: 'json',
+          delay: 250,
+          data: params => ({ q: params.term || '' }),
+          processResults: r => {
+            const src = Array.isArray(r?.data) ? r.data : [];
+            const seen = new Set();
+            const results = [];
+            for (const u of src) {
+              if (u == null || u.id == null) continue;
 
-        const nombreDe = u => {
-            const parts = [u?.nombre, u?.apellidoPaterno, u?.apellidoMaterno].filter(Boolean);
-            const t = parts.join(' ').trim();
-            return t.length ? t : null;
-        };
+              const text = nombreDe(u) ?? (u.email ?? '').trim();
 
-        $el.select2({
-            placeholder: 'Busca usuario...',
-            width: '100%',
-            closeOnSelect: false,
-            multiple: true,
-            allowClear: true,
-            dropdownParent: $('#modalEntidad'),
-            tags: false,
-            minimumInputLength: 2,                
-            ajax: {
-                url: routes.usuario,
-                dataType: 'json',
-                delay: 250,
-                data: params => ({ q: params.term || '' }),
-                processResults: r => {
-                const src = Array.isArray(r?.data) ? r.data : [];
-                const seen = new Set();
-                const results = [];
-                for (const u of src) {
-                    if (u == null || u.id == null) continue;
-                    const text = nombreDe(u) ?? (u.email ?? '').trim();
-                    if (!text) continue;            // <-- no mostrar valores nulos/vacíos
-                    const id = String(u.id);
-                    if (seen.has(id)) continue;
-                    seen.add(id);
-                    results.push({ id, text });
-                }
-                return { results };
-                },
-                cache: true
+              if (!text) continue; // <-- no mostrar valores nulos/vacíos
+              const id = String(u.id);
+              if (seen.has(id)) continue;
+              seen.add(id);
+              results.push({ id, text });
             }
-        }).on('change', function () {
-            $(this).valid();
+            return { results };
+          },
+          cache: true
+        }
+      })
+        .on('change', function () {
+          $(this).valid();
         });
 
-        if (!Array.isArray(preseleccion) || preseleccion.length === 0) return;
+      if (!Array.isArray(preseleccion) || preseleccion.length === 0) return;
 
-        try {
-            const respuestas = await Promise.all(
-                preseleccion.map(id => getJsonAsync(routes.usuarioId, { id }))
-            );
+      try {
+        const respuestas = await Promise.all(
+          preseleccion.map(id => getJsonAsync(routes.usuarioId, { id }))
+        );
 
-            const usuarios = respuestas
-                .filter(r => r?.success && r.data)
-                .map(r => r.data);
+        const usuarios = respuestas
+          .filter(r => r?.success && r.data)
+          .map(r => r.data);
 
-            for (const u of usuarios) {
-                const text = nombreDe(u) ?? (u.email ?? '').trim();
-                if (!text) continue;                // <-- evita nulos aquí también
-                const opt = new Option(text, String(u.id), true, true);
-                $el.append(opt);
-            }
-            $el.trigger('change');
-        } catch (e) {
-            console.error('Precarga de supervisores falló:', e);
-            Swal.fire('Error', e.message || 'No se pudieron precargar usuarios', 'error');
+        for (const u of usuarios) {
+          const text = nombreDe(u) ?? (u.email ?? '').trim();
+          if (!text) continue;                // <-- evita nulos aquí también
+          const opt = new Option(text, String(u.id), true, true);
+          $el.append(opt);
         }
+        $el.trigger('change');
+      } catch (e) {
+        console.error('Precarga de supervisores falló:', e);
+        Swal.fire('Error', e.message || 'No se pudieron precargar usuarios', 'error');
+      }
     }
-
-
 
     // ===== Limpia formulario y validaciones del modal =====
     function resetMailingForm() {
@@ -977,8 +931,6 @@
       $form.find('.select2-selection').removeClass('is-invalid');
     }
 
-
-
     async function editarMailing(programacionId) {
       if (!Number.isFinite(+programacionId) || +programacionId <= 0) {
         console.warn('programacionId inválido:', programacionId);
@@ -992,6 +944,9 @@
       try {
         $btn.prop('disabled', true);
 
+        // GET detalles
+        const r = await getJsonAsync(`${routes.editar}/${programacionId}`, null);
+
         // Cargas generales en paralelo
         await Promise.all([
           cargarTipoReporte(),
@@ -999,21 +954,14 @@
           cargarPeriodicidad(),
           cargarZonaHorario(),
           Usuario(),
-          cargarCorreosOtros(programacionId)
+          cargarCorreosOtros(programacionId),
+          cargarFormularios(null),
+          
         ]);
-
-        // Formularios (si depende de lo anterior)
-        await cargarFormularios(null);
 
         // Mostrar modal
         $('#modalTitulo').text('Editar Mailing Programación');
         $('#modalEntidad').modal({ backdrop: 'static', keyboard: false }).modal('show');
-
-        // GET detalles
-        const r = await getJsonAsync(`${routes.editar}/${programacionId}`, null);
-
-        // Volcar datos al formulario
-        console.log('editarMailing', r);
 
         await bindMailingToForm(r);
 
@@ -1030,8 +978,6 @@
       }
     }
 
-
-
     // Helper: toma una clave tolerando camelCase/PascalCase
     function pick(obj, key) {
       if (!obj) return undefined;
@@ -1039,8 +985,6 @@
       const camel = key.charAt(0).toLowerCase() + key.slice(1);
       return obj[camel];
     }
-
-
 
     // Normaliza hora "HH:mm" desde "HH:mm" | "HH:mm:ss" | "2025-01-01THH:mm:ss"
     function toHHmm(val) {
@@ -1054,14 +998,10 @@
       try { return String(val).slice(11, 16); } catch { return ''; }
     }
 
-
-
     async function bindMailingToForm(r) {
       if (!r) return;
 
       r = r.data;
-
-      console.log(r);
 
       const id = pick(r, 'Id') ?? 0;
       const unidadId = pick(r, 'unidadDeNegocio_id');
@@ -1083,29 +1023,26 @@
       await initSupervisoresSelect(destIds);
     }
 
+    async function cargarCorreosOtros(programacionId) {
+      try {
+        const r = await getJsonAsync(`${routes.destinatarios}/${programacionId}`);
 
-  async function cargarCorreosOtros(programacionId) {
-          try {
-            const r = await getJsonAsync(`${routes.destinatarios}/${programacionId}`);
+        if (!r || r.success !== true || !Array.isArray(r.data)) {
+          console.warn('Respuesta inesperada:', r);
+          $('#multiEmail').val('');
+          return;
+        }
 
-            if (!r || r.success !== true || !Array.isArray(r.data)) {
-              console.warn('Respuesta inesperada:', r);
-              $('#multiEmail').val('');
-              return;
-            }
+        const emails = r.data
+          .filter(x => (x.usuarioId === 0 || x.usuarioId == null) && x.email)
+          .map(x => x.email.trim());
 
-            const emails = r.data
-              .filter(x => (x.usuarioId === 0 || x.usuarioId == null) && x.email)
-              .map(x => x.email.trim());
-
-            $('#multiEmail').val(emails.join(';'));
-          } catch (e) {
-            console.error('Error cargando correos otros:', e);
-            Swal.fire('Error', e.message || 'No se pudieron cargar correos adicionales', 'error');
-          }
-   }
-
-
+        $('#multiEmail').val(emails.join(';'));
+      } catch (e) {
+        console.error('Error cargando correos otros:', e);
+        Swal.fire('Error', e.message || 'No se pudieron cargar correos adicionales', 'error');
+      }
+    }
 
     async function Agregar() {
       const $btn = $('#btnGuardar').prop('disabled', true);
@@ -1190,7 +1127,6 @@
       }
     }
 
-
     async function Actualizar(id) {
       const $btn = $('#btnGuardar').prop('disabled', true);
 
@@ -1229,7 +1165,7 @@
           Destinatarios: Destinatarios
         };
 
-        
+
 
         // 3) PUT JSON (tu endpoint)
         const r = await $.ajax({
@@ -1240,15 +1176,22 @@
           dataType: 'json'
         });
 
+        console.log(r.success);
+
         if (r?.success) {
           showAlert(r.message || 'Guardado correctamente', 'success');
+
           $('#modalEntidad').modal('hide');
+
           cargar(); // recarga tabla
+
           $form[0].reset();
           $form.find('.is-invalid').removeClass('is-invalid');
+
           $('#destinatarioSelect').val(null).trigger('change');
         } else {
           if (r?.errors) {
+
             Object.keys(r.errors).forEach(k => {
               const $el = $form.find(`[name="${k}"]`);
               const msg = Array.isArray(r.errors[k]) ? r.errors[k][0] : r.errors[k];

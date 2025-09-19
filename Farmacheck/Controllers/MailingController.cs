@@ -45,17 +45,6 @@ namespace Farmacheck.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> ListarUsuario()
-        {
-            var apiData = await _apiClient.GetAllUsersAsync();
-
-            var dtos = _mapper.Map<List<UserDto>>(apiData);
-            var usuarios = _mapper.Map<List<UsuarioViewModel>>(dtos);
-
-            return Json(new { success = true, data = usuarios });
-        }
-
-        [HttpGet]
         public async Task<IActionResult> Creates()
         {
             var apiData = await _apiClient.GetAllUsersAsync();
