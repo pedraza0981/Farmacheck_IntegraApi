@@ -1,6 +1,6 @@
 @model List<Farmacheck.Models.CategoriaCuestionarioViewModel>
 @{
-    ViewData["Title"] = "Categorías de cuestionario";
+    ViewData["Title"] = "Área";
 }
 <style>
     #tablaDatos thead th {
@@ -12,7 +12,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="text-dark">Categorías de cuestionario</h4>
         <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
-            <i class="bi bi-plus-circle"></i> Nueva categoría
+            <i class="bi bi-plus-circle"></i> Nueva área
         </button>
     </div>
     <table class="table table-bordered custom-table" id="tablaDatos">
@@ -32,7 +32,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary_form text-white">
-                <h5 class="modal-title" id="modalTitulo">Nueva categoría</h5>
+                <h5 class="modal-title" id="modalTitulo">Nueva área</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
@@ -61,7 +61,7 @@
 
             $('#btnNueva').click(function () {
                 limpiar();
-                $('#modalTitulo').text('Nueva categoría');
+                $('#modalTitulo').text('Nueva área');
                 $('#modalEntidad').modal('show');
             });
 
@@ -135,7 +135,7 @@
             $.get('@Url.Action("Obtener", "CategoriaCuestionario")', { id }, function (r) {
                 if (r.success) {
                     const u = r.data;
-                    $('#modalTitulo').text('Editar categoría');
+                    $('#modalTitulo').text('Editar área');
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#estatusCheck').prop('checked', u.activa);
@@ -147,7 +147,7 @@
         }
 
         function eliminar(id) {
-            confirmAction('¿Deseas eliminar esta categoría?').then(function (ok) {
+            confirmAction('¿Deseas eliminar esta área?').then(function (ok) {
                 if (!ok) return;
                 $.post('@Url.Action("Eliminar", "CategoriaCuestionario")', { id }, function (r) {
                     if (r.success) {
