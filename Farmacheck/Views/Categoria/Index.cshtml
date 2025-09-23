@@ -1,0 +1,263 @@
+@model List<Farmacheck.Models.CategoriaViewModel>
+@{
+    ViewData["Title"] = "Categorías";
+}
+<style>
+    #tablaDatos thead th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Categorías</h4>
+        <div>
+            <button id="btnDescargar" class="btn btn-secondary me-2">
+                <i class="bi bi-download"></i> Descargar
+            </button>
+            <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
+                <i class="bi bi-plus-circle"></i> Nueva categoría
+            </button>
+        </div>
+    </div>
+    <table class="table table-bordered custom-table" id="tablaDatos">
+        <thead>
+            <tr>
+                <th style="width:15%;">Id</th>
+                <th style="width:35%;">Nombre</th>
+                <th style="width:30%;">Rol</th>
+                <th style="width:10%;">Estatus</th>
+                <th style="width:10%;" class="text-center"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var categoria in Model)
+        {
+            <tr>
+                <td>@categoria.Id</td>
+                <td>@categoria.Nombre</td>
+                <td>@categoria.RolNombre</td>
+                <td>@(categoria.Estatus ? "Activo" : "Inactivo")</td>
+                <td class="text-center">
+                    <button class="btn btn-sm me-1" style="background-color:#00ab8e; color:white;" onclick="editar(@categoria.Id)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminar(@categoria.Id)"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalTitulo">Nueva categoría</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="entidadId" />
+                <div class="mb-2">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
+                </div>
+                <div class="mb-2">
+                    <label>Rol</label>
+                    <select class="form-select" id="rol"></select>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="estatusCheck">
+                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            cargarRoles();
+
+            const storedLength = localStorage.getItem('categoriasPageLength');
+            const initialPageLength = storedLength ? parseInt(storedLength) : 5;
+
+            const tabla = $('#tablaDatos').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: initialPageLength,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                }
+            });
+
+            tabla.on('length.dt', function (e, settings, len) {
+                localStorage.setItem('categoriasPageLength', len);
+            });
+
+            $('#btnNueva').click(function () {
+                limpiar();
+                $('#modalTitulo').text('Nueva categoría');
+                $('#estatusCheck').prop('checked', true);
+                cargarRoles();
+                $('#modalEntidad').modal('show');
+            });
+
+            $('#btnDescargar').click(function () {
+                descargarReporte();
+            });
+
+            $('#btnGuardar').click(function () {
+                guardar();
+            });
+        });
+
+        function cargarRoles(selectedId) {
+            return $.get('@Url.Action("ListarRoles", "Categoria")', function (r) {
+                if (r.success) {
+                    const select = $('#rol');
+                    const currentValue = selectedId ?? select.val();
+                    select.empty();
+                    select.append('<option value="">Seleccione un rol</option>');
+                    r.data.forEach(rol => select.append(`<option value="${rol.id}">${rol.nombre}</option>`));
+                    if (currentValue) {
+                        select.val(currentValue);
+                    }
+                }
+            });
+        }
+
+        function cargar() {
+            $.get('@Url.Action("Listar", "Categoria")', function (r) {
+                if (r.success) {
+                    const tabla = $('#tablaDatos');
+                    let pageLength = parseInt(localStorage.getItem('categoriasPageLength')) || 5;
+                    if ($.fn.DataTable.isDataTable(tabla)) {
+                        pageLength = tabla.DataTable().page.len();
+                        tabla.DataTable().destroy();
+                    }
+
+                    const tbody = tabla.find('tbody');
+                    tbody.empty();
+                    r.data.forEach(categoria => {
+                        tbody.append(`<tr>
+                            <td>${categoria.id}</td>
+                            <td>${categoria.nombre}</td>
+                            <td>${categoria.rolNombre ?? ''}</td>
+                            <td>${categoria.estatus ? 'Activo' : 'Inactivo'}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm me-1" style="background-color:#00ab8e; color:white;" onclick="editar(${categoria.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminar(${categoria.id})"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`);
+                    });
+
+                    tabla.DataTable({
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        info: true,
+                        lengthMenu: [5, 10, 25, 50],
+                        pageLength: pageLength,
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                        }
+                    });
+                }
+            });
+        }
+
+        function limpiar() {
+            $('#entidadId').val('0');
+            $('#nombre').val('');
+            $('#rol').val('');
+            $('#estatusCheck').prop('checked', true);
+        }
+
+        function editar(id) {
+            $.get('@Url.Action("Obtener", "Categoria")', { id }, function (r) {
+                if (r.success) {
+                    const categoria = r.data;
+                    limpiar();
+                    $('#modalTitulo').text('Editar categoría');
+                    $('#entidadId').val(categoria.id);
+                    $('#nombre').val(categoria.nombre);
+                    cargarRoles(categoria.rolId).done(function () {
+                        $('#estatusCheck').prop('checked', categoria.estatus);
+                        $('#modalEntidad').modal('show');
+                    });
+                } else {
+                    showAlert(r.error || 'No se pudo obtener la categoría', 'error');
+                }
+            });
+        }
+
+        function eliminar(id) {
+            if (!confirm('¿Desea eliminar la categoría seleccionada?')) {
+                return;
+            }
+
+            $.post('@Url.Action("Eliminar", "Categoria")', { id }, function (r) {
+                if (r.success) {
+                    showAlert('Categoría eliminada correctamente', 'success');
+                    cargar();
+                } else {
+                    showAlert('No se pudo eliminar la categoría', 'error');
+                }
+            });
+        }
+
+        function guardar() {
+            const id = parseInt($('#entidadId').val()) || 0;
+            const rolId = parseInt($('#rol').val());
+
+            if (!rolId) {
+                showAlert('Seleccione un rol', 'warning');
+                return;
+            }
+
+            const payload = {
+                id,
+                nombre: $('#nombre').val().trim(),
+                rolId: rolId,
+                estatus: $('#estatusCheck').prop('checked')
+            };
+
+            if (!payload.nombre) {
+                showAlert('El nombre es obligatorio', 'warning');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Guardar", "Categoria")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (r) {
+                    if (r.success) {
+                        $('#modalEntidad').modal('hide');
+                        const mensaje = id === 0
+                            ? 'Categoría registrada correctamente'
+                            : 'Categoría actualizada correctamente';
+                        showAlert(mensaje, 'success');
+                        cargar();
+                    } else {
+                        showAlert(r.error || 'Error al guardar', 'error');
+                    }
+                }
+            });
+        }
+
+        function descargarReporte() {
+            window.location.href = '@Url.Action("DescargarReporte", "Categoria")';
+        }
+    </script>
+}

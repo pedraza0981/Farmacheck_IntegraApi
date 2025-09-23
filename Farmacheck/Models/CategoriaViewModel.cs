@@ -1,4 +1,4 @@
-﻿namespace Farmacheck.Models
+namespace Farmacheck.Models
 {
     public class CategoriaViewModel
     {
@@ -9,5 +9,7 @@
         public string Nombre { get; set; } = null!;
 
         public bool Estatus { get; set; }
+
+        public string? RolNombre { get; set; }
     }
 }
