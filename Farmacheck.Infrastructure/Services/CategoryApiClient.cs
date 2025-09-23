@@ -99,7 +99,9 @@ namespace Farmacheck.Infrastructure.Services
             var response = await _http.DeleteAsync($"api/v1/Categories/{id}");
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<bool>() ?? true;
+            var result = await response.Content.ReadFromJsonAsync<bool?>();
+
+            return result ?? true;
         }
 
         public async Task<string> GetReportAsync()
