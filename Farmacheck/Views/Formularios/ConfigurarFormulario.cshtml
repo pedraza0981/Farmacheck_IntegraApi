@@ -67,27 +67,6 @@
             </div>
         </fieldset>
 
-        <!-- Configuración de firma -->
-        <fieldset class="border p-3 mb-4 rounded">
-            <legend class="w-auto px-2 text-secondary">Configuración de firma</legend>
-            <div class="row mb-3 align-items-end">
-                <div class="col-md-4">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="PersonalizarFirmasAdicionales" />
-                        <label class="form-check-label">Personalizar firmas adicionales</label>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label>Etiqueta 1</label>
-                    <input asp-for="EtiquetaDeFirma1" class="form-control form-control-ajustada" />
-                </div>
-                <div class="col-md-4">
-                    <label>Etiqueta 2</label>
-                    <input asp-for="EtiquetaDeFirma2" class="form-control form-control-ajustada" />
-                </div>
-            </div>
-        </fieldset>
-
         <!-- Notificaciones -->
         <fieldset class="border p-3 mb-4 rounded">
             <legend class="w-auto px-2 text-secondary">Configuración de Notificaciones</legend>
@@ -131,28 +110,21 @@
             <legend class="w-auto px-2 text-secondary">Extras</legend>
 
             <div class="row mb-3">
-                <div class="col-md-3">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="ActivarGeolocalizacionEnCuestionario" />
-                        <label class="form-check-label">Activar geolocalización</label>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" asp-for="EsconderCalificacion" />
                         <label class="form-check-label">Esconder Calificación</label>
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" asp-for="OcultarTareasPendientes" />
                         <label class="form-check-label">Ocultar tareas pendientes</label>
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" asp-for="PublicarCuestionario" />
                         <label class="form-check-label">Publicar</label>

@@ -410,19 +410,23 @@
                     <fieldset class="border p-3 mb-1 rounded">
                         <div id="item-contenedor${index}">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-2">
                                     <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${index}].Texto" autocomplete="off"/>
                                 </div>
                                 <div class="col-2">
                                     <input type="text" class="form-control" placeholder="Valor" id="opcionPonderacion" name="opciones[${index}].Valor" autocomplete="off" />
                                 </div>
-                                <div class="col-3">
+                                 <div class="col-2">
                                     <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" onchange="agregarComplemento(this.checked, ${index}, null)"/>
-                                    <label class="form-check-label" for="reqInformacionExtra">Información Extra</label>
+                                    <label class="form-check-label" for="reqInformacionExtra">Info. Extra</label>
                                 </div>
                                 <div class="col-3">
                                     <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" />
                                     <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
+                                </div>
+                                <div class="col-2">
+                                    <input type="checkbox" class="form-check-input" id="generaTarea" />
+                                    <label class="form-check-label" for="generaTarea">Genera tarea</label>
                                 </div>
                                 <div class="col-1">
                                     <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>
@@ -580,6 +584,7 @@
                     const ponderacion = esNumero(ponderacionValor) ? ponderacionValor : null;
                     const reqEvidencia = $(this).find("#requiereEvidenciaOpcion").is(':checked');
                     const reqInfoExtra = $(this).find("#requiereInformacionExtra").is(':checked');
+                    const generaTarea = $(this).find("#generaTarea").is(':checked');
                     const complementoNombre = $(this).find("#complementoNombre").val();
 
                     const opciones = {
@@ -587,6 +592,7 @@
                         Ponderacion: ponderacion,
                         RequiereEvidencia: reqEvidencia,
                         RequiereInformacionExtra: reqInfoExtra,
+                        GeneraTarea: generaTarea,
                         Estatus: true
                     };
 
@@ -674,6 +680,7 @@
                         p.opcionesPorPregunta.forEach((o, idx) => {
                             const evidenciaChecked = o.requiereEvidencia ? 'checked' : '';
                             const infoExtraChecked = o.requiereInformacionExtra ? 'checked' : '';
+                            const generaTareaChecked = o.generaTarea ? 'checked' : '';
                             const ponderacion = o.ponderacion !== null ? o.ponderacion : 'NA';
 
                             $('#opcionesContainer').append(`
@@ -681,19 +688,23 @@
                                 <fieldset class="border p-3 mb-1 rounded">
                                     <div id="item-contenedor${idx}">
                                             <div class="row mb-1">
-                                                <div class="col-3">
+                                                <div class="col-2">
                                                     <input type="text" class="form-control" placeholder="Etiqueta" id="opcionEtiqueta" name="opciones[${idx}].Texto" value="${o.etiqueta}" autocomplete="off"/>
                                                 </div>
                                                 <div class="col-2">
                                                     <input type="text" class="form-control" placeholder="Valor" id="opcionPonderacion" name="opciones[${idx}].Valor" value="${ponderacion}" autocomplete="off"/>
                                                 </div>
-                                                <div class="col-3">
+                                                <div class="col-2">
                                                     <input type="checkbox" class="form-check-input" id="requiereInformacionExtra" value="${p.requiereInformacionExtra}" ${infoExtraChecked} onchange="agregarComplemento(this.checked, ${idx}, null)"/>
-                                                    <label class="form-check-label" for="reqInformacionExtra">Informacion Extra</label>
+                                                    <label class="form-check-label" for="reqInformacionExtra">Info. Extra</label>
                                                 </div>
                                                 <div class="col-3">
                                                     <input type="checkbox" class="form-check-input" id="requiereEvidenciaOpcion" value="${p.requiereEvidencia}" ${evidenciaChecked} />
                                                     <label class="form-check-label" for="reqEvidenciaOpcion">Req. Evidencia</label>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="checkbox" class="form-check-input" id="generaTarea" value="${p.generaTarea}" ${generaTareaChecked} />
+                                                    <label class="form-check-label" for="generaTarea">Genera tarea</label>
                                                 </div>
                                                 <div class="col-1">
                                                     <button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('.opcion-item').remove()">🗑</button>

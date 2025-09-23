@@ -16,9 +16,10 @@
     <table class="table table-bordered custom-table" id="tablaSecciones">
         <thead>
             <tr>
-                <th style="width: 20%;">Id</th>
+                <th style="width: 10%;">Id</th>
                 <th style="width: 20%;">Nombre</th>
-                <th style="width: 60%;" class="text-center"></th>
+                <th style="width: 30%;">Categoría</th>
+                <th style="width: 40%;" class="text-center"></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -39,6 +40,10 @@
                     <label>Nombre</label>
                     <input type="text" class="form-control" id="titulo" placeholder="Ej. Cierre, Inventario, Seguridad" />
                 </div>
+                <div class="mb-2">
+                    <label>Categoría</label>
+                    <select class="form-select" id="categoria"></select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -55,6 +60,7 @@
         const formularioId = @ViewBag.FormularioId;
 
         $(document).ready(function () {
+            cargarCategorias();
             const storedLength = localStorage.getItem('sectionsPageLength');
             const initialPageLength = storedLength ? parseInt(storedLength) : 10;
             const tabla = $('#tablaSecciones').DataTable({
@@ -87,7 +93,8 @@
                 const datos = {
                     Id: $('#seccionId').val() || 0,
                     FormularioId: @ViewBag.FormularioId ?? 1,
-                    Nombre: $('#titulo').val()
+                    Nombre: $('#titulo').val(),
+                    CategoriaId: $('#categoria').val()
                 };
 
                 $.ajax({
@@ -111,6 +118,16 @@
             });
         });
 
+        function cargarCategorias() {
+            $.get('@Url.Action("ListarCategoriasDeSecciones", "Formularios")', function (r) {
+                if (r.success) {
+                    const select = $('#categoria');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                }
+            });
+        }
+
         function cargarSecciones() {
             $.get('@Url.Action("ListarSecciones", "Formularios")', { formularioId: @ViewBag.FormularioId ?? 1 }, function (r) {
                 if (r.success) {
@@ -127,9 +144,10 @@
                     r.secciones.forEach(s => {
                         tbody.append(`
                                    <tr>
-                                    <td style="width: 20%;">${s.id}</td>
+                                    <td style="width: 10%;">${s.id}</td>
                                     <td style="width: 20%;">${s.nombre}</td>
-                                    <td style="width: 60%; text-align:center;">
+                                    <td style="width: 30%;">${s.categoriaNombre}</td>
+                                    <td style="width: 40%; text-align:center;">
                                         <div class="btn-group" role="group">
                                          
                                             <button class="btn btn-sm" style="background-color: #0c4c98; color: white;" title="Configurar preguntas" onclick="window.location.href='${baseUrl}?seccionId=${s.id}'">
@@ -176,6 +194,7 @@
                     $('#modalSeccionTitulo').text("Editar sección");
                     $('#seccionId').val(s.id);
                     $('#titulo').val(s.nombre);
+                    $('#categoria').val(s.categoriaId);
                     $('#modalSeccion').modal('show');
                 } else {
                     showAlert(r.error || "No se pudo cargar la sección", 'error');
@@ -200,6 +219,7 @@
         function limpiarModal() {
             $('#seccionId').val('');
             $('#titulo').val('');
+            $('#categoria').val('');
         }
     </script>
 }

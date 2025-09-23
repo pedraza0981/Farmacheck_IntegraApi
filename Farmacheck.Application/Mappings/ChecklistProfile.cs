@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Farmacheck.Application.DTOs;
+using Farmacheck.Application.Models.Categories;
 using Farmacheck.Application.Models.Checklists;
 using Farmacheck.Application.Models.ChecklistScoreRating;
 using Farmacheck.Application.Models.ChecklistSections;
@@ -31,6 +32,7 @@ namespace Farmacheck.Application.Mappings
             CreateMap<OptionsByQuestionResponse, OpcionesPorPreguntaDto>();
             CreateMap<OptionsComplementByQuestionResponse, OpcionesComplementoPorPreguntaDto>();
             CreateMap<LabelsByNumericalScaleResponse, EtiquetasPorEscalaNumericaDto>();
+            CreateMap<CategoryResponse, CategoriaDto>();
         }
     }
 }

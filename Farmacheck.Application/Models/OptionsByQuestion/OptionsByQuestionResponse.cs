@@ -14,6 +14,8 @@ namespace Farmacheck.Application.Models.OptionsByQuestion
 
         public bool RequiereEvidencia { get; set; }
 
+        public bool GeneraTarea { get; set; }
+
         public bool Estatus { get; set; }
 
         public IEnumerable<OptionsComplementByQuestionResponse>? OpcionesComplemento { get; set; }

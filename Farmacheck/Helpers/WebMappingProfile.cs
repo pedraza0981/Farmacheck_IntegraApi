@@ -78,7 +78,9 @@ namespace Farmacheck.Helpers
             CreateMap<ClasificacionDePuntajeViewModel, ChecklistScoreRatingRequest>();
             CreateMap<ClasificacionDePuntajeViewModel, UpdateChecklistScoreRatingRequest>();
             CreateMap<SeccionInputModel, ChecklistSectionRequest>()
-                .ForMember(dest => dest.CuestionarioId, opt => opt.MapFrom(src => src.FormularioId));
+                .ForMember(dest => dest.CuestionarioId, opt => opt.MapFrom(src => src.FormularioId))
+                .ForMember(dest => dest.CategoriaId, opt => opt.MapFrom(src => src.CategoriaId))
+                .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre));
 
             CreateMap<PreguntaViewModel, QuestionRequest>()
                 .ForMember(dest => dest.SeccionId, opt => opt.MapFrom(src => src.SeccionDelCuestionarioId));
@@ -87,6 +89,7 @@ namespace Farmacheck.Helpers
             CreateMap<OpcionesComplementoPorPreguntaViewModel, OptionsComplementByQuestionRequest>();
 
             CreateMap<FormatoDeRespuestaCatDto, FormatoDeRespuestaCatViewModel>();
+            CreateMap<CategoriaDto, CategoriaViewModel>();
 
             CreateMap<EtiquetaDeAgrupacionDto, EtiquetaDeAgrupacionViewModel>();
             CreateMap<EtiquetaDeAgrupacionViewModel, UpdateGroupingTagRequest>();

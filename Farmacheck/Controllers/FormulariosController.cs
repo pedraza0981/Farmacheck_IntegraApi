@@ -4,15 +4,11 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Checklists;
 using Farmacheck.Application.Models.ChecklistScoreRating;
 using Farmacheck.Application.Models.ChecklistSections;
-using Farmacheck.Application.Models.GroupingTags;
-using Farmacheck.Infrastructure.Services;
 using Farmacheck.Models;
 using Farmacheck.Models.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
-using System.Reflection;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Farmacheck.Controllers
 {
@@ -33,17 +29,20 @@ namespace Farmacheck.Controllers
         public static List<SeccionViewModel> _secciones = new List<SeccionViewModel>();
 
         private readonly IChecklistApiClient _apiClient;
-        private readonly ICategoryByQuestionnaireApiClient _categoryApiClient;
+        private readonly ICategoryByQuestionnaireApiClient _checklistCategoryApiClient;
+        private readonly ICategoryApiClient _categoryApiClient;
         private readonly IChecklistSectionApiClient _seccionApiClient;
         private readonly IMapper _mapper;
         
 
         public FormulariosController(
             IChecklistApiClient apiClient, 
-            ICategoryByQuestionnaireApiClient categoryApiClient, 
+            ICategoryByQuestionnaireApiClient checklistCategoryApiClient,
+            ICategoryApiClient categoryApiClient,
             IChecklistSectionApiClient sectionApiClient, IMapper mapper)
         {
             _apiClient = apiClient;
+            _checklistCategoryApiClient = checklistCategoryApiClient;
             _categoryApiClient = categoryApiClient;
             _seccionApiClient = sectionApiClient;
             _mapper = mapper;
@@ -200,11 +199,20 @@ namespace Farmacheck.Controllers
         [HttpGet]
         public async Task<JsonResult> ListarCategorias()
         {
-            var apiData = await _categoryApiClient.GetAllCategoriesAsync();
+            var apiData = await _checklistCategoryApiClient.GetAllCategoriesAsync();
 
             var dtos = _mapper.Map<List<CategoryByQuestionnaireDto>>(apiData);
             var categorias = _mapper.Map<List<CategoriaCuestionarioViewModel>>(dtos);
 
+            return Json(new { success = true, data = categorias });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ListarCategoriasDeSecciones()
+        {
+            var apiData = await _categoryApiClient.GetAllCategoriesAsync();
+            var dtos = _mapper.Map<List<CategoriaDto>>(apiData);
+            var categorias = _mapper.Map<List<CategoriaViewModel>>(dtos);
             return Json(new { success = true, data = categorias });
         }
         #endregion
@@ -232,8 +240,8 @@ namespace Farmacheck.Controllers
         [HttpPost]
         public async Task<JsonResult> GuardarSeccion([FromBody] SeccionInputModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.Nombre))
-                return Json(new { success = false, error = "El nombre es obligatorio." });
+            if (model is null || string.IsNullOrWhiteSpace(model.Nombre))
+                return Json(new { success = false, error = "El nombre y la categoría son obligatorios." });
 
             if (model.Id == 0)
             {
@@ -253,12 +261,17 @@ namespace Farmacheck.Controllers
                 if (existente == null)
                     return Json(new { success = false, error = "Sección no encontrada." });
 
-                if (existente.Nombre == model.Nombre)
+                if (existente.Nombre == model.Nombre && existente.CategoriaId == model.CategoriaId)
                 {
                     return Json(new { success = true, message = "Sección actualizada" });
                 }
 
-                var seccionRequest = new UpdateChecklistSectionRequest() { CuestionarioId = model.FormularioId, SeccionId = model.Id, Nombre = model.Nombre };
+                var seccionRequest = new UpdateChecklistSectionRequest() { 
+                    CuestionarioId = model.FormularioId, 
+                    SeccionId = model.Id, 
+                    Nombre = model.Nombre,
+                    CategoriaId = model.CategoriaId
+                };
                 var response = await _seccionApiClient.UpdateAsync(seccionRequest);
                 if (!response.Updated)
                 {
