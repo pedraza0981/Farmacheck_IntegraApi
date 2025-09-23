@@ -3,6 +3,7 @@ using Farmacheck.Application.DTOs;
 using Farmacheck.Application.Models.Brands;
 using Farmacheck.Application.Models.BusinessStructures;
 using Farmacheck.Application.Models.BusinessUnits;
+using Farmacheck.Application.Models.Categories;
 using Farmacheck.Application.Models.CategoriesByQuestionnaires;
 using Farmacheck.Application.Models.Checklists;
 using Farmacheck.Application.Models.ChecklistScoreRating;
@@ -35,6 +36,13 @@ namespace Farmacheck.Helpers
         public WebMappingProfile()
         {
             CreateMap<MarcaDto, MarcaViewModel>();
+
+            CreateMap<CategoryResponse, CategoriaDto>();
+            CreateMap<CategoryResponse, CategoriaViewModel>()
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus ?? false));
+            CreateMap<CategoriaViewModel, CategoryRequest>();
+            CreateMap<CategoriaViewModel, UpdateCategoryRequest>()
+                .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => (bool?)src.Estatus));
 
             //CreateMap<MarcaViewModel, BrandRequest>();
             //CreateMap<MarcaViewModel, UpdateBrandRequest>();
