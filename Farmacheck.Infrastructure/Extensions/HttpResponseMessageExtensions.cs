@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Farmacheck.Infrastructure.Services
+namespace Farmacheck.Infrastructure.Extensions
 {
     internal static class HttpResponseMessageExtensions
     {

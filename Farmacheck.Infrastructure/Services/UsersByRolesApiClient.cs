@@ -1,6 +1,7 @@
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Users;
 using Farmacheck.Application.Models.Common;
+using Farmacheck.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
