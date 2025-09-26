@@ -66,7 +66,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
             var response = await _http.PostAsJsonAsync("api/v1/UsersByRoles", request);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
             return await response.Content.ReadFromJsonAsync<int>();
         }
 
@@ -74,7 +74,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
             var response = await _http.PutAsJsonAsync("api/v1/UsersByRoles", request);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
@@ -82,7 +82,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
             var response = await _http.DeleteAsync($"api/v1/UsersByRoles/{id}");
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
@@ -90,7 +90,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
             var response = await _http.GetAsync("api/v1/UsersByRoles/report");
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
             return await response.Content.ReadAsStringAsync();
         }
     }

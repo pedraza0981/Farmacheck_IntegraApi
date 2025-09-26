@@ -80,24 +80,17 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<string> CreateAsync(CustomerRolUserRequest request)
         {
-            try
-            {
-                AddBearerToken();
-                var response = await _http.PostAsJsonAsync("api/v1/Customers_RolesUsers", request);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            AddBearerToken();
+            var response = await _http.PostAsJsonAsync("api/v1/Customers_RolesUsers", request);
+            await response.EnsureSuccessWithDetailsAsync();
+            return await response.Content.ReadAsStringAsync();
         }
 
         public async Task<bool> UpdateAsync(UpdateCustomerRolUserRequest request)
         {
             AddBearerToken();
             var response = await _http.PutAsJsonAsync("api/v1/Customers_RolesUsers", request);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
@@ -105,7 +98,7 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
             var response = await _http.DeleteAsync($"api/v1/Customers_RolesUsers/{id}");
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
@@ -121,7 +114,7 @@ namespace Farmacheck.Infrastructure.Services
             var url = QueryHelpers.AddQueryString("api/v1/Customers_RolesUsers/customer", query);
 
             var response = await _http.DeleteAsync(url);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessWithDetailsAsync();
 
             return await response.Content.ReadFromJsonAsync<bool>();
         }
