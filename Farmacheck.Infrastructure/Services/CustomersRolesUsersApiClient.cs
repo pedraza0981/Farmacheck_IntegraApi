@@ -107,17 +107,33 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
 
-            var query = ids
-                .Select(id => new KeyValuePair<string, string?>("ids", id.ToString()))
-                .ToList();
-            query.Add(new KeyValuePair<string, string?>("customer", customer.ToString()));
+            if (ids == null || ids.Count == 0)
+            {
+                return true;
+            }
 
-            var url = QueryHelpers.AddQueryString("api/v1/Customers_RolesUsers/customer", query);
+            const int batchSize = 50;
+            var result = true;
 
-            var response = await _http.DeleteAsync(url);
-            await response.EnsureSuccessWithDetailsAsync();
+            for (var index = 0; index < ids.Count; index += batchSize)
+            {
+                var batch = ids.Skip(index).Take(batchSize).ToList();
 
-            return await response.Content.ReadFromJsonAsync<bool>();
+                var query = batch
+                    .Select(id => new KeyValuePair<string, string?>("ids", id.ToString()))
+                    .ToList();
+                query.Add(new KeyValuePair<string, string?>("customer", customer.ToString()));
+
+                var url = QueryHelpers.AddQueryString("api/v1/Customers_RolesUsers/customer", query);
+
+                var response = await _http.DeleteAsync(url);
+                await response.EnsureSuccessWithDetailsAsync();
+
+                var batchResult = await response.Content.ReadFromJsonAsync<bool?>();
+                result = result && (batchResult ?? true);
+            }
+
+            return result;
         }
     }
 }
