@@ -1,4 +1,6 @@
-﻿namespace Farmacheck.Application.Models.ChecklistSections
+﻿using Farmacheck.Application.Models.Questions;
+
+namespace Farmacheck.Application.Models.ChecklistSections
 {
     public class SectionResponse
     {
@@ -11,5 +13,7 @@
         public string CategoriaNombre { get; set; } = null!;
 
         public bool Estatus { get; set; }
+
+        public IEnumerable<QuestionResponse>? Preguntas { get; set; }
     }
 }

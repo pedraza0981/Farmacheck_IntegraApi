@@ -9,5 +9,7 @@
         public int? CategoriaId { get; set; }
 
         public string? CategoriaNombre { get; set; }
+
+        public List<PreguntaViewModel>? Preguntas { get; set; }
     }
 }

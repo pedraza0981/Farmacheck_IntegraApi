@@ -1,0 +1,161 @@
+﻿@model Farmacheck.Models.ChecklistSummaryViewModel
+@{
+    ViewData["Title"] = "ChecklistSummary";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
+           href="@Url.Action("Index", "Formularios")">
+            <i class="bi bi-arrow-left"></i> Regresar
+        </a>
+    </div>
+
+    <h1 class="display-3"></h1>
+    <legend class="w-auto px-2 text-secondary">@(Model.Id + " - " + Model.Nombre)</legend>
+
+    @if (Model.Secciones != null && Model.Secciones.Any())
+    {
+        @foreach (var seccion in Model.Secciones)
+        {
+            <fieldset class="border p-3 mb-4 rounded">
+                <figure class="text-center">
+                    <blockquote class="blockquote">
+                        <p>@(seccion.Id + " - " + seccion.Nombre)</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        @seccion.CategoriaNombre
+                    </figcaption>
+                </figure>
+                @if (seccion.Preguntas != null && seccion.Preguntas.Any())
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Pregunta</th>
+                                <th>Tipo</th>
+                                <th>Obligatoria</th>
+                                <th>Pondera</th>
+                                <th>Req. Evidencia</th>
+                                <th>Límite Evidencias</th>
+                                <th>Evidencias Obligatorias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pregunta in seccion.Preguntas)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@pregunta.Id</strong>
+                                    </td>
+                                    <td scope="row">
+                                        <strong>@(String.IsNullOrEmpty(pregunta.EtiquetaNombre) ? pregunta.Nombre : pregunta.EtiquetaNombre + ": " + pregunta.Nombre)</strong>
+                                    </td>
+                                    <td>
+                                        <strong>@pregunta.FormatoDeRespuesta.FormatoNombre</strong>
+                                    </td>
+                                    <th>
+                                        <strong>@(pregunta.EsPreguntaObligatoria != null ? (pregunta.EsPreguntaObligatoria.Value ? "Si" : "No") : "No")</strong>
+                                    </th>
+                                    <th>
+                                        <strong>@(pregunta.EsPreguntaConPonderacion != null ? (pregunta.EsPreguntaConPonderacion.Value ? "Si" : "No") : "No")</strong>
+                                    </th>
+                                    <th>
+                                        <strong>@(pregunta.RequiereEvidencia != null ? (pregunta.RequiereEvidencia.Value ? "Si" : "No") : "No")</strong>
+                                    </th>
+                                    <th>
+                                        <strong>@pregunta.NumeroDeEvidenciasLimitadasA</strong>
+                                    </th>
+                                    <th>
+                                        <strong>@pregunta.NumeroDeEvidenciasObligatorias</strong>
+                                    </th>
+                                </tr>
+                                @if (pregunta.EtiquetasPorEscalaNumerica != null && pregunta.EtiquetasPorEscalaNumerica.Any())
+                                {
+                                    <tr>
+                                        <td></td>
+                                        <td colspan="7">
+                                            <table class="table mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Límite Inferior</th>
+                                                        <th>Etiqueta Límite Inferior</th>
+                                                        <th>Límite Superior</th>
+                                                        <th>Etiqueta Límite Superior</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var opcion in @pregunta.EtiquetasPorEscalaNumerica)
+                                                    {
+                                                        <tr>
+                                                            <td>@opcion.LimiteInferior</td>
+                                                            <td>@opcion.EtiquetaParaEscalaInferior</td>
+                                                            <td>@opcion.LimiteSuperior</td>
+                                                            <td>@opcion.EtiquetaParaEscalaSuperior</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @if (pregunta.OpcionesPorPregunta != null && pregunta.OpcionesPorPregunta.Any())
+                                    {
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="7">
+                                                <table class="table mb-3">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Opciones</th>
+                                                            <th>Ponderacion</th>
+                                                            <th>Req. evidencia</th>
+                                                            <th>Req. info. extra</th>
+                                                            <th>Genera tarea</th>
+                                                            <th>Complemento Nombre</th>
+                                                            <th>Complemento Opciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var opcion in @pregunta.OpcionesPorPregunta)
+                                                        {
+                                                            <tr>
+                                                                <td>@opcion.Etiqueta</td>
+                                                                <td>@(opcion.Ponderacion == null ? "N/A" : opcion.Ponderacion)</td>
+                                                                <td>@(opcion.RequiereEvidencia ? "Si" : "No")</td>
+                                                                <td>@(opcion.RequiereInformacionExtra ? "Si" : "No")</td>
+                                                                <td>@(opcion.GeneraTarea ? "Si" : "No")</td>
+                                                                <td>@(opcion.OpcionesComplemento != null && opcion.OpcionesComplemento.Any() ? opcion.OpcionesComplemento[0].Nombre : "")</td>
+                                                                <td>@(opcion.OpcionesComplemento != null && opcion.OpcionesComplemento.Any() ? opcion.OpcionesComplemento[0].ListaDeOpcionesPredefinidas : "")</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <h6 style="text-align: center;">Sin preguntas</h6>
+                }
+            </fieldset>
+        }
+    }
+    else
+    {
+        <h6 style="text-align: center;">Sin secciones</h6>
+    }
+</div>
+
+
+

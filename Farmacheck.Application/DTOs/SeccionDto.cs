@@ -11,5 +11,7 @@
         public string CategoriaNombre { get; set; } = null!;
 
         public bool Estatus { get; set; }
+
+        public List<PreguntaDto>? Preguntas { get; set; }
     }
 }

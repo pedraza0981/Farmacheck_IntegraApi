@@ -1,5 +1,4 @@
 ﻿using Farmacheck.Application.Interfaces;
-using Farmacheck.Application.Models.Brands;
 using Farmacheck.Application.Models.Checklists;
 using System.Net.Http.Json;
 
@@ -20,6 +19,11 @@ namespace Farmacheck.Infrastructure.Services
                    ?? Enumerable.Empty<ChecklistResponse>();
 
             return checklists.OrderBy(c => c.Nombre);
+        }
+
+        public async Task<ChecklistSummary?> GetChecklistSummaryAsync(int? id)
+        {
+            return await _http.GetFromJsonAsync<ChecklistSummary>($"api/v1/checklists/summary?checklistId={id}");
         }
 
         public async Task DeleteAsync(int id)

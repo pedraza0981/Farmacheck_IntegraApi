@@ -313,11 +313,13 @@ namespace Farmacheck.Controllers
         }
 
         // GET: /Formularios/Previsualizar/5
-        public IActionResult Previsualizar(int id)
+        public async Task<IActionResult> Previsualizar(int id)
         {
-            var formulario = _formularios.FirstOrDefault(f => f.Id == id);
-            if (formulario == null) return NotFound();
-            return View(formulario);
+            var apiData = await _apiClient.GetChecklistSummaryAsync(id);
+            var dtos = _mapper.Map<ChecklistSummaryDto>(apiData);
+            var checklists = _mapper.Map<ChecklistSummaryViewModel>(dtos);
+            
+            return View(checklists);
         }
 
         // GET: /Formularios/Editar/5

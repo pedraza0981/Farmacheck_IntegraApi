@@ -38,6 +38,8 @@ namespace Farmacheck.Helpers
             CreateMap<MarcaDto, MarcaViewModel>();
 
             CreateMap<CategoryResponse, CategoriaDto>();
+            CreateMap<ChecklistSummary, ChecklistSummaryDto>();
+            CreateMap<ChecklistSummaryDto, ChecklistSummaryViewModel>();
             CreateMap<CategoryResponse, CategoriaViewModel>()
                 .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus ?? false));
             CreateMap<CategoriaViewModel, CategoryRequest>();

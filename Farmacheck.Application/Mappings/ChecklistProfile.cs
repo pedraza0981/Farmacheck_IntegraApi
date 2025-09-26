@@ -33,6 +33,7 @@ namespace Farmacheck.Application.Mappings
             CreateMap<OptionsComplementByQuestionResponse, OpcionesComplementoPorPreguntaDto>();
             CreateMap<LabelsByNumericalScaleResponse, EtiquetasPorEscalaNumericaDto>();
             CreateMap<CategoryResponse, CategoriaDto>();
+            CreateMap<ChecklistSummary, ChecklistSummaryDto>();
         }
     }
 }
