@@ -1,12 +1,10 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Categories;
 using Farmacheck.Application.Models.Common;
 using Microsoft.AspNetCore.Http;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace Farmacheck.Infrastructure.Services
 {
@@ -37,92 +35,81 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<IEnumerable<CategoryResponse>> GetCategoriesAsync()
         {
-            var response = await GetAsync<IEnumerable<CategoryResponse>>("api/v1/Categories");
+            AddBearerToken();
+            var categories = await _http.GetFromJsonAsync<IEnumerable<CategoryResponse>>("api/v1/Categories")
+                   ?? Enumerable.Empty<CategoryResponse>();
 
-            return (response ?? Enumerable.Empty<CategoryResponse>()).OrderBy(c => c.Nombre);
+            return categories.OrderBy(c => c.Nombre);
         }
 
         public async Task<IEnumerable<CategoryResponse>> GetAllCategoriesAsync()
         {
-            var response = await GetAsync<IEnumerable<CategoryResponse>>("api/v1/Categories/all");
+            AddBearerToken();
+            var categories = await _http.GetFromJsonAsync<IEnumerable<CategoryResponse>>("api/v1/Categories/all")
+                   ?? Enumerable.Empty<CategoryResponse>();
 
-            return (response ?? Enumerable.Empty<CategoryResponse>()).OrderBy(c => c.Nombre);
+            return categories.OrderBy(c => c.Nombre);
         }
 
         public async Task<PaginatedResponse<CategoryResponse>> GetCategoriesByPageAsync(int page, int items)
         {
+            AddBearerToken();
             var url = $"api/v1/Categories/pages?page={page}&items={items}";
-            return await GetAsync<PaginatedResponse<CategoryResponse>>(url)
+            return await _http.GetFromJsonAsync<PaginatedResponse<CategoryResponse>>(url)
                    ?? new PaginatedResponse<CategoryResponse>();
         }
 
         public async Task<CategoryResponse?> GetCategoryAsync(int id)
         {
-            return await GetAsync<CategoryResponse>($"api/v1/Categories/{id}");
+            AddBearerToken();
+            return await _http.GetFromJsonAsync<CategoryResponse>($"api/v1/Categories/{id}");
         }
 
         public async Task<IEnumerable<CategoryResponse>> GetCategoriesByRoleAsync(int roleId)
         {
+            AddBearerToken();
             var url = $"api/v1/Categories/role/{roleId}";
-            var response = await GetAsync<IEnumerable<CategoryResponse>>(url);
+            var categories = await _http.GetFromJsonAsync<IEnumerable<CategoryResponse>>(url)
+                   ?? Enumerable.Empty<CategoryResponse>();
 
-            return (response ?? Enumerable.Empty<CategoryResponse>()).OrderBy(c => c.Nombre);
+            return categories.OrderBy(c => c.Nombre);
         }
 
         public async Task<int> CreateAsync(CategoryRequest request)
         {
-            var response = await SendAsync<int>(() => _http.PostAsJsonAsync("api/v1/Categories", request));
-            return response ?? 0;
+            AddBearerToken();
+            var response = await _http.PostAsJsonAsync("api/v1/Categories", request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<int>();
         }
 
         public async Task<bool> UpdateAsync(UpdateCategoryRequest request)
         {
-            var response = await SendAsync<bool>(() => _http.PutAsJsonAsync("api/v1/Categories", request));
-            return response ?? false;
+            AddBearerToken();
+            var response = await _http.PutAsJsonAsync("api/v1/Categories", request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var response = await SendAsync<bool>(() => _http.DeleteAsync($"api/v1/Categories/{id}"));
-            return response ?? true;
+            AddBearerToken();
+            var response = await _http.DeleteAsync($"api/v1/Categories/{id}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<bool?>();
+
+            return result ?? true;
         }
 
         public async Task<string> GetReportAsync()
         {
-            var response = await GetAsync<string>("api/v1/Categories/report");
-            return response ?? string.Empty;
-        }
-
-        private async Task<T?> GetAsync<T>(string url)
-        {
             AddBearerToken();
-            var httpResponse = await _http.GetAsync(url);
-
-            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
-            {
-                return default;
-            }
-
-            httpResponse.EnsureSuccessStatusCode();
-
-            var apiResponse = await httpResponse.Content.ReadFromJsonAsync<ApiResponse<T>>();
-            return apiResponse?.Data;
-        }
-
-        private async Task<T?> SendAsync<T>(Func<Task<HttpResponseMessage>> action)
-        {
-            AddBearerToken();
-            var httpResponse = await action();
-
-            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
-            {
-                return default;
-            }
-
-            httpResponse.EnsureSuccessStatusCode();
-
-            var apiResponse = await httpResponse.Content.ReadFromJsonAsync<ApiResponse<T>>();
-            return apiResponse?.Data;
+            var response = await _http.GetAsync("api/v1/Categories/report");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }
