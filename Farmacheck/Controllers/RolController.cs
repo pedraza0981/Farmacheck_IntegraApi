@@ -43,7 +43,9 @@ namespace Farmacheck.Controllers
 
             var apiData = await _apiClient.GetAllRolesAsync();
             var dtos = _mapper.Map<List<RoleDto>>(apiData);
-            var roles = _mapper.Map<List<RolViewModel>>(dtos);
+            var roles = _mapper.Map<List<RolViewModel>>(dtos)
+                .OrderBy(r => r.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
             foreach (var r in roles)
@@ -60,7 +62,9 @@ namespace Farmacheck.Controllers
         {
             var apiData = await _apiClient.GetAllRolesAsync();
             var dtos = _mapper.Map<List<RoleDto>>(apiData);
-            var roles = _mapper.Map<List<RolViewModel>>(dtos);
+            var roles = _mapper.Map<List<RolViewModel>>(dtos)
+                .OrderBy(r => r.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
             foreach (var r in roles)
@@ -77,7 +81,9 @@ namespace Farmacheck.Controllers
         {
             var apiData = await _apiClient.GetRolesByBusinessUnitAsync((byte)unidadId);
             var dtos = _mapper.Map<List<RoleDto>>(apiData);
-            var roles = _mapper.Map<List<RolViewModel>>(dtos);
+            var roles = _mapper.Map<List<RolViewModel>>(dtos)
+                .OrderBy(r => r.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var unidadesApi = await _businessUnitApi.GetBusinessUnitsAsync();
             foreach (var r in roles)

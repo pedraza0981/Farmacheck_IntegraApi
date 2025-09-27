@@ -85,7 +85,9 @@ namespace Farmacheck.Controllers
         {
             var apiData = await _businessUnitApi.GetBusinessUnitsAsync();
             var dtos = _mapper.Map<List<BusinessUnitDto>>(apiData);
-            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos);
+            var unidades = _mapper.Map<List<UnidadDeNegocio>>(dtos)
+                .OrderBy(u => u.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             return Json(new { success = true, data = unidades });
         }
