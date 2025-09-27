@@ -115,6 +115,7 @@ namespace Farmacheck.Controllers
             var zonas = apiData
                 .GroupBy(z => z.ZonaId)
                 .Select(g => new ZonaViewModel { Id = g.Key, Nombre = g.First().Zona ?? string.Empty })
+                 .OrderBy(z => z.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             return Json(new { success = true, data = zonas });
