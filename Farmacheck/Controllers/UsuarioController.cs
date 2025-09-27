@@ -94,7 +94,9 @@ namespace Farmacheck.Controllers
         {
             var apiData = await _brandApi.GetBrandsByBusinessUnitAsync(unidadId);
             var dtos = _mapper.Map<List<MarcaDto>>(apiData);
-            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos);
+            var marcas = _mapper.Map<List<MarcaViewModel>>(dtos)
+                .OrderBy(m => m.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             return Json(new { success = true, data = marcas });
         }
@@ -103,7 +105,9 @@ namespace Farmacheck.Controllers
         {
             var apiData = await _subbrandApi.GetSubbrandsByBrandsAsync( marcaId );
             var dtos = _mapper.Map<List<SubmarcaDto>>(apiData);
-            var submarcas = _mapper.Map<List<SubMarca>>(dtos);
+            var submarcas = _mapper.Map<List<SubMarca>>(dtos)
+                .OrderBy(s => s.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             return Json(new { success = true, data = submarcas });
         }
@@ -128,7 +132,9 @@ namespace Farmacheck.Controllers
             var dtos = _mapper.Map<List<CustomerDto>>(apiData);
             var clientes = _mapper.Map<List<ClienteEstructuraViewModel>>(dtos);
             clientes.ForEach(c => c.Nombre = $"{c.ClienteId} - {c.Nombre} ");
-            clientes = clientes.OrderBy(c => c.ClienteId).ToList();
+            clientes = clientes
+                .OrderBy(c => c.Nombre ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
             return Json(new { success = true, data = clientes });
         }
 
