@@ -217,6 +217,7 @@
         let rol1Choices;
         let rol3Choices;
         let correos;
+        let categoriaSelected = 0;
 
         $(document).ready(function () {
             cargarCategorias();
@@ -237,6 +238,7 @@
                 $.get('@Url.Action("ObtenerFormulario", "Formularios")', { id }, function (r) {
                     if (r.success) {
                         const f = r.data;
+                        categoriaSelected = f.categoriaId;
                         $('#Id').val(f.id);
                         $('#Nombre').val(f.nombre);
                         $('#Alias').val(f.alias);
@@ -331,9 +333,9 @@
                     const select = $('#categoria');
                     select.empty();
                     r.data.forEach(c => select.append(`<option value="${c.id}">${c.nombre}</option>`));
-                    //if (categoriaId) {
-                        //select.val(categoriaId);
-                    //}
+                    if (categoriaSelected > 0) {
+                        $('#categoria').val(categoriaSelected);
+                    }
                 }
             });
         }
