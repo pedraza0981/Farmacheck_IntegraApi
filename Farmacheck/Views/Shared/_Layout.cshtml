@@ -23,6 +23,34 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/use-bootstrap-tag@2.2.2/dist/use-bootstrap-tag.min.css">
 
+    <style>
+        #sidebar .menu-scroll {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: #0d6efd rgba(255, 255, 255, 0.1);
+        }
+
+        #sidebar .menu-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #sidebar .menu-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+        }
+
+        #sidebar .menu-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #0d6efd 0%, #0b5ed7 100%);
+            border-radius: 4px;
+        }
+
+        #sidebar .menu-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #0b5ed7 0%, #094db3 100%);
+        }
+    </style>
+
 </head>
 <body>
     <!-- Sidebar -->
@@ -33,7 +61,7 @@
         </div>
 
         <!-- MENÚ -->
-        <div class="px-3 pt-3 w-100 flex-grow-1">
+        <div class="px-3 pt-3 w-100 flex-grow-1 menu-scroll">
 
             <a href="#" class="d-block py-2 text-white"><i class="bi bi-geo-alt me-2"></i> Ubicaciones</a>
             <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#submenuFormularios" role="button" aria-expanded="false" aria-controls="submenuFormularios">
