@@ -98,7 +98,7 @@ public class AuthController : Controller
                 return Json(new { success = false, error = "Usuario no encontrado" });
             }
 
-            return Json(new { success = true, data = new { actualizaPass = user.ActualizaPass } });
+            return Json(new { success = true, data = new { actualizarPass = user.ActualizarPass } });
         }
         catch (Exception ex)
         {

@@ -103,7 +103,7 @@
                 }
 
                 const result = await response.json();
-                return result.success && result.data && result.data.actualizaPass === true;
+                return result.success && result.data && result.data.actualizarPass === true;
             } catch (error) {
                 console.error('Error al obtener información del usuario:', error);
                 return false;
