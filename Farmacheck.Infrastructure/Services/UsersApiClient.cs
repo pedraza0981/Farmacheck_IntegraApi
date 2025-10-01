@@ -2,6 +2,8 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Users;
 using Farmacheck.Application.Models.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -60,6 +62,17 @@ namespace Farmacheck.Infrastructure.Services
         {
             AddBearerToken();
             return await _http.GetFromJsonAsync<UserResponse>($"api/v1/Users/{id}");
+        }
+
+        public async Task<UserResponse?> GetUserByEmailAsync(string email)
+        {
+            AddBearerToken();
+            var url = QueryHelpers.AddQueryString("api/v1/Users/by-email", new Dictionary<string, string?>
+            {
+                ["email"] = email,
+            });
+
+            return await _http.GetFromJsonAsync<UserResponse>(url);
         }
 
         public async Task<int> CreateAsync(UserRequest request)
