@@ -9,6 +9,7 @@ namespace Farmacheck.Application.Interfaces
         Task<List<UserResponse>> GetUsersAsync();
         Task<PaginatedResponse<UserResponse>> GetUsersByPageAsync(int page, int items);
         Task<UserResponse?> GetUserAsync(int id);
+        Task<UserResponse?> GetUserByEmailAsync(string email);
         Task<int> CreateAsync(UserRequest request);
         Task<bool> UpdateAsync(UpdateUserRequest request);
         Task DeleteAsync(int id);
