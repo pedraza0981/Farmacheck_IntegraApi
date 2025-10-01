@@ -57,6 +57,35 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="passwordUpdateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px;">
+                <div class="modal-header" style="background-color: #0d6efd; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title">Actualizar contraseña</h5>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="newPassword" style="font-weight: bold;">Nueva contraseña</label>
+                        <div style="position: relative;">
+                            <input type="password" id="newPassword" placeholder="••••••••" style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
+                            <i id="toggleNewPassword" class="bi bi-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label for="confirmPassword" style="font-weight: bold;">Confirmar contraseña</label>
+                        <div style="position: relative;">
+                            <input type="password" id="confirmPassword" placeholder="••••••••" style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
+                            <i id="toggleConfirmPassword" class="bi bi-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="justify-content: center;">
+                    <button id="updatePasswordButton" type="button" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">Actualizar Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -99,6 +128,46 @@
             passwordInput.setAttribute('type', type);
             this.classList.toggle('bi-eye');
             this.classList.toggle('bi-eye-slash');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalElement = document.getElementById('passwordUpdateModal');
+            const passwordModal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            let allowModalClose = false;
+
+            modalElement.addEventListener('hide.bs.modal', function (event) {
+                if (!allowModalClose) {
+                    event.preventDefault();
+                } else {
+                    allowModalClose = false;
+                }
+            });
+
+            passwordModal.show();
+
+            const toggleVisibility = (toggleId, inputId) => {
+                const toggle = document.getElementById(toggleId);
+                const input = document.getElementById(inputId);
+
+                toggle.addEventListener('click', function () {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    this.classList.toggle('bi-eye');
+                    this.classList.toggle('bi-eye-slash');
+                });
+            };
+
+            toggleVisibility('toggleNewPassword', 'newPassword');
+            toggleVisibility('toggleConfirmPassword', 'confirmPassword');
+
+            document.getElementById('updatePasswordButton').addEventListener('click', function () {
+                allowModalClose = true;
+                passwordModal.hide();
+            });
         });
     </script>
 </body>
