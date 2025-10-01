@@ -13,11 +13,13 @@ public class AuthController : Controller
 {
     private readonly IAuthApiClient _apiClient;
     private readonly IMapper _mapper;
+    private readonly IUserApiClient _userApiClient;
 
-    public AuthController(IAuthApiClient apiClient, IMapper mapper)
+    public AuthController(IAuthApiClient apiClient, IMapper mapper, IUserApiClient userApiClient)
     {
         _apiClient = apiClient;
         _mapper = mapper;
+        _userApiClient = userApiClient;
     }
 
     [HttpGet]
@@ -73,6 +75,30 @@ public class AuthController : Controller
             Response.Cookies.Append("AuthToken", vm.Token, cookieOptions);
 
             return Json(new { success = true, data = vm });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, error = ex.Message });
+        }
+    }
+
+    [HttpGet]
+    public async Task<JsonResult> GetUserByEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Json(new { success = false, error = "Correo electrónico requerido" });
+        }
+
+        try
+        {
+            var user = await _userApiClient.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                return Json(new { success = false, error = "Usuario no encontrado" });
+            }
+
+            return Json(new { success = true, data = new { actualizaPass = user.ActualizaPass } });
         }
         catch (Exception ex)
         {
