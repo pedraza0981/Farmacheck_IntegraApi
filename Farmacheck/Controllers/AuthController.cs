@@ -99,7 +99,7 @@ public class AuthController : Controller
                 return Json(new { success = false, error = "Usuario no encontrado" });
             }
 
-            return Json(new { success = true, data = new { actualizarPass = user.ActualizarPass } });
+            return Json(new { success = true, data = new { actualizaPass = user.ActualizaPass } });
         }
         catch (Exception ex)
         {
