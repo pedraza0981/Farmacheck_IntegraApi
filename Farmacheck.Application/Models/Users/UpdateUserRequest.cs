@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Farmacheck.Application.Models.Users
 {
@@ -13,8 +12,7 @@ namespace Farmacheck.Application.Models.Users
         public string Email { get; set; }
         public long? NumeroDeTelefono { get; set; }
         public bool Estatus { get; set; }
-        [JsonPropertyName("actualizaPass")]
-        public bool ActualizarPass { get; set; }
+        public bool ActualizaPass { get; set; }
         public bool GeolocalizacionActiva { get; set; }
     }
 }

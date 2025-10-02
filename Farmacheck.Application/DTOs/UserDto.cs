@@ -11,7 +11,7 @@ namespace Farmacheck.Application.DTOs
         public bool Estatus { get; set; }
         public DateTime CreadoEl { get; set; }
         public DateTime ActualizadoEl { get; set; }
-        public bool ActualizarPass { get; set; }
+        public bool ActualizaPass { get; set; }
         public bool GeolocalizacionActiva { get; set; }
     }
 }
