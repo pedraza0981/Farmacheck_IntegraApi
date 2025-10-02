@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Farmacheck.Application.Models.Users
 {
     public class UserResponse
@@ -11,7 +13,10 @@ namespace Farmacheck.Application.Models.Users
         public bool Estatus { get; set; }
         public DateTime CreadoEl { get; set; }
         public DateTime ActualizadoEl { get; set; }
+
+        [JsonPropertyName("actualizaPass")]
         public bool ActualizarPass { get; set; }
+
         public bool GeolocalizacionActiva { get; set; }
     }
 }
