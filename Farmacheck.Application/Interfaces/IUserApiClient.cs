@@ -12,6 +12,7 @@ namespace Farmacheck.Application.Interfaces
         Task<UserResponse?> GetUserByEmailAsync(string email);
         Task<int> CreateAsync(UserRequest request);
         Task<bool> UpdateAsync(UpdateUserRequest request);
+        Task<bool> UpdatePasswordAsync(UpdateUserPasswordRequest request);
         Task DeleteAsync(int id);
         Task<string> GetReport();
     }

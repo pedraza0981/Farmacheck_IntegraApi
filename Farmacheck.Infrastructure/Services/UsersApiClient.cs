@@ -99,6 +99,14 @@ namespace Farmacheck.Infrastructure.Services
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
+        public async Task<bool> UpdatePasswordAsync(UpdateUserPasswordRequest request)
+        {
+            AddBearerToken();
+            var response = await _http.PostAsJsonAsync("api/v1/Users/password", request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<bool>();
+        }
+
         public async Task DeleteAsync(int id)
         {
             AddBearerToken();
