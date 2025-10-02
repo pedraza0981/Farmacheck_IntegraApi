@@ -89,7 +89,8 @@
     <script>
         let passwordModal;
         let allowModalClose = false;
-        let redirectAfterModal = false;
+        let modalRedirectUrl = null;
+        let loginEmail = '';
 
         const needsPasswordUpdate = async (email) => {
             try {
@@ -124,9 +125,10 @@
                     event.preventDefault();
                 } else {
                     allowModalClose = false;
-                    if (redirectAfterModal) {
-                        redirectAfterModal = false;
-                        window.location.href = '@Url.Action("Index", "Formularios")';
+                    if (modalRedirectUrl) {
+                        const redirectUrl = modalRedirectUrl;
+                        modalRedirectUrl = null;
+                        window.location.href = redirectUrl;
                     }
                 }
             });
@@ -168,12 +170,12 @@
 
                 const result = await response.json();
                 if (response.ok && result.success && result.data && result.data.token) {
+                    loginEmail = email;
                     localStorage.setItem('username', email);
                     localStorage.setItem('token', result.data.token);
 
                     const mustUpdatePassword = await needsPasswordUpdate(email);
                     if (mustUpdatePassword) {
-                        redirectAfterModal = true;
                         passwordModal.show();
                         return;
                     }
@@ -192,9 +194,72 @@
                 }
             });
 
-            document.getElementById('updatePasswordButton').addEventListener('click', function () {
-                allowModalClose = true;
-                passwordModal.hide();
+            document.getElementById('updatePasswordButton').addEventListener('click', async function () {
+                const newPasswordInput = document.getElementById('newPassword');
+                const confirmPasswordInput = document.getElementById('confirmPassword');
+
+                const newPassword = newPasswordInput.value.trim();
+                const confirmPassword = confirmPasswordInput.value.trim();
+
+                if (newPassword.length === 0 || confirmPassword.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Contraseña requerida',
+                        text: 'Debes ingresar y confirmar la nueva contraseña.'
+                    });
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Contraseñas diferentes',
+                        text: 'La nueva contraseña y su confirmación deben ser iguales.'
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await fetch('@Url.Action("UpdatePassword", "Auth")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ email: loginEmail, password: newPassword })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('token');
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Contraseña actualizada',
+                            text: 'La contraseña se actualizó correctamente. Inicia sesión nuevamente.'
+                        }).then(() => {
+                            modalRedirectUrl = '@Url.Action("Login", "Security")';
+                            allowModalClose = true;
+                            passwordModal.hide();
+                        });
+                    } else {
+                        const message = result.error || 'No fue posible actualizar la contraseña.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: message
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error al actualizar la contraseña:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error al intentar actualizar la contraseña.'
+                    });
+                }
             });
         });
     </script>

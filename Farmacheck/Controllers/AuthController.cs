@@ -3,6 +3,7 @@ using Farmacheck.Application.Interfaces;
 using Farmacheck.Application.Models.Security;
 using Farmacheck.Application.DTOs;
 using Farmacheck.Models;
+using Farmacheck.Application.Models.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
@@ -99,6 +100,40 @@ public class AuthController : Controller
             }
 
             return Json(new { success = true, data = new { actualizarPass = user.ActualizarPass } });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost]
+    public async Task<JsonResult> UpdatePassword([FromBody] UpdateUserPasswordRequest request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            return Json(new { success = false, error = "Correo electrónico y contraseña son requeridos" });
+        }
+
+        try
+        {
+            var updated = await _userApiClient.UpdatePasswordAsync(request);
+            if (!updated)
+            {
+                return Json(new { success = false, error = "No fue posible actualizar la contraseña." });
+            }
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Path = "/"
+            };
+
+            Response.Cookies.Delete("AuthToken", cookieOptions);
+
+            return Json(new { success = true });
         }
         catch (Exception ex)
         {
