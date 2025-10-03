@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -10,8 +10,199 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-dark: #06264c;
+            --primary: #0a4c9b;
+            --primary-light: #4ea3ff;
+            --card-radius: 24px;
+            --card-shadow: 0 25px 45px rgba(10, 33, 73, 0.15);
+            --input-border: rgba(6, 38, 76, 0.18);
+        }
+
+        body {
+            font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+            background: radial-gradient(110% 160% at 0% 0%, #f4f9ff 0%, #ffffff 50%, #ecf3ff 100%);
+            min-height: 100vh;
+            color: var(--primary-dark);
+        }
+
+        .login-container {
+            min-height: 80vh;
+        }
+
+        .login-panel {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, #ffffff 100%);
+            border-radius: var(--card-radius);
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem 2.25rem;
+        }
+
+        .login-panel h4 {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-top: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: rgba(6, 38, 76, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .form-control.custom-input {
+            border: 1px solid var(--input-border);
+            border-radius: 14px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control.custom-input:focus {
+            border-color: rgba(15, 95, 194, 0.5);
+            box-shadow: 0 0 0 4px rgba(78, 163, 255, 0.15);
+        }
+
+        .toggle-visibility {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(6, 38, 76, 0.55);
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-visibility:hover {
+            color: var(--primary);
+        }
+
+        .btn-primary.custom-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            padding: 0.8rem 1.5rem;
+            box-shadow: 0 16px 32px rgba(15, 95, 194, 0.25);
+        }
+
+        .btn-primary.custom-primary:hover,
+        .btn-primary.custom-primary:focus {
+            background: linear-gradient(135deg, #0d5dbb 0%, #54b2ff 100%);
+            box-shadow: 0 20px 36px rgba(15, 95, 194, 0.32);
+        }
+
+        .forgot-password-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .forgot-password-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .password-update-modal .modal-dialog {
+            max-width: 420px;
+        }
+
+        .password-update-modal .modal-content {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .password-card {
+            position: relative;
+            background: linear-gradient(170deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.98) 100%);
+            border-radius: var(--card-radius);
+            box-shadow: var(--card-shadow);
+            padding: 2.75rem 2.5rem 2.5rem;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .password-card::before {
+            content: "";
+            position: absolute;
+            inset: -120px -40px auto;
+            height: 320px;
+            background: url('@Url.Content("~/images/ChatGPT Image 2 oct 2025, 10_00_18 p.m..png")') center/contain no-repeat;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .password-card h2 {
+            position: relative;
+            z-index: 1;
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 1.55rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .password-card p {
+            position: relative;
+            z-index: 1;
+            color: rgba(6, 38, 76, 0.68);
+            margin-bottom: 1.75rem;
+            font-size: 0.95rem;
+        }
+
+        .password-card .form-group {
+            position: relative;
+            margin-bottom: 1.25rem;
+            text-align: left;
+            z-index: 1;
+        }
+
+        .password-card .form-label {
+            color: rgba(6, 38, 76, 0.78);
+            font-size: 0.9rem;
+        }
+
+        .password-card .form-control.custom-input {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .password-card .toggle-visibility {
+            color: rgba(6, 38, 76, 0.45);
+            font-size: 1.05rem;
+        }
+
+        .password-card .toggle-visibility:hover {
+            color: var(--primary);
+        }
+
+        .password-card .btn {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        @@media (max-width: 576px) {
+            .login-panel {
+                padding: 2rem 1.5rem;
+            }
+
+            .password-update-modal .modal-dialog {
+                margin: 1.5rem auto;
+            }
+
+            .password-card {
+                padding: 2.25rem 1.75rem 2.25rem;
+            }
+        }
+    </style>
 </head>
-<body style="background-color: #f8f9fa;">
+<body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -20,67 +211,59 @@
                         <img src="~/images/Logo_Header.png" style="width: 10%; height: auto;" />
                     </div>
                     <div class="row">
-                        <img src="~/images/linea_header.png" style="width: 100%; height: auto;" />
+                        <img src="~/images/Linea_Header.png" style="width: 100%; height: auto;" />
                     </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-        <div style="width: 100%; max-width: 400px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 2rem;">
-            <div style="text-align: center; margin-bottom: 1rem;">
-                @* <img src="images/farmacheck_logo_trazado.svg" alt="Farmacheck" style="height: 60px;"> *@
-                <h4 style="color: #004080; margin-top: 1rem;">Iniciar sesión</h4>
+    <div class="container d-flex justify-content-center align-items-center login-container">
+        <div class="login-panel">
+            <div class="text-center">
+                <h4>Iniciar sesión</h4>
             </div>
             <form id="loginForm">
-                <div style="margin-bottom: 1rem;">
-                    <label for="email" style="font-weight: bold;">Correo electrónico</label>
-                    <input type="email" id="email" name="email" placeholder="usuario@dominio.com"
-                           style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="usuario@dominio.com" class="form-control custom-input" required>
                 </div>
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="password" style="font-weight: bold;">Contraseña</label>
-                    <div style="position: relative;">
-                        <input type="password" id="password" name="password" placeholder="••••••••"
-                               style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
-                        <i id="togglePassword" class="bi bi-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="position-relative">
+                        <input type="password" id="password" name="password" placeholder="••••••••" class="form-control custom-input" required>
+                        <i id="togglePassword" class="bi bi-eye toggle-visibility"></i>
                     </div>
                 </div>
                 <div>
-                    <button type="submit" style="width: 100%; background-color: #007bff; color: white; border: none; padding: 0.6rem; border-radius: 4px;">
-                        Entrar
-                    </button>
+                    <button type="submit" class="btn btn-primary custom-primary w-100">Entrar</button>
                 </div>
             </form>
-            <div style="text-align: center; margin-top: 1rem;">
-                <a href="/forgot-password" style="font-size: 0.9rem; color: #28a745;">¿Olvidaste tu contraseña?</a>
+            <div class="text-center mt-3">
+                <a href="/forgot-password" class="forgot-password-link">¿Olvidaste tu contraseña?</a>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="passwordUpdateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal fade password-update-modal" id="passwordUpdateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 12px;">
-                <div class="modal-header" style="background-color: #06264C; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h5 class="modal-title">Actualizar contraseña</h5>
-                </div>
-                <div class="modal-body">
-                    <div style="margin-bottom: 1rem;">
-                        <label for="newPassword" style="font-weight: bold;">Nueva contraseña</label>
-                        <div style="position: relative;">
-                            <input type="password" id="newPassword" placeholder="••••••••" style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
-                            <i id="toggleNewPassword" class="bi bi-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+            <div class="modal-content">
+                <div class="password-card">
+                    <h2>Actualizar contraseña</h2>
+                    <p>Ingresa una nueva contraseña segura para continuar.</p>
+                    <div class="form-group">
+                        <label for="newPassword" class="form-label">Nueva contraseña</label>
+                        <div class="position-relative">
+                            <input type="password" id="newPassword" placeholder="••••••••" class="form-control custom-input" required>
+                            <i id="toggleNewPassword" class="bi bi-eye toggle-visibility"></i>
                         </div>
                     </div>
-                    <div style="margin-bottom: 1rem;">
-                        <label for="confirmPassword" style="font-weight: bold;">Confirmar contraseña</label>
-                        <div style="position: relative;">
-                            <input type="password" id="confirmPassword" placeholder="••••••••" style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border: 1px solid #ccc; border-radius: 4px;" required>
-                            <i id="toggleConfirmPassword" class="bi bi-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                    <div class="form-group mb-4">
+                        <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                        <div class="position-relative">
+                            <input type="password" id="confirmPassword" placeholder="••••••••" class="form-control custom-input" required>
+                            <i id="toggleConfirmPassword" class="bi bi-eye toggle-visibility"></i>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer" style="justify-content: center;">
-                    <button id="updatePasswordButton" type="button" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">Actualizar Password</button>
+                    <button id="updatePasswordButton" type="button" class="btn btn-primary custom-primary">Actualizar Password</button>
                 </div>
             </div>
         </div>
