@@ -1,0 +1,982 @@
+﻿@model Farmacheck.Models.SprintViewModel
+
+@{
+    var isEditing = Model.Id != 0;
+    ViewData["Title"] = isEditing ? "Actualizar" : "Guardar";
+}
+
+<style>
+    /* Ítems seleccionados (chips en multiselect) */
+    .choices[data-type*="select-multiple"] .choices__list--multiple .choices__item {
+        background-color: #06264c !important;
+    }
+
+    /* Valor seleccionado en select-one */
+    .choices[data-type*="select-one"] .choices__item.choices__item--selectable {
+        background-color: #06264c !important;
+    }
+
+</style>
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
+           href="@Url.Action("Index", "Sprint")">
+            <i class="bi bi-arrow-left"></i> Regresar
+        </a>
+    </div>
+    <h4 class=" text-white p-3 rounded" style="background-color:#0c4c98">@(isEditing ? "Actualizar Sprint" : "Guardar Sprint")</h4>
+
+    <form id="formSprint">
+        <input type="hidden" id="sprintId" />
+
+        <fieldset class="border p-3 mb-4 rounded">
+            <legend class="w-auto px-2 text-secondary">Información General</legend>
+
+
+            <div class="mb-2">
+                <label>Título</label>
+                <input type="text" class="form-control" id="titulo" placeholder="Título del Sprint" autocomplete="off" />
+            </div>
+
+            <div class="mb-2">
+                <label>Descripción</label>
+                <input type="text" class="form-control" id="descripcion" placeholder="Descripción" autocomplete="off" />
+            </div>
+
+            <div class="mb-2">
+                <label>Unidad de negocio</label>
+                <select class="form-select" id="unidadNegocio"></select>
+            </div>
+
+            <div class="mb-2 row">
+                <div class="col-md-3 mb-2">
+                    <label>Vigencia Inicio</label>
+                    <input id="vigenciaInicioFecha" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label> </label>
+                    <input id="vigenciaInicioHora" class="form-control" type="time" />
+                </div>
+
+                <div class="col-md-3 mb-2">
+                    <label>Vigencia Fin</label>
+                    <input id="vigenciaFinFecha" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label> </label>
+                    <input id="vigenciaFinHora" class="form-control" type="time" />
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseTipoAsignacion" aria-expanded="true" aria-controls="collapseTipoAsignacion">
+                    <strong style="color: white;">
+                        <i class="bi bi-shield-lock"></i> Asignación de Sprint
+                    </strong>
+                    <i class="bi bi-chevron-down text-white"></i>
+                </div>
+                <div id="collapseTipoAsignacion" class="collapse show">
+                    <div class="card-body">
+                        <fieldset class="border p-3 mb-1 rounded">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">Marcas <span id="countMarcas" style="font-size:12px;">(0)</span></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="checkAllMarcas">
+                                        <label class="form-check-label" for="checkAllMarcas">All</label>
+                                    </div>
+                                    <div id="contenedorMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Submarcas <span id="countSubMarcas" style="font-size:12px;">(0)</span></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="checkAllSubMarcas">
+                                        <label class="form-check-label" for="checkAllSubMarcas">All</label>
+                                    </div>
+                                    <div id="contenedorSubMarcas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Zonas <span id="countZonas" style="font-size:12px;">(0)</span></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="checkAllZonas">
+                                        <label class="form-check-label" for="checkAllZonas">All</label>
+                                    </div>
+                                    <div id="contenedorZonas" class="border rounded p-2" style="max-height:300px; overflow-y:auto;"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label class="form-label">Clientes <span id="countClientes" style="font-size:12px;">(0)</span></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="checkAllClientes">
+                                        <label class="form-check-label" for="checkAllClientes">All</label>
+                                    </div>
+                                    <input type="text" id="buscarCliente" class="form-control mb-2" placeholder="Buscar cliente...">
+                                    <div id="contenedorClientes" class="border rounded p-2 row row-cols-1 row-cols-md-3 g-2" style="max-height:300px; overflow-y:auto;"></div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="border p-3 mb-1 rounded">
+                            <div class="mb-2 row">
+                                <div class="col-md-12 mb-2">
+                                    <label>Seleccione Roles</label>
+                                    <select id="asignacionRoles" class="form-select choices-dropdown" multiple></select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseSupervisores" aria-expanded="true" aria-controls="collapseSupervisores">
+                    <strong style="color: white;">
+                        <i class="bi bi-shield-lock"></i> Asignación de Supervisores
+                    </strong>
+                    <i class="bi bi-chevron-down text-white"></i>
+                </div>
+                <div id="collapseSupervisores" class="collapse show">
+                    <div class="card-body">
+                        <fieldset class="border p-3 mb-1 rounded">
+                            <div class="row">
+                                <div class="col-md-12 mb-2 d-flex align-items-end">
+                                    <div class="form-check ms-3">
+                                        <input type="checkbox" class="form-check-input" id="requiereSupervision" />
+                                        <label class="form-check-label" for="requiereSupervision">Requiere supervisión</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-md-12 mb-2">
+                                    <label>Periodo de supervisión</label>
+                                    <input type="number" class="form-control" id="periodoSupervision" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-md-12 mb-2">
+                                    <label>Roles</label>
+                                    <select class="form-select" id="roles"></select>
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-md-12 mb-2">
+                                    <label>Supervisores</label>
+                                    <select id="supervisores" class="form-select choices-dropdown" multiple></select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseRevisores" aria-expanded="true" aria-controls="collapseRevisores">
+                    <strong style="color: white;">
+                        <i class="bi bi-shield-lock"></i> Asignación de Revisores
+                    </strong>
+                    <i class="bi bi-chevron-down text-white"></i>
+                </div>
+                <div id="collapseRevisores" class="collapse show">
+                    <div class="card-body">
+                        <fieldset class="border p-3 mb-3 rounded">
+                            <div class="row">
+                                <div class="col-md-12 mb-2 d-flex align-items-end">
+                                    <div class="form-check ms-3">
+                                        <input type="checkbox" class="form-check-input" id="requiereRevision" />
+                                        <label class="form-check-label" for="requiereRevision">Requiere revisión</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-md-12 mb-2">
+                                    <label>Periodo de revisión</label>
+                                    <input type="number" class="form-control" id="periodoRevision" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-md-12 mb-2">
+                                    <label>Roles</label>
+                                    <select id="revisoresRoles" class="form-select choices-dropdown" multiple></select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            @if (!isEditing)
+            {
+                <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                    <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseTareas" aria-expanded="true" aria-controls="collapseTareas">
+                        <strong style="color: white;">
+                            <i class="bi bi-shield-lock"></i> Asignación de Tareas
+                        </strong>
+                        <i class="bi bi-chevron-down text-white"></i>
+                    </div>
+                    <div id="collapseTareas" class="collapse show">
+                        <div class="card-body">
+                            <div class="row align-items-end mb-3">
+                                <div class="col-md-2">
+                                    <button id="btnNuevaTarea" type="button" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3"
+                                            style="background-color: #79b828; color: white;">
+                                        <i class="bi bi-gear"></i> Nueva Tarea
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover" id="tablaTareas">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Titulo</th>
+                                            <th>Vigencia Inicio</th>
+                                            <th>Vigencia Fin</th>
+                                            <th class="text-center" style="width: 80px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-center text-muted" id="noTareasRow">
+                                            <td colspan="4">No hay tareas</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </fieldset>
+
+        <div class="form-group mt-4 text-end">
+            <button type="button" id="btnGuardar" class="btn btn-primary">@(isEditing ? "Actualizar" : "Guardar")</button>
+            <!--<button type="button" id="btnResumen" class="btn btn-info">Mostrar Resumen</button>-->
+            <a href="@Url.Action("Index", "Sprint")" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTareaTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalTareaTitulo">Nueva Tarea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <h6 class="text-primary">Información General</h6>
+                </div>
+
+                <div class="mb-2">
+                    <label>Título</label>
+                    <input type="text" class="form-control" id="tituloTarea" placeholder="Título de la Tarea" autocomplete="off" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Descripción</label>
+                    <input type="text" class="form-control" id="descripcionTarea" placeholder="Descripción" autocomplete="off" />
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-9 mb-2">
+                        <label>Comentario de Referencia</label>
+                        <input type="text" class="form-control" id="comentarioReferencia" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <div class="form-check ms-3">
+                            <input type="checkbox" class="form-check-input" id="requiereEvidencia" />
+                            <label class="form-check-label" for="requiereEvidencia">Requiere Evidencia</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-6 mb-2">
+                        <label>Prioridad</label>
+                        <select class="form-select" id="prioridad"></select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Categoría</label>
+                        <select class="form-select" id="categoria"></select>
+                    </div>
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-3 mb-2">
+                        <label>Vigencia Inicio</label>
+                        <input id="vigenteFecha" class="form-control" type="date" disabled />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label> </label>
+                        <input id="vigenteHora" class="form-control" type="time" disabled />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label>Vigencia Fin</label>
+                        <input id="vencimientoFecha" class="form-control" type="date" disabled />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label> </label>
+                        <input id="vencimientoHora" class="form-control" type="time" disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnAgregarTarea" class="btn btn-primary">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalGuardado" tabindex="-1" aria-labelledby="modalGuardadoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalGuardadoLabel">Sprint</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="mensajeGuardado"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAceptarGuardado" onclick="cargarSprints()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalResumen" tabindex="-1" aria-labelledby="modalResumenTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalResumen">Resumen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <h6 class="text-primary">Información General</h6>
+                </div>
+
+                <div class="mb-1 row">
+                    <label for="staticEmail" class="col-sm-2 col-form-label">Título</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" value="TITULO">
+                    </div>
+                </div>
+                <div class="mb-1 row">
+                    <label for="staticEmail" class="col-sm-2 col-form-label">Descripción</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" value="DESCRIPCION">
+                    </div>
+                </div>
+
+                <div class="mb-1 row">
+                    <label for="staticEmail" class="col-sm-2 col-form-label">Unidad de Negocio</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" value="UNIDAD DE NEGOCIO">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        let supervisorChoices;
+        let revisorChoices;
+        let asignacionRolesChoices;
+        let tareasDelSprint;
+        let clientesSeleccionados = [];
+        let vigenciaFechaInicio = '';
+        let vigenciaHoraInicio = '';
+        let vigenciaFechaFin = '';
+        let vigenciaHoraFin = '';
+
+        $(document).ready(function () {
+            supervisorChoices = new Choices('#supervisores', { removeItemButton: true });
+            revisorChoices = new Choices('#revisoresRoles', { removeItemButton: true });
+            asignacionRolesChoices = new Choices('#asignacionRoles', { removeItemButton: true });
+            tareasDelSprint = [];
+            cargarCategorias();
+            cargarPrioridades();
+            limpiarModalTarea();
+
+            $('#collapseTipoAsignacion').collapse('hide');
+            $('#collapseSupervisores').collapse('hide');
+            $('#collapseRevisores').collapse('hide');
+            $('#collapseTareas').collapse('hide');
+
+            cargarUnidadesDeNegocio();
+            cargarRoles();
+            limpiarModalSprint();
+
+            $('#btnGuardar').click(function () {
+                guardarSprint();
+            });
+
+            $('#btnResumen').click(function () {
+                $('#modalResumen').modal('show');
+            });
+
+            $('#roles').change(function () {
+                const rolId = $(this).val();
+                ObtenerUsuariosPorRol(rolId);
+            });
+
+            $('#btnAgregarTarea').click(function () {
+                agregarTarea();
+            });
+
+            $('#unidadNegocio').change(function () {
+                const unidadId = $(this).val();
+                cargarMarcas(unidadId);
+                //cargarRolesModal(unidadId);
+            });
+
+            $('#contenedorMarcas').on('change', '.marca-check', function () {
+                const total = $('#contenedorMarcas .marca-check').length;
+                const checked = $('#contenedorMarcas .marca-check:checked').length;
+                $('#checkAllMarcas').prop('checked', total > 0 && total === checked);
+
+                const seleccionadas = $('#contenedorMarcas .marca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const subSeleccionadas = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+
+                cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
+                cargarZonas();
+            });
+
+            $('#checkAllMarcas').change(function () {
+                const checked = this.checked;
+                $('#contenedorMarcas .marca-check').prop('checked', checked);
+                const seleccionadas = checked ? $('#contenedorMarcas .marca-check').map(function () {
+                    return parseInt(this.value);
+                }).get() : [];
+                const subSeleccionadas = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                cargarSubMarcas(seleccionadas, subSeleccionadas, zonasSeleccionadas);
+                cargarZonas();
+            });
+
+            $('#contenedorSubMarcas').on('change', '.submarca-check', function () {
+                const total = $('#contenedorSubMarcas .submarca-check').length;
+                const checked = $('#contenedorSubMarcas .submarca-check:checked').length;
+                $('#checkAllSubMarcas').prop('checked', total > 0 && total === checked);
+                const marcas = $('#contenedorMarcas .marca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                cargarZonas(marcas, subbrands, zonasSeleccionadas);
+                // cargarClientes();
+            });
+
+            $('#checkAllSubMarcas').change(function () {
+                const checked = this.checked;
+                $('#contenedorSubMarcas .submarca-check').prop('checked', checked);
+                const marcas = $('#contenedorMarcas .marca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                const zonasSeleccionadas = $('#contenedorZonas .zona-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+                cargarZonas(marcas, subbrands, zonasSeleccionadas);
+                // cargarClientes();
+            });
+
+            $('#contenedorZonas').on('change', '.zona-check', function () {
+                const total = $('#contenedorZonas .zona-check').length;
+                const checked = $('#contenedorZonas .zona-check:checked').length;
+                $('#checkAllZonas').prop('checked', total > 0 && total === checked);
+                cargarClientes();
+            });
+
+            $('#checkAllZonas').change(function () {
+                const checked = this.checked;
+                $('#contenedorZonas .zona-check').prop('checked', checked);
+                cargarClientes();
+            });
+
+            $('#contenedorClientes').on('change', '.cliente-check', function () {
+                const total = $('#contenedorClientes .cliente-check').length;
+                const checked = $('#contenedorClientes .cliente-check:checked').length;
+                $('#checkAllClientes').prop('checked', total > 0 && total === checked);
+            });
+
+            $('#checkAllClientes').change(function () {
+                const checked = this.checked;
+                $('#contenedorClientes .cliente-check').prop('checked', checked);
+            });
+
+            $('#buscarCliente').on('input', filtrarClientes);
+
+            const elementVigenciaInicioFecha = document.getElementById('vigenciaInicioFecha');
+            const elementVigenciaInicioHora = document.getElementById('vigenciaInicioHora');
+            const elementVigenciaFinFecha = document.getElementById('vigenciaFinFecha');
+            const elementVigenciaFinHora = document.getElementById('vigenciaFinHora');
+            const elementVigenciaInicioFechaTarea = document.getElementById('vigenteFecha');
+            const elementVigenciaInicioHoraTarea = document.getElementById('vigenteHora');
+            const elementVigenciaFinFechaTarea = document.getElementById('vencimientoFecha');
+            const elementVigenciaFinHoraTarea = document.getElementById('vencimientoHora');
+
+            elementVigenciaInicioFecha.addEventListener('change', function() {
+                vigenciaFechaInicio = elementVigenciaInicioFecha.value;
+            });
+
+            elementVigenciaInicioHora.addEventListener('change', function() {
+                vigenciaHoraInicio = elementVigenciaInicioHora.value;
+            });
+
+            elementVigenciaFinFecha.addEventListener('change', function() {
+                vigenciaFechaFin = elementVigenciaFinFecha.value;
+            });
+
+            elementVigenciaFinHora.addEventListener('change', function() {
+                vigenciaHoraFin = elementVigenciaFinHora.value;
+            });
+
+            $('#btnNuevaTarea').click(function () {
+                elementVigenciaInicioFechaTarea.value = vigenciaFechaInicio;
+                elementVigenciaInicioHoraTarea.value = vigenciaHoraInicio;
+                elementVigenciaFinFechaTarea.value = vigenciaFechaFin;
+                elementVigenciaFinHoraTarea.value = vigenciaHoraFin;
+                $('#modalEntidad').modal('show');
+            });
+        });
+
+        function cargarCategorias() {
+            $.get('@Url.Action("ObtenerCategorias", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#categoria');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                    select.val('');
+                }
+            });
+        }
+
+        function cargarMarcas(unidadId, marcasSeleccionadas = [], submarcasSeleccionadas = [], zonasSeleccionadas = []) {
+            const contenedor = $('#contenedorMarcas');
+            const contenedorSub = $('#contenedorSubMarcas');
+            const contenedorZonas = $('#contenedorZonas');
+            const contenedorClientes = $('#contenedorClientes');
+
+            contenedor.empty();
+            contenedorSub.empty();
+            contenedorZonas.empty();
+            contenedorClientes.empty();
+
+            $('#checkAllMarcas').prop('checked', false);
+            $('#checkAllSubMarcas').prop('checked', false);
+            $('#checkAllZonas').prop('checked', false);
+            $('#checkAllClientes').prop('checked', false);
+
+            $('#countMarcas').text('(0)');
+            $('#countSubMarcas').text('(0)');
+            $('#countZonas').text('(0)');
+            $('#countClientes').text('(0)');
+
+            if (!unidadId) {
+                return;
+            }
+            $.get('@Url.Action("ListarMarcas", "Usuario")', { unidadId }, function (r) {
+                if (r.success) {
+                    r.data.forEach(m => {
+                        const checked = marcasSeleccionadas.includes(m.id) ? 'checked' : '';
+                        contenedor.append(`
+                            <div class="form-check">
+                                <input class="form-check-input marca-check" type="checkbox" value="${m.id}" id="marca_${m.id}" ${checked}>
+                                <label class="form-check-label" for="marca_${m.id}">${m.nombre}</label>
+                            </div>
+                        `);
+                    });
+                    const total = $('#contenedorMarcas .marca-check').length;
+                    $('#countMarcas').text(`(${total})`);
+                    const checkedCount = $('#contenedorMarcas .marca-check:checked').length;
+                    $('#checkAllMarcas').prop('checked', total > 0 && total === checkedCount);
+                    if (marcasSeleccionadas.length > 0) {
+                        cargarSubMarcas(marcasSeleccionadas, submarcasSeleccionadas, zonasSeleccionadas);
+                    }
+                }
+            });
+        }
+
+        function cargarSubMarcas(marcaIds, submarcasSeleccionadas = [], zonasSeleccionadas = []) {
+            const contenedor = $('#contenedorSubMarcas');
+            contenedor.empty();
+            $('#checkAllSubMarcas').prop('checked', false);
+            $('#countSubMarcas').text('(0)');
+            if (!marcaIds || marcaIds.length === 0) {
+                cargarZonas();
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("ListarPorMarca", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { marcaId: marcaIds },
+                success: function (r) {
+                    if (r.success) {
+                        r.data.forEach(s => {
+                            const checked = submarcasSeleccionadas.includes(s.id) ? 'checked' : '';
+                            contenedor.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input submarca-check" type="checkbox" value="${s.id}" id="submarca_${s.id}" ${checked}>
+                                    <label class="form-check-label" for="submarca_${s.id}">${s.nombre}</label>
+                                </div>
+                            `);
+                        });
+                        const total = $('#contenedorSubMarcas .submarca-check').length;
+                        $('#countSubMarcas').text(`(${total})`);
+                        const checkedCount = $('#contenedorSubMarcas .submarca-check:checked').length;
+                        $('#checkAllSubMarcas').prop('checked', total > 0 && total === checkedCount);
+                        const seleccionadasActuales = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                            return parseInt(this.value);
+                        }).get();
+                        if (seleccionadasActuales.length > 0) {
+                            cargarZonas(marcaIds, seleccionadasActuales, zonasSeleccionadas);
+                            cargarClientes();
+                        } else {
+                            cargarZonas();
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarZonas(brands = [], subbrands = [], zonasSeleccionadas = []) {
+            const contenedor = $('#contenedorZonas');
+            const contenedorClientes = $('#contenedorClientes');
+            contenedor.empty();
+            contenedorClientes.empty();
+            $('#checkAllZonas').prop('checked', false);
+            $('#checkAllClientes').prop('checked', false);
+            $('#countZonas').text('(0)');
+            $('#countClientes').text('(0)');
+            if (!subbrands || subbrands.length === 0) {
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("ListarZonas", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { brandIds: brands, subbrandIds: subbrands },
+                success: function (r) {
+                    if (r.success) {
+                        r.data.forEach(z => {
+                            const checked = zonasSeleccionadas.includes(z.id) ? 'checked' : '';
+                            contenedor.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input zona-check" type="checkbox" value="${z.id}" id="zona_${z.id}" ${checked}>
+                                    <label class="form-check-label" for="zona_${z.id}">${z.nombre}</label>
+                                </div>
+                            `);
+                        });
+                        const total = $('#contenedorZonas .zona-check').length;
+                        $('#countZonas').text(`(${total})`);
+                        const checkedCount = $('#contenedorZonas .zona-check:checked').length;
+                        $('#checkAllZonas').prop('checked', total > 0 && total === checkedCount);
+
+                        if (zonasSeleccionadas.length > 0) {
+                            cargarClientes();
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarClientes() {
+            const brands = $('#contenedorMarcas .marca-check:checked').map(function () {
+                return parseInt(this.value);
+            }).get();
+
+            const subbrands = $('#contenedorSubMarcas .submarca-check:checked').map(function () {
+                return parseInt(this.value);
+            }).get();
+
+            const zones = $('#contenedorZonas .zona-check:checked').map(function () {
+                return parseInt(this.value);
+            }).get();
+
+            const contenedor = $('#contenedorClientes');
+            contenedor.empty();
+            $('#checkAllClientes').prop('checked', false);
+            $('#countClientes').text('(0)');
+
+            if (zones.length === 0) {
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("ListarClientesPorFiltros", "Usuario")',
+                method: 'GET',
+                traditional: true,
+                data: { brandIds: brands,subbrandIds: subbrands, zoneIds: zones },
+                success: function (r) {
+                    if (r.success) {
+                        const ids = new Set();
+                        r.data.forEach(c => {
+                            if (!ids.has(c.clienteId)) {
+                                ids.add(c.clienteId);
+                                contenedor.append(`
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input cliente-check" type="checkbox" value="${c.clienteId}" id="cliente_${c.clienteId}">
+                                        <label class="form-check-label" for="cliente_${c.clienteId}">${c.nombre}</label>
+                                    </div>
+                                </div>
+                            `);
+                            }
+                        });
+
+                        clientesSeleccionados = [...new Set(clientesSeleccionados)];
+                        clientesSeleccionados.forEach(id => {
+                            $(`#cliente_${id}`).prop('checked', true);
+                        });
+                        const total = $('#contenedorClientes .cliente-check').length;
+                        $('#countClientes').text(`(${total})`);
+                        const checked = $('#contenedorClientes .cliente-check:checked').length;
+                        $('#checkAllClientes').prop('checked', total > 0 && total === checked);
+                        filtrarClientes();
+                    }
+                }
+            });
+        }
+
+        function filtrarClientes() {
+            const filtro = $('#buscarCliente').val().toLowerCase();
+            $('#contenedorClientes .col').each(function () {
+                const nombre = $(this).text().toLowerCase();
+                $(this).toggle(nombre.includes(filtro));
+            });
+        }
+
+        function cargarPrioridades() {
+            $.get('@Url.Action("ObtenerPrioridadesDeTarea", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#prioridad');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                    select.val('');
+                }
+            });
+        }
+
+        function ObtenerUsuariosPorRol(rolId) {
+            $.get('@Url.Action("ObtenerUsuariosPorRol", "Sprint")', { rolId }, function (r) {
+                if (r.success) {
+                    const opciones = r.data.map(usuario => ({ value: String(usuario.usuarioId), label: usuario.usuarioNombre }));
+                    supervisorChoices.clearChoices();
+                    supervisorChoices.setChoices(opciones, 'value', 'label', true);
+                }
+            });
+        }
+
+        function cargarSprints() {
+            window.location.href = '@Url.Action("Listar", "Sprint")';
+        }
+
+        function cargarRoles() {
+            $.get('@Url.Action("ListarRoles", "Sprint")', function (r) {
+                if (!r.success) {
+                    showAlert(r.error || 'Error al cargar roles', 'error');
+                    return;
+                }
+
+                const select = $('#roles');
+                select.empty();
+                r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+
+                const opciones = r.data.map(rol => ({ value: String(rol.id), label: rol.nombre }));
+                revisorChoices.clearChoices();
+                revisorChoices.setChoices(opciones, 'value', 'label', true);
+
+                asignacionRolesChoices.clearChoices();
+                asignacionRolesChoices.setChoices(opciones, 'value', 'label', true);
+            });
+        }
+
+        function cargarUnidadesDeNegocio() {
+            $.get('@Url.Action("ObtenerUnidadesNegocio", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#unidadNegocio');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                    select.val('');
+                }
+            });
+        }
+
+        function guardarSprint() {
+            const supervisoresIds = supervisorChoices.getValue(true).map(Number);
+            const supervisores = supervisoresIds.filter((item, index) => supervisoresIds.indexOf(item) === index);
+            const rolesAsignadosIds = asignacionRolesChoices.getValue(true).map(Number);
+            const revisoresIds = revisorChoices.getValue(true).map(Number);
+            const clienteIds = $('#contenedorClientes .cliente-check:checked').map(function () {
+                    return parseInt(this.value);
+                }).get();
+
+            const id = parseInt($('#sprintId').val()) || 0;
+            const vigenciaInicioFecha = $('#vigenciaInicioFecha').val();
+            const vigenciaInicioHora = $('#vigenciaInicioHora').val();
+            const vigenciaFinFecha = $('#vigenciaFinFecha').val();
+            const vigenciaFinHora = $('#vigenciaFinHora').val();
+            const vigenciaDel = `${vigenciaInicioFecha} ${vigenciaInicioHora}`;
+            const vigenciaAl = `${vigenciaFinFecha} ${vigenciaFinHora}`;
+
+            const datos = {
+                Id: id,
+                Titulo: $('#titulo').val(),
+                Descripcion: $('#descripcion').val(),
+                UnidadDeNegocioId: $('#unidadNegocio').val(),
+                VigenciaInicio: vigenciaDel,
+                VigenciaFin: vigenciaAl,
+                RequiereSupervision: $('#requiereSupervision').prop('checked'),
+                PeriodoDeSupervision: $('#periodoSupervision').val() || null,
+                RequiereRevision: $('#requiereRevision').prop('checked'),
+                PeriodoDeRevision: $('#periodoRevision').val() || null,
+                Estatus: true,
+                Supervisores: [],
+                Revisores: [],
+                Tareas: []
+            };
+
+            supervisores.forEach((number) => {
+                datos.Supervisores.push({ usuarioId: number });
+            });
+            revisoresIds.forEach((number) => {
+                datos.Revisores.push({ rolId: number });
+            });
+            tareasDelSprint.forEach((tarea) => {
+                tarea.Clientes = clienteIds;
+                tarea.Roles = rolesAsignadosIds;
+                datos.Tareas.push(tarea);
+            });
+
+            $.ajax({
+                url: '@Url.Action("GuardarSprint", "Sprint")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function (r) {
+                    if (r.success) {
+                        $('#mensajeGuardado').text(r.message);
+                        $('#modalGuardado').modal('show');
+                    } else {
+                        showAlert(r.error || 'Error al guardar', 'error');
+                    }
+                }
+            });
+        }
+
+        function agregarTarea() {
+            const vigenteDelFecha = $('#vigenteFecha').val();
+            const vigenteDelHora = $('#vigenteHora').val();
+            const vigenteDel = `${vigenteDelFecha} ${vigenteDelHora}`;
+
+            const vencimientoFecha = $('#vencimientoFecha').val();
+            const vencimientoHora = $('#vencimientoHora').val();
+            const vencimiento = `${vencimientoFecha} ${vencimientoHora}`;
+            const id = tareasDelSprint.length + 1;
+
+            const tarea = {
+                TareaId: id,
+                Titulo: $('#tituloTarea').val(),
+                Descripcion: $('#descripcionTarea').val(),
+                ComentarioDeReferencia: $('#comentarioReferencia').val(),
+                VigenciaInicio: vigenteDel,
+                VigenciaFin: vencimiento,
+                PrioridadId: $('#prioridad').val(),
+                CategoriaId: $('#categoria').val(),
+                RequiereEvidencia: $('#requiereEvidencia').prop('checked'),
+                Estatus: true,
+            };
+            
+            tareasDelSprint.push(tarea);
+            $('#modalEntidad').modal('hide');
+
+            cargarTareas();
+            limpiarModalTarea();
+        }
+
+        function cargarTareas() {
+            const tbody = $('#tablaTareas tbody');
+            tbody.empty();
+
+            tareasDelSprint.forEach(item => {
+                tbody.append(`
+                    <tr>
+                        <td>${item.Titulo}</td>
+                        <td>${item.VigenciaInicio}</td>
+                        <td>${item.VigenciaFin}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="eliminarTarea(${item.TareaId})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function eliminarTarea(id) {
+            tareasDelSprint = tareasDelSprint.filter(item => item.TareaId !== id);
+            cargarTareas();
+        }
+
+        function limpiarModalSprint() {
+            $('#entidadId').val('');
+            $('#modalTitulo').text('Nuevo Sprint');
+            $('#sprintId').val('');
+            $('#titulo').val('');
+            $('#descripcion').val('');
+            $('#unidadNegocio').val('');
+            $('#vigenciaInicioFecha').val('');
+            $('#vigenciaInicioHora').val('');
+            $('#vigenciaFinFecha').val('');
+            $('#vigenciaFinHora').val('');
+            $('#requiereRevision').prop('checked', false);
+            $('#requiereSupervision').prop('checked', false);
+            $('#periodoRevision').val('');
+            $('#periodoSupervision').val('');
+        }
+
+        function limpiarModalTarea() {
+            $('#tituloTarea').val('');
+            $('#descripcionTarea').val('');
+            $('#comentarioReferencia').val('');
+            $('#prioridad').val('');
+            $('#categoria').val('');
+            $('#requiereEvidencia').prop('checked', false);
+            $('#vigenteFecha').val('');
+            $('#vigenteHora').val('');
+            $('#vencimientoFecha').val('');
+            $('#vencimientoHora').val('');
+        }
+
+        function mostrarModalGuardado(mensaje) {
+            $('#mensajeGuardado').text(mensaje);
+            $('#modalGuardado').modal('show');
+        }
+    </script>
+}

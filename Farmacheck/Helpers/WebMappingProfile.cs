@@ -26,8 +26,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 using Farmacheck.Application.Models.LabelsByNumericalScale;
 using Farmacheck.Application.Models.GroupingTags;
+using Farmacheck.Application.Models.Sprints;
+using Farmacheck.Application.Models.Tasks;
 using Farmacheck.Application.Models.MailingProgramacion;
 using Farmacheck.Application.Models.ZonaHorario;
+using Farmacheck.Application.Models.NotificationCenter;
 
 namespace Farmacheck.Helpers
 {
@@ -121,6 +124,21 @@ namespace Farmacheck.Helpers
             
             CreateMap<EtiquetasPorEscalaNumericaViewModel, LabelsByNumericalScaleRequest>();
             CreateMap<EtiquetasPorEscalaNumericaViewModel, UpdateLabelsByNumericalScaleRequest>();
+
+            CreateMap<SprintDto, SprintViewModel>();
+            CreateMap<SprintViewModel, SprintRequest>();
+            CreateMap<SprintViewModel, UpdateSprintRequest>();
+            CreateMap<SprintSupervisorViewModel, SprintSupervisorRequest>();
+            CreateMap<SprintRevisorViewModel, SprintRevisorRequest>();
+
+
+            CreateMap<TareaDto, TareaViewModel>();
+            CreateMap<TareaViewModel, TaskRequest>();
+            CreateMap<TareaViewModel, UpdateTaskRequest>();
+
+            CreateMap<PrioridadDeTareaDto, PrioridadDeTareaViewModel>();
+            CreateMap<OrigenDeTareaDto, OrigenDeTareaViewModel>();
+            CreateMap<OrigenDeTareaDto, OrigenDeTareaViewModel>();
 
             CreateMap<CustomerDto, ClienteEstructuraViewModel>()
              .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.Id))
@@ -220,6 +238,7 @@ namespace Farmacheck.Helpers
             CreateMap<RolPorUsuarioClientesAsignadosDto, RolPorUsuarioClientesAsignadosViewModel>().ReverseMap();
             CreateMap<QuizAssignmentManagerDto, AsignacionCuestionarioViewModel>().ReverseMap();
             CreateMap<AsignacionCuestionarioViewModel, QuizAssignmentManagerRequest>();
+            CreateMap<UsuarioPorRolDto, UsuarioPorRolViewModel>().ReverseMap();
 
             CreateMap<vMailingProgramacionDestinatarioModel, vMailingProgramacionWebRequest>().ReverseMap();
             CreateMap<ZonaHorarioModel, ZonaHorarioRequest>().ReverseMap();
@@ -228,6 +247,12 @@ namespace Farmacheck.Helpers
 
             CreateMap<TokenDto, TokenViewModel>().ReverseMap();
             CreateMap<UserInfoDto, UserInfoViewModel>().ReverseMap();
+
+            CreateMap<NotificationTypeDto, NotificationTypeViewModel>().ReverseMap();
+            CreateMap<NotificationDto, NotificationViewModel>().ReverseMap();
+            CreateMap<NotificationFormatDto, NotificationFormatViewModel>().ReverseMap();
+            CreateMap<NotificationSettingPostViewModel, NotificationSettingRequest>().ReverseMap();
+            CreateMap<NotificationSettingViewModel, NotificationSetting>().ReverseMap();
         }
     }
 }

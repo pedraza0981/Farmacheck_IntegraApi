@@ -1,0 +1,85 @@
+﻿ul.task-list {
+    list-style: none;
+    padding: 0;
+    margin: auto;
+}
+
+ul.task-list li {
+    background: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    flex-wrap: wrap;
+    margin-bottom: 10px
+}
+
+ul.task-list li label.task, ul.task-list li label.notification-format {
+    flex: 1;
+    min-width: 200px;
+    cursor: pointer;
+}
+
+ul.task-list li:hover{
+    background-color: #f3f3f3;
+}
+
+/* botón menú (⋮) */
+.menu-label {
+    display: none;
+    cursor: pointer;
+    font-size: 20px;
+    user-select: none;
+    padding: 4px 8px;
+}
+
+/* menú oculto */
+.menu-options {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 40px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 5px 0;
+    min-width: 140px;
+    z-index: 10;
+}
+
+.menu-options div {
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.menu-options div:hover {
+    background: #f0f0f0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    ul.task-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    ul.task-list li .menu-label {
+        align-self: flex-end;
+        margin-top: 6px;
+    }
+
+    ul.task-list li .menu-options {
+        top: auto;
+        bottom: -75px; /* ajusta la posición bajo el menú */
+    }
+}
+
+.error {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}

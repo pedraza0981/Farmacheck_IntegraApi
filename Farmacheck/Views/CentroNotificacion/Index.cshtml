@@ -1,0 +1,215 @@
+﻿@model List<Farmacheck.Models.NotificationTypeViewModel>
+@{
+    ViewData["Title"] = "Centro de Notificaciones";
+}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Centro de Notificaciones</h4>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                @foreach (var notificationType in Model)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(notificationType.Id == 1 ? "active" : "")" id="task-tab-@notificationType.Id" data-bs-toggle="tab" data-bs-target="#task-@notificationType.Id"
+                                type="button" role="tab" aria-controls="#task-@notificationType.Id" aria-selected="true">
+                            @notificationType.TipoNotificacion
+                        </button>
+                    </li>
+                }
+            </ul>
+            <div class="tab-content mt-3" id="myTabContent">
+                @foreach (var notificationType in Model)
+                {
+                    <div class="tab-pane @(notificationType.Id == 1 ? "fade show active" : "")" id="task-@notificationType.Id" role="tabpanel" aria-labelledby="task-tab-@notificationType.Id">
+                        <ul class="task-list">
+                            @foreach (var notification in notificationType.Notificaciones!)
+                            {
+                                <li>
+                                    <label class="task">
+                                        <input type="checkbox" value="@notification.Id" checked="@notification.IsChecked"> @notification.Descripcion
+                                    </label>
+                                    <div class="error-msg error" style="display:none;">Debes seleccionar al menos un método de notificación.</div>
+                                    <span class="menu-label">⋮</span>
+                                    <div class="menu-options">
+                                        <ul class="list-unstyled">
+                                            @foreach (var notificationFormat in notification.FormatosNotificaciones!)
+                                            {
+                                                <li>
+                                                    <label class="notification-format">
+                                                        <input type="checkbox" class="sub-option" value="@notificationFormat.Id" checked="@notificationFormat.IsChecked"> @notificationFormat.Descripcion
+                                                    </label>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+            <div class="">
+                <div class="mt-4 text-end">
+                    <button class="btn btn-primary" id="btnSaveConfig">Guardar configuración</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        function transformData(data){
+            const listaJson = [];
+
+            data.forEach(item => {
+                item.methods.forEach(m => {
+                    listaJson.push({
+                        idNotificacion: parseInt(item.value, 10),
+                        idFormatoNotificacion: parseInt(m.value, 10)
+                    });
+                });
+            });
+
+            return listaJson;
+        }
+
+        function getNotificationList(){
+            const config = [];
+
+            document.querySelectorAll('.task-list > li').forEach(li => {
+                const taskLabel = li.querySelector('.task input[type="checkbox"]');
+                const isTaskEnabled = taskLabel.checked;
+                const taskName = taskLabel.parentElement.textContent.trim();
+                const taskValue = taskLabel.value;
+
+                const subOptions = Array.from(li.querySelectorAll('.sub-option')).map(opt => ({
+                    label: opt.parentElement.textContent.trim(),
+                    enabled: opt.checked,
+                    value: opt.value
+                }));
+
+                config.push({
+                    task: taskName,
+                    enabled: isTaskEnabled,
+                    value: taskValue,
+                    methods: subOptions
+                });
+            });
+
+            return config;
+        }
+
+        document.querySelectorAll('.menu-label').forEach(label => {
+            label.addEventListener('click', () => {
+                const menu = label.nextElementSibling;
+                const isVisible = menu.style.display === 'block';
+
+                // Cierra todos los menús
+                document.querySelectorAll('.menu-options').forEach(m => m.style.display = 'none');
+
+                // Toggle del menú actual
+                menu.style.display = isVisible ? 'none' : 'block';
+            });
+        });
+
+        // Cierra menús al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (!e.target.closest('li')) {
+                document.querySelectorAll('.menu-options').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        document.getElementById('btnSaveConfig').addEventListener('click', () => {
+
+            var notificationList = getNotificationList();
+
+            // VALIDACIÓN: muestra error si alguna tarea está activa pero sin métodos activos
+            const errores = notificationList.filter(item => item.enabled && item.methods.filter(m => m.enabled).length === 0);
+            if (errores.length > 0) {
+                 showAlert('Verifica que todas las notificaciones activadas tengan al menos un método seleccionado.', 'error');
+                return;
+            }
+
+            // Obtener solo los activados
+            const configuracionesActivas = notificationList
+                .filter(item => item.enabled)
+                .map(item => ({
+                    task: item.task,
+                    value: item.value,
+                    methods: item.methods.filter(m => m.enabled)
+                }))
+                .filter(item => item.methods.length > 0);
+
+            $.ajax({
+                    url: '@Url.Action("Guardar", "CentroNotificacion")',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({"notifications": transformData(configuracionesActivas)}),
+                    success: function (r) {
+                        if (r.success) {
+                            showAlert('Se guardaron correctamente los datos', 'success');
+                        } else {
+                            showAlert(r.error || 'Error al guardar', 'error');
+                        }
+                    }
+                });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.task > input[type="checkbox"]').forEach(taskCheckbox => {
+
+                const li = taskCheckbox.closest('li');
+                const errorMsg = li.querySelector('.error');
+                const subOptions = li.querySelectorAll('.sub-option');
+                const menuLabel = li.querySelector('.menu-label');
+                const menu = li.querySelector('.menu-options');
+
+                function aplicarEstadoPrincipal() {
+                    if (taskCheckbox.checked) {
+                        let isAnyChecked = Array.from(subOptions).some(cb => cb.checked);
+                        if (!isAnyChecked && errorMsg) {
+                            errorMsg.style.display = 'block';
+                        }
+                        if (menuLabel) {
+                            menuLabel.style.display = 'inline-block';
+                        }
+                    } else {
+                        if (errorMsg) errorMsg.style.display = 'none';
+                        if (menuLabel) menuLabel.style.display = 'none';
+                        if (menu) menu.style.display = 'none';
+
+                        subOptions.forEach(subCheckbox => {
+                            subCheckbox.checked = false;
+                        });
+                    }
+                }
+
+                function aplicarEstadoSubOpciones() {
+                    if (errorMsg) {
+                        let isAnyChecked = Array.from(subOptions).some(cb => cb.checked);
+                        errorMsg.style.display = isAnyChecked ? 'none' : 'block';
+                    }
+                }
+
+                // Listener para el checkbox principal
+                taskCheckbox.addEventListener('change', aplicarEstadoPrincipal);
+
+                // Listener para cada sub-opción
+                subOptions.forEach(subCheckbox => {
+                    subCheckbox.addEventListener('change', aplicarEstadoSubOpciones);
+                });
+
+                // 👇 Aplicar estado inicial al cargar la página
+                aplicarEstadoPrincipal();
+            });
+        });
+
+    </script>
+
+}

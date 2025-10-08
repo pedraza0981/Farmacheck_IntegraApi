@@ -1,0 +1,353 @@
+﻿@model List<Farmacheck.Models.TareaViewModel>
+@{
+    ViewData["Title"] = "Tareas";
+}
+
+<style>
+    #tablaTareas thead th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-success" style="background-color: #0c4c98 !Important; color: white;"
+           href="@Url.Action("Index", "Sprint")">
+            <i class="bi bi-arrow-left"></i> Regresar
+        </a>
+        <h4 class="text-dark">Tareas</h4>
+        <div>
+            <button id="btnNueva" class="btn" style="background-color:#00ab8e; color:white;">
+                <i class="bi bi-plus-circle"></i> Nueva Tarea
+            </button>
+        </div>
+    </div>
+    <table class="table table-bordered custom-table" id="tablaTareas">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Id</th>
+                <th style="width: 40%;">Titulo</th>
+                <th style="width: 20%;">Descripción</th>
+                <th style="width: 15%;" class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Titulo</td>
+                    <td>@u.Descripcion</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarTarea('@u.Id')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="eliminarTarea('@u.Id')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTareaTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <!--<div class="modal-header bg-success text-white">-->
+        <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalTareaTitulo">Nueva Tarea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="tareaId" />
+                <input type="hidden" id="origenId" />
+
+                <div class="mb-2">
+                    <h6 class="text-primary">Información General</h6>
+                </div>
+
+                <div class="mb-2">
+                    <label>Título</label>
+                    <input type="text" class="form-control" id="titulo" placeholder="Título de la Tarea" autocomplete="off" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Descripción</label>
+                    <input type="text" class="form-control" id="descripcion" placeholder="Descripción" autocomplete="off" />
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-9 mb-2">
+                        <label>Comentario de Referencia</label>
+                        <input type="text" class="form-control" id="comentarioReferencia" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <div class="form-check ms-3">
+                            <input type="checkbox" class="form-check-input" id="requiereEvidencia" />
+                            <label class="form-check-label" for="requiereEvidencia">Requiere Evidencia</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-6 mb-2">
+                        <label>Prioridad</label>
+                        <select class="form-select" id="prioridad"></select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label>Categoría</label>
+                        <select class="form-select" id="categoria"></select>
+                    </div>
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-3 mb-2">
+                        <label>Vigencia Inicio</label>
+                        <input id="vigenteFecha" class="form-control" type="date" disabled />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label> </label>
+                        <input id="vigenteHora" class="form-control" type="time" disabled />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label>Vigencia Fin</label>
+                        <input id="vencimientoFecha" class="form-control" type="date" disabled />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label> </label>
+                        <input id="vencimientoHora" class="form-control" type="time" disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de guardado -->
+<div class="modal fade" id="modalGuardado" tabindex="-1" aria-labelledby="modalGuardadoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalGuardadoLabel">Tarea</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="mensajeGuardado"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAceptarGuardado" onclick="cargarTareas()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        const sprintId = @ViewBag.SprintId;
+
+        $(document).ready(function () {
+            cargarCategorias();
+            cargarOrigenes();
+            cargarPrioridades();
+            const storedLength = localStorage.getItem('tasksPageLength');
+            const initialPageLength = storedLength ? parseInt(storedLength) : 10;
+            const tabla = $('#tablaTareas').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: initialPageLength,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                }
+            });
+
+            tabla.on('length.dt', function (e, settings, len) {
+                localStorage.setItem('tasksPageLength', len);
+            });
+
+            $('#btnNueva').click(function () {
+                limpiarModalTarea();
+                $('#modalTitulo').text('Nueva Tarea');
+                $('#modalEntidad').modal('show');
+                
+                const id = sprintId;
+                
+                $.get('@Url.Action("ObtenerSprintPorId", "Sprint")', { sprintId, id }, function (r) {
+                    if (r.success) {
+                        const u = r.data;
+                        const fechaVigencia = new Date(u.vigenciaDel.toString());
+                        const fechaVigenciaFormato = fechaVigencia.toISOString().substring(0, 10);
+                        const horaVigenciaFormato = fechaVigencia.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                        const fechaVencimiento = new Date(u.vigenciaAl.toString());
+                        const fechaVencimientoFormato = fechaVencimiento.toISOString().substring(0, 10);
+                        const horaVencimientoFormato = fechaVencimiento.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                        $('#vigenteFecha').val(fechaVigenciaFormato);
+                        $('#vigenteHora').val(horaVigenciaFormato);
+                        $('#vencimientoFecha').val(fechaVencimientoFormato);
+                        $('#vencimientoHora').val(horaVencimientoFormato);
+                     } else {
+                         showAlert(r.error || 'No se pudo cargar la info del sprint', 'error');
+                     }
+                });
+            });
+
+
+            $('#btnGuardar').click(function () {
+                guardarTarea();
+            });
+        });
+
+        function cargarCategorias() {
+            $.get('@Url.Action("ObtenerCategorias", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#categoria');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                }
+            });
+        }
+
+        function cargarOrigenes() {
+            $.get('@Url.Action("ObtenerOrigenesDeTarea", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#origen');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                }
+            });
+        }
+
+        function cargarPrioridades() {
+            $.get('@Url.Action("ObtenerPrioridadesDeTarea", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#prioridad');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                }
+            });
+        }
+
+        function guardarTarea() {
+            const formData = new FormData();
+            const id = $('#tareaId').val() || "";
+            
+            const vigenteDelFecha = $('#vigenteFecha').val();
+            const vigenteDelHora = $('#vigenteHora').val();
+            const vigenteDel = `${vigenteDelFecha} ${vigenteDelHora}`;
+
+            const vencimientoFecha = $('#vencimientoFecha').val();
+            const vencimientoHora = $('#vencimientoHora').val();
+            const vencimiento = `${vencimientoFecha} ${vencimientoHora}`;
+
+           formData.append('Id', id);
+           formData.append('SprintId', sprintId);
+           formData.append('Titulo', $('#titulo').val());
+           formData.append('Descripcion', $('#descripcion').val());
+           formData.append('ComentarioDeReferencia', $('#comentarioReferencia').val());
+           formData.append('PrioridadId', $('#prioridad').val());
+           formData.append('CategoriaId', $('#categoria').val());
+           formData.append('OrigenId', $('#origenId').val());
+           formData.append('RequiereEvidencia', $('#requiereEvidencia').prop('checked'));
+           formData.append('VigenteDel', vigenteDel);
+           formData.append('VenceEl', vencimiento);
+           formData.append('Estatus', true);
+
+           $.ajax({
+               url: '@Url.Action("GuardarTarea", "Sprint")',
+               method: 'POST',
+               data: formData,
+               processData: false,
+               contentType: false,
+               success: function (r) {
+                   if (r.success) {
+                        $('#modalEntidad').modal('hide');
+                        $("#modalGuardadoLabel").text("Tarea");
+                        mostrarModalGuardado('Guardado correctamente');
+                   } else {
+                        showAlert(r.error || "Error al guardar", 'error');
+                   }
+               }
+           });
+        }
+
+        function editarTarea(id) {
+            $.get('@Url.Action("ObtenerTareaPorId", "Sprint")', { sprintId, id }, function (r) {
+                if (r.success) {
+                    const u = r.data;
+                    const fechaVencimiento = new Date(u.venceEl.toString());
+                    const fechaVencimientoFormato = fechaVencimiento.toISOString().substring(0, 10);
+                    const horaVencimientoFormato = fechaVencimiento.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                    const fechaVigencia = new Date(u.vigenteDel.toString());
+                    const fechaVigenciaFormato = fechaVigencia.toISOString().substring(0, 10);
+                    const horaVigenciaFormato = fechaVigencia.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                    $('#modalEntidad').modal('show');
+                    $('#modalTitulo').text('Editar Tarea');
+                    $('#tareaId').val(u.id);
+                    $('#titulo').val(u.titulo);
+                    $('#descripcion').val(u.descripcion);
+                    $('#comentarioReferencia').val(u.comentarioDeReferencia);
+                    $('#prioridad').val(u.prioridadId);
+                    $('#categoria').val(u.categoriaId);
+                    $('#origenId').val(u.origenId);
+                    $('#requiereEvidencia').prop('checked', u.requiereEvidencia === true);
+                    $('#vigenteFecha').val(fechaVigenciaFormato);
+                    $('#vigenteHora').val(horaVigenciaFormato);
+                    $('#vencimientoFecha').val(fechaVencimientoFormato);
+                    $('#vencimientoHora').val(horaVencimientoFormato);
+                } else {
+                    showAlert(r.error || 'No se pudo cargar', 'error');
+                }
+            });
+        }
+
+        function eliminarTarea(id) {
+            confirmAction('¿Deseas eliminar esta Tarea?').then(function (ok) {
+                if (!ok) return;
+                $.post('@Url.Action("EliminarTarea", "Sprint")', { sprintId, id }, function (r) {
+                     if (r.success) {
+                        $("#modalGuardadoLabel").text("Tarea");
+                        mostrarModalGuardado('Eliminado correctamente');
+                   } else {
+                        showAlert(r.error || "Error al eliminar", 'error');
+                   }
+                });
+            });
+        }
+
+        function limpiarModalTarea() {
+            $('#entidadId').val('');
+            $('#modalTitulo').text('Nueva Tarea');
+            $('#tareaId').val('');
+            $('#titulo').val('');
+            $('#descripcion').val('');
+            $('#comentarioReferencia').val('');
+            $('#prioridad').val('');
+            $('#categoria').val('');
+            $('#origen').val('');
+            $('#requiereEvidencia').prop('checked', false);
+            $('#vencimientoFecha').val('');
+            $('#vencimientoHora').val('');
+        }
+
+        function mostrarModalGuardado(mensaje) {
+            $('#mensajeGuardado').text(mensaje);
+            $('#modalGuardado').modal('show');
+        }
+
+        function cargarTareas() {
+            window.location.href = '@Url.Action("ConfigurarTareas", "Sprint", new { id = "id" })'.replace("id", sprintId);
+        }
+    </script>
+}

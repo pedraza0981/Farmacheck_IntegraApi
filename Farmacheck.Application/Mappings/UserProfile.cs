@@ -19,6 +19,7 @@ namespace Farmacheck.Application.Mappings
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UsuarioId))
                 .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.RolId))
                 .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.RolNombre));
+            CreateMap<UserByRoleResponse, UsuarioPorRolDto>().ReverseMap();
         }
     }
 }

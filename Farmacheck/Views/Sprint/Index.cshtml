@@ -1,0 +1,532 @@
+﻿@model List<Farmacheck.Models.SprintViewModel>
+@{
+    ViewData["Title"] = "Sprints";
+}
+
+<style>
+    #tablaDatos thead th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark">Sprints</h4>
+        <div>
+            <!--<button id="btnDescargar" class="btn btn-secondary me-2">
+                <i class="bi bi-download"></i> Descargar
+            </button>-->
+            
+            <a asp-controller="Sprint" asp-action="ConfigurarSprints" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Agregar Sprint
+            </a>
+        </div>
+    </div>
+    <table class="table table-bordered custom-table" id="tablaDatos">
+        <thead>
+            <tr>
+                <th style="width:10%;">Id</th>
+                <th style="width:50%;">Titulo</th>
+                <th style="width:10%;">Vigencia Inicio</th>
+                <th style="width:10%;">Vigencia Fin</th>
+                <th style="width:20%;" class="text-center"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Titulo</td>
+                    <td>@u.VigenciaDel</td>
+                    <td>@u.VigenciaAl</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editarSprint(@u.Id)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="configurarTareas(@u.Id)">
+                            <i class="bi bi-journal-code"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="eliminarSprint(@u.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalSprintTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalSprintTitulo">Nuevo Sprint</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="sprintId" />
+
+                <div class="mb-2">
+                    <h6 class="text-primary">Información General</h6>
+                </div>
+
+                <div class="mb-2">
+                    <label>Título</label>
+                    <input type="text" class="form-control" id="titulo" placeholder="Título del Sprint" autocomplete="off" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Descripción</label>
+                    <input type="text" class="form-control" id="descripcion" placeholder="(Opcional)" autocomplete="off" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Unidad de negocio</label>
+                    <select class="form-select" id="unidadNegocio"></select>
+                </div>
+
+                <div class="mb-2 row">
+                    <div class="col-md-3 mb-2">
+                        <label>Vigencia Inicio</label>
+                        <input id="vigenciaInicioFecha" class="form-control" type="date" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label> </label>
+                        <input id="vigenciaInicioHora" class="form-control" type="time" />
+                    </div>
+                    
+                    <div class="col-md-3 mb-2">
+                        <label>Vigencia Fin</label>
+                        <input id="vigenciaFinFecha" class="form-control" type="date" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label> </label>
+                        <input id="vigenciaFinHora" class="form-control" type="time" />
+                    </div>
+                </div>
+
+                <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                    <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseSupervisores" aria-expanded="true" aria-controls="collapseSupervisores">
+                        <strong style="color: white;">
+                            <i class="bi bi-shield-lock"></i> Asignación de Supervisores
+                        </strong>
+                        <i class="bi bi-chevron-down text-white"></i>
+                    </div>
+                    <div id="collapseSupervisores" class="collapse show">
+                        <div class="card-body">
+                            <fieldset class="border p-3 mb-1 rounded">
+                                <div class="row">
+                                    <div class="col-md-12 mb-2 d-flex align-items-end">
+                                        <div class="form-check ms-3">
+                                            <input type="checkbox" class="form-check-input" id="requiereSupervision" />
+                                            <label class="form-check-label" for="requiereSupervision">Requiere supervisión</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-2 row">
+                                    <div class="col-md-12 mb-2">
+                                        <label>Periodo de supervisión</label>
+                                        <input type="number" class="form-control" id="periodoSupervision" autocomplete="off" />
+                                    </div>
+                                </div>
+                                <div class="mb-2 row">
+                                    <div class="col-md-12 mb-2">
+                                        <label>Roles</label>
+                                        <select class="form-select" id="roles"></select>
+                                    </div>
+                                </div>
+                                <div class="mb-2 row">
+                                    <div class="col-md-12 mb-2">
+                                        <label>Supervisores</label>
+                                        <select id="supervisores" class="form-select choices-dropdown" multiple></select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                    <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseRevisores" aria-expanded="true" aria-controls="collapseRevisores">
+                        <strong style="color: white;">
+                            <i class="bi bi-shield-lock"></i> Asignación de Revisores
+                        </strong>
+                        <i class="bi bi-chevron-down text-white"></i>
+                    </div>
+                    <div id="collapseRevisores" class="collapse show">
+                        <div class="card-body">
+                            <fieldset class="border p-3 mb-3 rounded">
+                                <div class="row">
+                                    <div class="col-md-12 mb-2 d-flex align-items-end">
+                                        <div class="form-check ms-3">
+                                            <input type="checkbox" class="form-check-input" id="requiereRevision" />
+                                            <label class="form-check-label" for="requiereRevision">Requiere revisión</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-2 row">
+                                    <div class="col-md-12 mb-2">
+                                        <label>Periodo de revisión</label>
+                                        <input type="number" class="form-control" id="periodoRevision" autocomplete="off" />
+                                    </div>
+                                </div>
+                                <div class="mb-2 row">
+                                    <div class="col-md-12 mb-2">
+                                        <label>Roles</label>
+                                        <select id="revisoresRoles" class="form-select choices-dropdown" multiple></select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 shadow-sm border-0" style="border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                    <div class="card-header bg-light border-bottom-0 d-flex justify-content-between align-items-center" style="background-color: #004a99 !important; cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseTareas" aria-expanded="true" aria-controls="collapseTareas">
+                        <strong style="color: white;">
+                            <i class="bi bi-shield-lock"></i> Asignación de Tareas
+                        </strong>
+                        <i class="bi bi-chevron-down text-white"></i>
+                    </div>
+                    <div id="collapseTareas" class="collapse show">
+                        <div class="card-body">
+                            <div class="row align-items-end mb-3">
+                                <div class="col-md-12">
+                                    <button id="btnAgregarTarea" type="button" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3"
+                                            style="background-color: #79b828; color: white;" data-bs-toggle="modal" data-bs-target="#modalAgregarTarea">
+                                        <i class="bi bi-gear"></i> Nueva Tarea
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover" id="tablaRoles">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Titulo</th>
+                                            <th>Vigencia Inicio</th>
+                                            <th>Vigencia Fin</th>
+                                            <th class="text-center" style="width: 80px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-center text-muted" id="noTareasRow">
+                                            <td colspan="4">No hay tareas</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAgregarTarea" tabindex="-1" aria-labelledby="modalTituloTarea" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalTituloRol">Nueva tarea</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="idRolPorUsuario" />
+                
+                
+               
+                
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardarRol" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal de guardado -->
+<div class="modal fade" id="modalGuardado" tabindex="-1" aria-labelledby="modalGuardadoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary_form text-white">
+                <h5 class="modal-title" id="modalGuardadoLabel">Sprint</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="mensajeGuardado"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAceptarGuardado" onclick="cargarSprints()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        let supervisorChoices;
+        let revisorChoices;
+
+        $(document).ready(function () {
+            supervisorChoices = new Choices('#supervisores', { removeItemButton: true });
+            revisorChoices = new Choices('#revisoresRoles', { removeItemButton: true });
+            //$('#asignarSupervisores').hide();
+            //$('#asignarRevisores').hide();
+            $('#collapseSupervisores').collapse('hide');
+            $('#collapseRevisores').collapse('hide');
+
+            cargarUnidadesDeNegocio();
+            cargarRoles();
+            const storedLength = localStorage.getItem('sprintsPageLength');
+            const initialPageLength = storedLength ? parseInt(storedLength) : 5;
+            const tabla = $('#tablaDatos').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: initialPageLength,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                }
+            });
+
+            tabla.on('length.dt', function (e, settings, len) {
+                localStorage.setItem('sprintsPageLength', len);
+            });
+
+            
+
+            $('#btnNuevo').click(function () {
+                limpiarModalSprint();
+                $('#modalTitulo').text('Nuevo Sprint');
+                $('#modalEntidad').modal('show');
+            });
+
+            $('#btnDescargar').click(function () {
+                descargarReporte();
+            });
+
+            $('#btnGuardar').click(function () {
+                guardarSprint();
+            });
+
+            $('#roles').change(function () {
+                const rolId = $(this).val();
+                ObtenerUsuariosPorRol(rolId);
+            });
+
+            /*$('#requiereSupervision').change(function () {
+                if (this.checked) {
+                    $('#asignarSupervisores').show();
+                } else {
+                    $('#asignarSupervisores').hide();
+                }
+            });
+
+            $('#requiereRevision').change(function () {
+                if (this.checked) {
+                    $('#asignarRevisores').show();
+                } else {
+                    $('#asignarRevisores').hide();
+                }
+            });
+            */
+        });
+
+        function ObtenerUsuariosPorRol(rolId) {           
+            $.get('@Url.Action("ObtenerUsuariosPorRol", "Sprint")', { rolId }, function (r) {
+                if (r.success) {
+                    const opciones = r.data.map(usuario => ({ value: String(usuario.usuarioId), label: usuario.rolNombre }));
+                    supervisorChoices.clearChoices();
+                    supervisorChoices.setChoices(opciones, 'value', 'label', true);
+                }
+            });
+        }
+
+        function cargarRoles() {
+            $.get('@Url.Action("ListarRoles", "Sprint")', function (r) {
+                if (!r.success) {
+                    showAlert(r.error || 'Error al cargar roles', 'error');
+                    return;
+                }
+
+                const select = $('#roles');
+                select.empty();
+                r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+
+                const opciones = r.data.map(rol => ({ value: String(rol.id), label: rol.nombre }));
+                revisorChoices.clearChoices();
+                revisorChoices.setChoices(opciones, 'value', 'label', true);
+            });
+        }
+
+        function cargarSprints() {
+            window.location.href = '@Url.Action("Listar", "Sprint")';
+        }
+
+        function cargarTareas() {
+            $('#modalGuardado').modal('hide');
+            window.location.href = '@Url.Action("Index", "Sprint")';
+        }
+
+        function cargarUnidadesDeNegocio() {
+            $.get('@Url.Action("ObtenerUnidadesNegocio", "Sprint")', function (r) {
+                if (r.success) {
+                    const select = $('#unidadNegocio');
+                    select.empty();
+                    r.data.forEach(u => select.append(`<option value="${u.id}">${u.nombre}</option>`));
+                    select.val('');
+                }
+            });
+        }
+
+        function configurarTareas(id) {
+            window.location.href = '@Url.Action("ConfigurarTareas", "Sprint", new { id = "id" })'.replace("id", id);
+        }
+
+        function descargarReporte() {
+            fetch('@Url.Action("DescargarReporteSprints", "Sprint")')
+                .then(r => r.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ReporteSprints.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
+        }
+
+        function editarSprint(id) {
+            //window.location.href = '@Url.Action("Listar", "Sprint")';
+            $.get('@Url.Action("ConfigurarSprints", "Sprint")', { id }, function (r) {
+                if (r.success) {
+                    const u = r.data;
+                    
+                    const fechaVigenciaDel = new Date(u.vigenciaDel.toString());
+                    const fechaVigenciaDelFormato = fechaVigenciaDel.toISOString().substring(0, 10);
+                    const horaVigenciaDel = fechaVigenciaDel.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                    const fechaVigenciaAl = new Date(u.vigenciaAl.toString());
+                    const fechaVigenciaAlFormato = fechaVigenciaAl.toISOString().substring(0, 10);
+                    const horaVigenciaAl = fechaVigenciaAl.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                    $('#modalEntidad').modal('show');
+                    $('#modalTitulo').text('Editar Sprint');
+                    $('#sprintId').val(u.id);
+                    $('#titulo').val(u.titulo);
+                    $('#descripcion').val(u.descripcion);
+                    $('#unidadNegocio').val(u.unidadDeNegocioId);
+                    $('#estatus').val(true);
+                    $('#vigenciaInicioFecha').val(fechaVigenciaDelFormato);
+                    $('#vigenciaInicioHora').val(horaVigenciaDel);
+                    $('#vigenciaFinFecha').val(fechaVigenciaAlFormato);
+                    $('#vigenciaFinHora').val(horaVigenciaAl);
+                    $('#requiereRevision').prop('checked', u.requiereRevision === true);
+                    $('#periodoRevision').val(u.periodoDeRevision);
+                } else {
+                    showAlert(r.error || 'No se pudo cargar', 'error');
+                }
+            });
+        }
+
+        function eliminarSprint(id) {
+            confirmAction('¿Deseas eliminar este Sprint?').then(function (ok) {
+                if (!ok) return;
+                $.post('@Url.Action("EliminarSprint", "Sprint")', { id }, function (r) {
+                     if (r.success) {
+                        $("#modalGuardadoLabel").text("Sprint");
+                        mostrarModalGuardado('Eliminado correctamente');
+                   } else {
+                        showAlert(r.error || "Error al eliminar", 'error');
+                   }
+                });
+            });
+        }
+
+        function guardarSprint() {
+            const supervisoresIds = supervisorChoices.getValue(true).map(Number);
+            const revisoresIds = revisorChoices.getValue(true).map(Number);
+
+            const id = parseInt($('#sprintId').val()) || 0;
+            const vigenciaInicioFecha = $('#vigenciaInicioFecha').val();
+            const vigenciaInicioHora = $('#vigenciaInicioHora').val();
+            const vigenciaFinFecha = $('#vigenciaFinFecha').val();
+            const vigenciaFinHora = $('#vigenciaFinHora').val();
+            const vigenciaDel = `${vigenciaInicioFecha} ${vigenciaInicioHora}`;
+            const vigenciaAl = `${vigenciaFinFecha} ${vigenciaFinHora}`;
+            
+            const datos = {
+                Id: id,
+                Titulo: $('#titulo').val(),
+                Descripcion: $('#descripcion').val(),
+                UnidadDeNegocioId: $('#unidadNegocio').val(),
+                VigenciaInicio: vigenciaDel,
+                VigenciaFin: vigenciaAl,
+                RequiereSupervision: $('#requiereSupervision').prop('checked'),
+                PeriodoDeSupervision: $('#periodoSupervision').val() || null,
+                RequiereRevision: $('#requiereRevision').prop('checked'),
+                PeriodoDeRevision: $('#periodoRevision').val() || null,
+                Estatus: true,
+                Supervisores: [],
+                Revisores: []
+            };
+
+            supervisoresIds.forEach((number) => {
+                    datos.Supervisores.push({ usuarioId: number });
+            });
+            revisoresIds.forEach((number) => {
+                    datos.Revisores.push({ rolId: number });
+            });
+
+            $.ajax({
+                url: '@Url.Action("GuardarSprint", "Sprint")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function (r) {
+                    if (r.success) {
+                         $('#modalEntidad').modal('hide');
+                         $("#modalGuardadoLabel").text("Sprint");
+                         console.log('se va a mostrar el modal de guardado')
+                         mostrarModalGuardado('Guardado correctamente');
+                    } else {
+                         showAlert(r.error || "Error al guardar", 'error');
+                    }
+                }
+            });
+        }
+         
+        function limpiarModalSprint() {
+            $('#entidadId').val('');
+            $('#modalTitulo').text('Nuevo Sprint');
+            $('#sprintId').val('');
+            $('#titulo').val('');
+            $('#descripcion').val('');
+            $('#unidadNegocio').val('');
+            $('#vigenciaInicioFecha').val('');
+            $('#vigenciaInicioHora').val('');
+            $('#vigenciaFinFecha').val('');
+            $('#vigenciaFinHora').val('');
+            $('#requiereRevision').prop('checked', false);
+            $('#periodoRevision').val('');
+        }
+
+        function mostrarModalGuardado(mensaje) {
+            $('#mensajeGuardado').text(mensaje);
+            $('#modalGuardado').modal('show');
+        }
+    </script>
+}

@@ -1,6 +1,6 @@
-namespace Farmacheck.Application.Models.Users
+﻿namespace Farmacheck.Models
 {
-    public class UserByRoleResponse
+    public class UsuarioPorRolViewModel
     {
         public int Id { get; set; }
         public int UsuarioId { get; set; }

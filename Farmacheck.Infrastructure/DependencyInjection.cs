@@ -99,6 +99,26 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["PeriodicityByQuestionnaireApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<ITaskPriorityApiClient, TaskPriorityApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["TaskPriorityApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<ITaskOriginApiClient, TaskOriginApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["TaskOriginApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<ISprintApiClient, SprintApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["SprintApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<ITaskApiClient, TaskApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["TaskApi:BaseUrl"]!);
+        });
+
         services.AddHttpClient<IHierarchyByRoleApiClient, HierarchyByRolesApiClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["HierarchyByRolesApi:BaseUrl"]!);
@@ -137,6 +157,11 @@ public static class DependencyInjection
         services.AddHttpClient<IMailingProgramacionClient, MailingProgramacionClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["MailingProgramacionApi:BaseUrl"]!);
+        });
+
+        services.AddHttpClient<INotificationCenterApiClient, NotificationCenterSettingApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["NotificationCenterApi:BaseUrl"]!);
         });
 
         return services;
