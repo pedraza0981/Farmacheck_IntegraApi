@@ -83,10 +83,10 @@ namespace Farmacheck.Infrastructure.Services
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
-        public async Task<bool> DeleteRolMenuAsync(int id)
+        public async Task<bool> DeleteRolMenuAsync(int rolId, int menuId)
         {
             AddBearerToken();
-            var response = await _http.DeleteAsync($"api/v1/RolMenus/{id}");
+            var response = await _http.DeleteAsync($"api/v1/RolMenus/{rolId}/{menuId}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
