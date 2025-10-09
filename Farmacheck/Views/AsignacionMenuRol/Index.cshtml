@@ -14,33 +14,31 @@
                     <h4 class="mb-0 fw-semibold">Asignación de permisos por rol</h4>
                 </div>
                 <div class="card-body p-4">
-                    <div class="row g-3 align-items-end mb-4">
-                        <div class="col-lg-6 col-md-7">
-                            <label class="form-label text-secondary fw-semibold" for="roleSelect">Selecciona un rol</label>
-                            <select class="form-select" id="roleSelect">
-                                <option value="">-- Selecciona un rol --</option>
-                                @foreach (var rol in Model.Roles)
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <div class="selector-panel border rounded-3 p-3 h-100">
+                                <label class="form-label text-secondary fw-semibold" for="roleSelect">Selecciona un rol</label>
+                                <select class="form-select mb-3" id="roleSelect">
+                                    <option value="">-- Selecciona un rol --</option>
+                                    @foreach (var rol in Model.Roles)
+                                    {
+                                        <option value="@rol.Value">@rol.Text</option>
+                                    }
+                                </select>
+                                <input type="hidden" id="selectedRoleId" name="selectedRoleId" />
+                                <button type="button" class="btn w-100 asignacion-save" id="saveMenuAssignment">
+                                    Guardar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <h5 class="mb-3 text-secondary fw-semibold">Menús disponibles</h5>
+                            <div id="menuTree" class="menu-tree bg-white border rounded-3 p-3 h-100">
+                                @if (Model.MenuTree != null && Model.MenuTree.Any())
                                 {
-                                    <option value="@rol.Value">@rol.Text</option>
-                                }
-                            </select>
-                            <input type="hidden" id="selectedRoleId" name="selectedRoleId" />
-                        </div>
-                        <div class="col-auto ms-md-auto">
-                            <button type="button" class="btn px-4 asignacion-save" id="saveMenuAssignment">
-                                Guardar cambios
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h5 class="mb-3 text-secondary fw-semibold">Menús disponibles</h5>
-                        <div id="menuTree" class="menu-tree bg-light border rounded-3 p-3">
-                            @if (Model.MenuTree != null && Model.MenuTree.Any())
-                            {
-                                <ul class="tree-root">
-                                    @RenderNodes(Model.MenuTree)
-                                </ul>
+                                    <ul class="tree-root">
+                                        @RenderNodes(Model.MenuTree)
+                                    </ul>
                             }
                             else
                             {
@@ -61,20 +59,24 @@
         }
 
         .asignacion-header {
-            background-color: #06264c;
+            background-color: #0C4C98;
         }
 
         .asignacion-save {
-            background-color: #06264c;
+            background-color: #0C4C98;
             color: #ffffff;
-            border-color: #06264c;
+            border-color: #0C4C98;
         }
 
         .asignacion-save:hover,
         .asignacion-save:focus {
-            background-color: #06264c;
+            background-color: #0C4C98;
             color: #ffffff;
-            border-color: #06264c;
+            border-color: #0C4C98;
+        }
+
+        .selector-panel {
+            background-color: #f8f9fc;
         }
 
         .menu-tree ul {
@@ -92,7 +94,7 @@
             cursor: pointer;
             display: inline-block;
             width: 1.25rem;
-            color: #0d6efd;
+            color: #0C4C98;
             font-weight: 600;
             margin-right: 0.15rem;
         }
@@ -111,12 +113,12 @@
         }
 
         .menu-tree .node-checkbox {
-            accent-color: #0d6efd;
+            accent-color: #0C4C98;
             transform: scale(1.05);
         }
 
         .menu-tree li:hover > label {
-            color: #0b5ed7;
+            color: #0C4C98;
         }
 
         @media (max-width: 576px) {
