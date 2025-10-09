@@ -236,9 +236,12 @@
         {
             builder.Append("<li>");
 
-            if (node.Hijos != null && node.Hijos.Any())
+            var hasChildren = node.Hijos != null && node.Hijos.Any();
+            var shouldExpand = hasChildren && HasSelectedDescendant(node);
+
+            if (hasChildren)
             {
-                builder.Append("<span class='toggle'>▼</span>");
+                builder.Append($"<span class='toggle'>{(shouldExpand ? "▼" : "▶")}</span>");
             }
             else
             {
@@ -248,9 +251,9 @@
             builder.Append($"<input type='checkbox' class='node-checkbox' data-id='{node.Id}' id='node_{node.Id}' name='Seleccionados' value='{node.Id}' {(node.Seleccionado ? "checked" : string.Empty)} />");
             builder.Append($"<label for='node_{node.Id}'> {node.Nombre}</label>");
 
-            if (node.Hijos != null && node.Hijos.Any())
+            if (hasChildren)
             {
-                builder.Append("<ul>");
+                builder.Append($"<ul{(shouldExpand ? string.Empty : " class='collapsed'")}>");
                 builder.Append(RenderNodes(node.Hijos).ToString());
                 builder.Append("</ul>");
             }
@@ -259,5 +262,28 @@
         }
 
         return new HtmlString(builder.ToString());
+    }
+
+    private bool HasSelectedDescendant(MenuTreeNode node)
+    {
+        if (node.Seleccionado)
+        {
+            return true;
+        }
+
+        if (node.Hijos == null || !node.Hijos.Any())
+        {
+            return false;
+        }
+
+        foreach (var child in node.Hijos)
+        {
+            if (HasSelectedDescendant(child))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
