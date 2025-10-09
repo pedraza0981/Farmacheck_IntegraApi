@@ -19,6 +19,6 @@ namespace Farmacheck.Application.Interfaces
 
         Task<bool> UpdateRolMenuAsync(UpdateRolMenuRequest request);
 
-        Task<bool> DeleteRolMenuAsync(int id);
+        Task<bool> DeleteRolMenuAsync(int rolId, int menuId);
     }
 }

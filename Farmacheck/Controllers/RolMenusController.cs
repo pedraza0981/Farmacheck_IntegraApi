@@ -141,7 +141,13 @@ namespace Farmacheck.Controllers
         {
             try
             {
-                var deleted = await _rolMenuApiClient.DeleteRolMenuAsync(id);
+                var rolMenu = await _rolMenuApiClient.GetRolMenuByIdAsync(id);
+                if (rolMenu == null)
+                {
+                    return Json(new { success = false, error = "No encontrado" });
+                }
+
+                var deleted = await _rolMenuApiClient.DeleteRolMenuAsync(rolMenu.RolId, rolMenu.MenuId);
                 return Json(new { success = deleted });
             }
             catch (Exception ex)
