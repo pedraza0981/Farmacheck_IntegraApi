@@ -31,6 +31,7 @@ using Farmacheck.Application.Models.Tasks;
 using Farmacheck.Application.Models.MailingProgramacion;
 using Farmacheck.Application.Models.ZonaHorario;
 using Farmacheck.Application.Models.NotificationCenter;
+using Farmacheck.Application.Models.Menus;
 
 namespace Farmacheck.Helpers
 {
@@ -84,6 +85,12 @@ namespace Farmacheck.Helpers
             .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre))
             .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo))
             .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
+
+            CreateMap<MenuDto, MenuViewModel>().ReverseMap();
+            CreateMap<MenuViewModel, MenuRequest>();
+            CreateMap<MenuViewModel, UpdateMenuRequest>()
+                .ForMember(dest => dest.Activo, opt => opt.MapFrom(src => (bool?)src.Activo))
+                .ForMember(dest => dest.Visible, opt => opt.MapFrom(src => (bool?)src.Visible));
 
             CreateMap<CuestionarioViewModel, ChecklistRequest>();
             CreateMap<CuestionarioViewModel, UpdateChecklistRequest>();
