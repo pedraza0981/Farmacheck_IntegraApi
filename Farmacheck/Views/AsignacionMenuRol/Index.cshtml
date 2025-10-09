@@ -6,35 +6,49 @@
     ViewData["Title"] = "Asignación de menús por rol";
 }
 
-<div class="container-fluid py-3">
-    <div class="row mb-4">
-        <div class="col-lg-6 col-md-8">
-            <label class="form-label" for="roleSelect">Selecciona un rol</label>
-            <select class="form-select" id="roleSelect">
-                <option value="">-- Selecciona un rol --</option>
-                @foreach (var rol in Model.Roles)
-                {
-                    <option value="@rol.Value">@rol.Text</option>
-                }
-            </select>
-            <input type="hidden" id="selectedRoleId" name="selectedRoleId" />
-        </div>
-    </div>
+<div class="container-fluid py-4 asignacion-menu">
+    <div class="row justify-content-center">
+        <div class="col-xl-9">
+            <div class="card shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0 fw-semibold">Asignación de permisos por rol</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end mb-4">
+                        <div class="col-lg-6 col-md-7">
+                            <label class="form-label text-secondary fw-semibold" for="roleSelect">Selecciona un rol</label>
+                            <select class="form-select" id="roleSelect">
+                                <option value="">-- Selecciona un rol --</option>
+                                @foreach (var rol in Model.Roles)
+                                {
+                                    <option value="@rol.Value">@rol.Text</option>
+                                }
+                            </select>
+                            <input type="hidden" id="selectedRoleId" name="selectedRoleId" />
+                        </div>
+                        <div class="col-auto ms-md-auto">
+                            <button type="button" class="btn btn-primary px-4" id="saveMenuAssignment">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <h5 class="mb-3">Menús disponibles</h5>
-            <div id="menuTree" class="menu-tree border rounded p-3">
-                @if (Model.MenuTree != null && Model.MenuTree.Any())
-                {
-                    <ul class="tree-root">
-                        @RenderNodes(Model.MenuTree)
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted mb-0">No hay menús disponibles.</p>
-                }
+                    <div>
+                        <h5 class="mb-3 text-secondary fw-semibold">Menús disponibles</h5>
+                        <div id="menuTree" class="menu-tree bg-light border rounded-3 p-3">
+                            @if (Model.MenuTree != null && Model.MenuTree.Any())
+                            {
+                                <ul class="tree-root">
+                                    @RenderNodes(Model.MenuTree)
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No hay menús disponibles.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -42,6 +56,10 @@
 
 @section Styles {
     <style>
+        .asignacion-menu {
+            background: linear-gradient(180deg, rgba(13, 110, 253, 0.08), transparent 60%);
+        }
+
         .menu-tree ul {
             list-style-type: none;
             padding-left: 1.25rem;
@@ -57,10 +75,41 @@
             cursor: pointer;
             display: inline-block;
             width: 1.25rem;
+            color: #0d6efd;
+            font-weight: 600;
+            margin-right: 0.15rem;
         }
 
         .menu-tree ul.collapsed {
             display: none;
+        }
+
+        .menu-tree label {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .menu-tree .node-checkbox {
+            accent-color: #0d6efd;
+            transform: scale(1.05);
+        }
+
+        .menu-tree li:hover > label {
+            color: #0b5ed7;
+        }
+
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 1.5rem !important;
+            }
+
+            #saveMenuAssignment {
+                width: 100%;
+            }
         }
     </style>
 }
