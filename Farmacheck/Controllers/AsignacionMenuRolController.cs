@@ -13,11 +13,16 @@ namespace Farmacheck.Controllers
     {
         private readonly IRoleApiClient _roleApiClient;
         private readonly IMenuApiClient _menuApiClient;
+        private readonly IRolMenuApiClient _rolMenuApiClient;
 
-        public AsignacionMenuRolController(IRoleApiClient roleApiClient, IMenuApiClient menuApiClient)
+        public AsignacionMenuRolController(
+            IRoleApiClient roleApiClient,
+            IMenuApiClient menuApiClient,
+            IRolMenuApiClient rolMenuApiClient)
         {
             _roleApiClient = roleApiClient;
             _menuApiClient = menuApiClient;
+            _rolMenuApiClient = rolMenuApiClient;
         }
 
         public async Task<IActionResult> Index()
@@ -53,6 +58,19 @@ namespace Farmacheck.Controllers
                     Hijos = BuildTree(menus, menu.Id)
                 })
                 .ToList();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMenusByRole(int roleId)
+        {
+            var rolMenus = await _rolMenuApiClient.GetRolMenusByRolAsync(roleId);
+
+            if (rolMenus == null)
+            {
+                return Json(Enumerable.Empty<object>());
+            }
+
+            return Json(rolMenus);
         }
     }
 }
