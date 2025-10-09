@@ -138,12 +138,64 @@
         document.addEventListener('DOMContentLoaded', function () {
             const roleSelect = document.getElementById('roleSelect');
             const hiddenInput = document.getElementById('selectedRoleId');
+            const menuTree = document.getElementById('menuTree');
+            const fetchRoleMenusUrl = '@Url.Action("GetMenusByRole", "AsignacionMenuRol")';
+
+            const getCheckboxes = () => menuTree ? menuTree.querySelectorAll('.node-checkbox') : [];
+
+            const clearMenuSelections = () => {
+                getCheckboxes().forEach(function (checkbox) {
+                    checkbox.checked = false;
+                });
+            };
+
+            const applyMenuSelections = (rolMenus) => {
+                const selectedIds = new Set();
+
+                (rolMenus || []).forEach(function (menu) {
+                    if (!menu) {
+                        return;
+                    }
+
+                    const menuId = menu.menuId !== undefined ? menu.menuId : menu.MenuId;
+                    const canView = menu.puedeVer !== undefined ? menu.puedeVer : menu.PuedeVer;
+
+                    if (menuId && (canView === undefined || canView === null || canView)) {
+                        selectedIds.add(Number(menuId));
+                    }
+                });
+
+                getCheckboxes().forEach(function (checkbox) {
+                    const menuId = Number(checkbox.dataset.id || checkbox.value);
+                    checkbox.checked = selectedIds.has(menuId);
+                });
+            };
 
             if (roleSelect) {
-                roleSelect.addEventListener('change', function (event) {
+                roleSelect.addEventListener('change', async function (event) {
                     const selectedId = event.target.value;
                     hiddenInput.value = selectedId;
-                    console.log('Rol seleccionado:', selectedId);
+
+                    clearMenuSelections();
+
+                    if (!selectedId) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`${fetchRoleMenusUrl}?roleId=${encodeURIComponent(selectedId)}`);
+
+                        if (!response.ok) {
+                            console.error('Error al obtener menús por rol:', response.statusText);
+                            return;
+                        }
+
+                        const rolMenus = await response.json();
+                        applyMenuSelections(rolMenus);
+                    }
+                    catch (error) {
+                        console.error('Error de red al obtener los menús por rol:', error);
+                    }
                 });
             }
 
