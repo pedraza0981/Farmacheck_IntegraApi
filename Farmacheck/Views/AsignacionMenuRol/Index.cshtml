@@ -1,5 +1,143 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@using Farmacheck.Models
+@using Microsoft.AspNetCore.Html
+@model AsignacionMenuRolViewModel
+
 @{
+    ViewData["Title"] = "Asignación de menús por rol";
+}
+
+<div class="container-fluid py-3">
+    <div class="row mb-4">
+        <div class="col-lg-6 col-md-8">
+            <label class="form-label" for="roleSelect">Selecciona un rol</label>
+            <select class="form-select" id="roleSelect">
+                <option value="">-- Selecciona un rol --</option>
+                @foreach (var rol in Model.Roles)
+                {
+                    <option value="@rol.Value">@rol.Text</option>
+                }
+            </select>
+            <input type="hidden" id="selectedRoleId" name="selectedRoleId" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <h5 class="mb-3">Menús disponibles</h5>
+            <div id="menuTree" class="menu-tree border rounded p-3">
+                @if (Model.MenuTree != null && Model.MenuTree.Any())
+                {
+                    <ul class="tree-root">
+                        @RenderNodes(Model.MenuTree)
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No hay menús disponibles.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .menu-tree ul {
+            list-style-type: none;
+            padding-left: 1.25rem;
+            margin-bottom: 0;
+        }
+
+        .menu-tree li {
+            margin: 0.25rem 0;
+            position: relative;
+        }
+
+        .menu-tree .toggle {
+            cursor: pointer;
+            display: inline-block;
+            width: 1.25rem;
+        }
+
+        .menu-tree ul.collapsed {
+            display: none;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const roleSelect = document.getElementById('roleSelect');
+            const hiddenInput = document.getElementById('selectedRoleId');
+
+            if (roleSelect) {
+                roleSelect.addEventListener('change', function (event) {
+                    const selectedId = event.target.value;
+                    hiddenInput.value = selectedId;
+                    console.log('Rol seleccionado:', selectedId);
+                });
+            }
+
+            document.querySelectorAll('#menuTree .toggle').forEach(function (toggle) {
+                toggle.addEventListener('click', function () {
+                    const listItem = toggle.closest('li');
+                    const childList = listItem ? listItem.querySelector(':scope > ul') : null;
+                    if (!childList) {
+                        return;
+                    }
+
+                    childList.classList.toggle('collapsed');
+                    toggle.textContent = childList.classList.contains('collapsed') ? '▶' : '▼';
+                });
+
+                const listItem = toggle.closest('li');
+                const childList = listItem ? listItem.querySelector(':scope > ul') : null;
+                if (childList && childList.classList.contains('collapsed')) {
+                    toggle.textContent = '▶';
+                } else if (childList) {
+                    toggle.textContent = '▼';
+                }
+            });
+        });
+    </script>
+}
+
+@functions {
+    private IHtmlContent RenderNodes(List<MenuTreeNode>? nodes)
+    {
+        if (nodes == null || !nodes.Any())
+        {
+            return HtmlString.Empty;
+        }
+
+        var builder = new System.Text.StringBuilder();
+        foreach (var node in nodes)
+        {
+            builder.Append("<li>");
+
+            if (node.Hijos != null && node.Hijos.Any())
+            {
+                builder.Append("<span class='toggle'>▼</span>");
+            }
+            else
+            {
+                builder.Append("<span class='toggle'></span>");
+            }
+
+            builder.Append($"<input type='checkbox' class='node-checkbox' data-id='{node.Id}' id='node_{node.Id}' name='Seleccionados' value='{node.Id}' {(node.Seleccionado ? "checked" : string.Empty)} />");
+            builder.Append($"<label for='node_{node.Id}'> {node.Nombre}</label>");
+
+            if (node.Hijos != null && node.Hijos.Any())
+            {
+                builder.Append("<ul>");
+                builder.Append(RenderNodes(node.Hijos).ToString());
+                builder.Append("</ul>");
+            }
+
+            builder.Append("</li>");
+        }
+
+        return new HtmlString(builder.ToString());
+    }
 }
