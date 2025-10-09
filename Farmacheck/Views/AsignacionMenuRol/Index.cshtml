@@ -10,7 +10,7 @@
     <div class="row justify-content-center">
         <div class="col-xl-9">
             <div class="card shadow-sm border-0 overflow-hidden">
-                <div class="card-header bg-primary text-white py-3">
+                <div class="card-header text-white py-3 asignacion-header">
                     <h4 class="mb-0 fw-semibold">Asignación de permisos por rol</h4>
                 </div>
                 <div class="card-body p-4">
@@ -27,7 +27,7 @@
                             <input type="hidden" id="selectedRoleId" name="selectedRoleId" />
                         </div>
                         <div class="col-auto ms-md-auto">
-                            <button type="button" class="btn btn-primary px-4" id="saveMenuAssignment">
+                            <button type="button" class="btn px-4 asignacion-save" id="saveMenuAssignment">
                                 Guardar cambios
                             </button>
                         </div>
@@ -58,6 +58,23 @@
     <style>
         .asignacion-menu {
             background: linear-gradient(180deg, rgba(13, 110, 253, 0.08), transparent 60%);
+        }
+
+        .asignacion-header {
+            background-color: #06264c;
+        }
+
+        .asignacion-save {
+            background-color: #06264c;
+            color: #ffffff;
+            border-color: #06264c;
+        }
+
+        .asignacion-save:hover,
+        .asignacion-save:focus {
+            background-color: #06264c;
+            color: #ffffff;
+            border-color: #06264c;
         }
 
         .menu-tree ul {
