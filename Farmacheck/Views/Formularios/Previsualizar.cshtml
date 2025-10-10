@@ -55,7 +55,7 @@
                                         <strong>@(String.IsNullOrEmpty(pregunta.EtiquetaNombre) ? pregunta.Nombre : pregunta.EtiquetaNombre + ": " + pregunta.Nombre)</strong>
                                     </td>
                                     <td>
-                                        <strong>@pregunta.FormatoDeRespuesta.FormatoNombre</strong>
+                                        <strong>@pregunta.FormatoDeRespuesta?.FormatoNombre</strong>
                                     </td>
                                     <th>
                                         <strong>@(pregunta.EsPreguntaObligatoria != null ? (pregunta.EsPreguntaObligatoria.Value ? "Si" : "No") : "No")</strong>

@@ -42,6 +42,7 @@ namespace Farmacheck.Infrastructure.Services
 
         public async Task<ChecklistSummary?> GetChecklistSummaryAsync(int? id)
         {
+            AddBearerToken();
             return await _http.GetFromJsonAsync<ChecklistSummary>($"api/v1/checklists/summary?checklistId={id}");
         }
 

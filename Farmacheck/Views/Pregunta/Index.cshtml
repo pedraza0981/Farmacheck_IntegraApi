@@ -153,11 +153,11 @@
                         </div>
                         <div class="col-md-4 mb-2">
                             <label>Límite de evidencias</label>
-                            <input type="number" class="form-control" id="limiteDeEvidencias" autocomplete="off" />
+                            <input type="number" class="form-control" id="limiteDeEvidencias" autocomplete="off" onchange="establecerLimite()" />
                         </div>
                         <div class="col-md-4 mb-2">
                             <label>Evidencias obligatorias</label>
-                            <input type="number" class="form-control" id="numeroDeEvidenciasObligatorias" autocomplete="off" />
+                            <input type="number" class="form-control" id="numeroDeEvidenciasObligatorias" autocomplete="off" onchange="establecerEvidenciasObligatorias()" />
                         </div>
                     </div>
 
@@ -239,6 +239,8 @@
 @section Scripts {
     <script>
         var formatos = @Html.Raw(ViewBag.Formatos);
+        let limiteDeEvidencias = 0;
+        let evidenciasObligatorias = 0;
 
         const storedLength = localStorage.getItem('questionsPageLength');
         const initialPageLength = storedLength ? parseInt(storedLength) : 10;
@@ -280,6 +282,35 @@
 
         function limpiarModalEtiqueta() {
             $('#tituloEtiqueta').val('');
+        }
+
+        function establecerLimite() {
+            var limite = document.getElementById("limiteDeEvidencias").value;
+            var obligatorias = document.getElementById("numeroDeEvidenciasObligatorias").value;
+            
+            if (Number(obligatorias) > Number(limite)) {
+                showAlert('El número de evidencias obligatorias debe ser menor o igual al límite de evidencias', 'error');
+                $('#limiteDeEvidencias').val('');
+                $('#numeroDeEvidenciasObligatorias').val('');
+                return;
+            }
+
+            limiteDeEvidencias = limite;
+            numeroDeEvidenciasObligatorias = obligatorias;
+        }
+
+        function establecerEvidenciasObligatorias() {
+            var limite = document.getElementById("limiteDeEvidencias").value;
+            var obligatorias = document.getElementById("numeroDeEvidenciasObligatorias").value;
+            
+            if (Number(obligatorias) > Number(limite)) {
+                showAlert('El número de evidencias obligatorias debe ser menor o igual al límite de evidencias', 'error');
+                $('#numeroDeEvidenciasObligatorias').val('');
+                return;
+            }
+
+            limiteDeEvidencias = limite;
+            numeroDeEvidenciasObligatorias = obligatorias;
         }
 
         function abrirModalPregunta() {
@@ -657,7 +688,9 @@
                     $('#etiquetaDeAgrupacion').val(p.etiquetaId);
                     $('#imagenNombre').val(p.imagenDeReferencia);
                     $('#limiteDeEvidencias').val(p.numeroDeEvidenciasLimitadasA);
+                    limiteDeEvidencias = p.numeroDeEvidenciasLimitadasA;
                     $('#numeroDeEvidenciasObligatorias').val(p.numeroDeEvidenciasObligatorias.toString());
+                    evidenciasObligatorias = p.numeroDeEvidenciasObligatorias;
                     $('#requiereEvidencia').prop('checked', p.requiereEvidencia);
 
                     elegirOpciones(p.formatoDeRespuesta.formatoId, true);
