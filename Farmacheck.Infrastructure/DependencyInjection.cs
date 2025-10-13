@@ -174,6 +174,11 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(configuration["NotificationCenterApi:BaseUrl"]!);
         });
 
+        services.AddHttpClient<ICalendarioClient, CalendarioClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["CalendarioApi:BaseUrl"]!);
+        });
+
         return services;
     }
 }

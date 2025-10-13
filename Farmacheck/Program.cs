@@ -35,6 +35,7 @@ namespace Farmacheck
                 typeof(UserProfile),
                 typeof(AuthProfile),
                 typeof(MailingProgramacionProfile),
+                typeof(CalendarEventProfile),
                 typeof(UserProfile));
 
             builder.Services.AddInfrastructure(builder.Configuration);

@@ -1,0 +1,1665 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Calendario";
+}
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+<!-- FullCalendar -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+
+<!-- jQuery + Select2 -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js"></script>
+
+<div class="row">
+    <!-- SIDEBAR -->
+    <div class="col-2">
+        <section class="side-section">
+            <div class="section-header d-flex justify-content-between align-items-center">
+                <button id="btnSidebarConfig"
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                        onclick="configuracion()">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Configuración</span>
+                </button>
+            </div>
+        </section>
+
+        <aside class="fc-side px-2 py-3">
+            <!-- Mini Calendario -->
+            <div class="mini-cal border rounded-3 p-2 mb-3">
+                <div class="d-flex justify-content-between align-items-center px-1">
+                    <button id="calPrev" class="btn btn-sm btn-link text-decoration-none p-0">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <div id="calTitle" class="fw-semibold small"></div>
+                    <button id="calNext" class="btn btn-sm btn-link text-decoration-none p-0">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="mini-cal-week small text-muted px-1 mt-1">
+                    <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                </div>
+                <div id="calGrid" class="mini-cal-grid"></div>
+            </div>
+
+            <!-- Mis actividades -->
+            <section class="side-section mb-3">
+                <div class="section-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold"><i class="bi bi-ui-checks-grid me-2"></i>Mis actividades</span>
+                </div>
+                <div class="pt-2">
+                    <div class="form-check form-check-sm mb-1">
+                        <input class="form-check-input" type="checkbox" id="chkAll" checked>
+                        <label class="form-check-label" for="chkAll">Todas</label>
+                    </div>
+                    <div class="form-check form-check-sm mb-1">
+                        <input class="form-check-input filter-chk" type="checkbox" id="chkEventos" checked>
+                        <label class="form-check-label" for="chkEventos">Eventos</label>
+                    </div>
+                    <div class="form-check form-check-sm mb-1">
+                        <input class="form-check-input filter-chk" type="checkbox" id="chkFormularios" checked>
+                        <label class="form-check-label" for="chkFormularios">Formularios</label>
+                    </div>
+                    <div class="form-check form-check-sm mb-1">
+                        <input class="form-check-input filter-chk" type="checkbox" id="chkTareas" checked>
+                        <label class="form-check-label" for="chkTareas">Tareas</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ver otras Agendas -->
+            <section class="side-section">
+                <div class="section-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold"><i class="bi bi-calendar2-check me-2"></i>Ver otras Agendas</span>
+                </div>
+
+                <div class="pt-2">
+                    <div class="form-check form-switch form-switch-sm mb-2">
+                        <input class="form-check-input" type="checkbox" id="swMiAgenda">
+                        <label class="form-check-label small" for="swMiAgenda">Ver mi Agenda</label>
+                    </div>
+
+                    <!-- Buscador -->
+                    <div class="input-group input-group-sm rounded-pill bg-light px-2 mb-2 border">
+                        <span class="input-group-text bg-transparent border-0 p-0 pe-1">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input id="userSearch" type="search" class="form-control bg-transparent border-0"
+                               placeholder="Buscar usuarios" aria-label="Buscar usuarios">
+                    </div>
+
+                    <!-- Chips de usuarios seleccionados -->
+                    <div id="userChips" class="d-flex flex-column gap-2"></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="col-10">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- Modal: Evento existente -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold" id="evTitle">Título</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <div class="small text-muted mb-3" id="evWhen"></div>
+                <div class="mb-3">
+                    <div class="small text-uppercase text-muted fw-semibold mb-1">Formulario</div>
+                    <ul class="list-unstyled mb-0 vstack gap-1" id="evFormList"></ul>
+                </div>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span id="evStatusBadge" class="badge rounded-pill text-success bg-success-subtle fw-semibold">Finalizado</span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnVerFormulario">Ver Formulario</button>
+                </div>
+                <div class="small">
+                    <div><span class="text-muted">Puntaje total:</span> <span id="evScore" class="fw-semibold text-danger">50%</span></div>
+                    <div><span class="text-muted">Tiempo de ejecución:</span> <span id="evDuration">—</span></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pt-0">
+                <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Acción genérica del día -->
+<div class="modal fade" id="dayActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="dayActionForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Acción del día</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label">Fecha</label>
+                    <input type="text" id="modalDate" class="form-control" readonly>
+                </div>
+                <div id="actionSelected" class="small text-muted"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Continuar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Configuración -->
+<div class="modal fade" id="ConfiguracionModal" tabindex="-1" aria-labelledby="configTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <form id="configForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configTitle">
+                    <i class="bi bi-gear-fill me-2"></i>Configuración
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="border rounded p-3 mb-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-0">Notificaciones</h6>
+                            <small class="text-muted">Establece notificaciones recurrentes…</small>
+                        </div>
+                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#cfg-collapse-noti">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="cfg-collapse-noti" class="collapse show mt-3">
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h6 class="mb-0">Eventos</h6>
+                            </div>
+                            <div id="rows-eventos" class="vstack gap-2"></div>
+                            <button id="btn-add-eventos" type="button" class="btn btn-link p-0 mt-2" onclick="addNotifRow('eventos')">
+                                <i class="bi bi-plus-lg me-1"></i>Agregar Notificación
+                            </button>
+                        </div>
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h6 class="mb-0">Formularios</h6>
+                            </div>
+                            <div id="rows-formularios" class="vstack gap-2"></div>
+                            <button id="btn-add-formularios" type="button" class="btn btn-link p-0 mt-2" onclick="addNotifRow('formularios')">
+                                <i class="bi bi-plus-lg me-1"></i>Agregar Notificación
+                            </button>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h6 class="mb-0">Tareas</h6>
+                            </div>
+                            <div id="rows-tareas" class="vstack gap-2"></div>
+                            <button id="btn-add-tareas" type="button" class="btn btn-link p-0 mt-2" onclick="addNotifRow('tareas')">
+                                <i class="bi bi-plus-lg me-1"></i>Agregar Notificación
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion" id="cfg-accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="hdr-vista">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pane-vista">Vista</button>
+                        </h2>
+                        <div id="pane-vista" class="accordion-collapse collapse" data-bs-parent="#cfg-accordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Vista por defecto</label>
+                                        <select id="cfgDefaultView" class="form-select">
+                                            <option value="dayGridMonth">Mes</option>
+                                            <option value="timeGridWeek">Semana</option>
+                                            <option value="timeGridDay">Día</option>
+                                            <option value="listWeek">Lista</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Primer día de la semana</label>
+                                        <select id="cfgWeekStart" class="form-select">
+                                            <option value="1">Lunes</option>
+                                            <option value="0">Domingo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="hdr-horario">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pane-horario">Mi horario laboral</button>
+                        </h2>
+                        <div id="pane-horario" class="accordion-collapse collapse" data-bs-parent="#cfg-accordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Inicio</label>
+                                        <input type="time" id="cfgHoraIni" class="form-control" value="09:00">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Fin</label>
+                                        <input type="time" id="cfgHoraFin" class="form-control" value="18:00">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item" hidden>
+                        <h2 class="accordion-header" id="hdr-export">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pane-export">Exportar y compartir</button>
+                        </h2>
+                        <div id="pane-export" class="accordion-collapse collapse" data-bs-parent="#cfg-accordion">
+                            <div class="accordion-body">
+                                <div class="d-grid d-sm-flex gap-2">
+                                    <button type="button" class="btn btn-outline-primary">Exportar (.ics)</button>
+                                    <button type="button" class="btn btn-outline-secondary">Copiar enlace público</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label">Color de Agenda</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="color" id="agendaColor" class="form-control form-control-color" value="#1e90ff" title="Elige un color">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="switchColorPersonal" checked>
+                            <label class="form-check-label" for="switchColorPersonal">Usar color personalizado</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO FORMULARIO -->
+<div class="modal fade" id="modalNuevoFormulario" tabindex="-1" aria-labelledby="nfTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <form id="nfForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nfTitle"><i class="bi bi-window-plus"></i> Nuevo formulario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Formulario</label>
+                    <div class="input-group">
+                        <select id="nfFormulario" class="form-select"></select>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="nfAsignarResp">
+                    <label class="form-check-label" for="nfAsignarResp">Asignar a otros responsables</label>
+                </div>
+                <div id="nfRespPane" class="mb-3 d-none">
+                    <input id="nfResp" class="form-control" placeholder="Buscar/ingresar responsables…">
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="nfAddDesc">
+                    <label class="form-check-label" for="nfAddDesc">Agregar una descripción</label>
+                </div>
+                <div id="nfDescPane" class="mb-3 d-none">
+                    <textarea id="nfDesc" class="form-control" rows="2" placeholder="Descripción…"></textarea>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label mb-1">Establece una fecha y horario</label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-12 col-sm-4">
+                            <div class="input-group">
+                                <input id="nfFecha" type="date" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="nfAllDay">
+                                <label class="form-check-label" for="nfAllDay">Todo el día</label>
+                            </div>
+                        </div>
+
+                        <div id="nfTimeRow" class="col-12 col-sm-8">
+                            <div class="row g-2 mt-1">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input id="nfHoraIni" type="time" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input id="nfHoraFin" type="time" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <small id="nfTimeHelp" class="text-danger d-none">Atención, la fecha de inicio debe ser menor a la fecha final.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Repetición</label>
+                    <select id="nfRecurrencia" class="form-select">
+                        <option value="none">Sin repeticiones</option>
+                        <option value="daily">Diaria</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly">Mensual</option>
+                    </select>
+                </div>
+
+                <div class="mb-1 d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0">Ubicaciones</h6>
+                </div>
+                <div id="nfUbicPane" class="collapse show">
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input id="nfUbicSearch" class="form-control" placeholder="Buscar ubicaciones">
+                    </div>
+                    <div id="nfUbicList" class="vstack gap-1" style="max-height: 220px; overflow:auto;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Crear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO EVENTO -->
+<div class="modal fade" id="modalNuevoEvento" tabindex="-1" aria-labelledby="neTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <form id="neForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="neTitle"><i class="bi bi-send-plus-fill"></i> Nuevo evento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input id="neTitulo" class="form-control" placeholder="Título" required>
+                    <small id="neTitleHelp" class="text-danger d-none">Este campo es obligatorio</small>
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="neAsignarResp">
+                    <label class="form-check-label" for="neAsignarResp">Asignar a otros responsables</label>
+                </div>
+                <div id="neRespPane" class="mb-3 d-none">
+                    <input id="neResp" class="form-control" placeholder="Buscar/ingresar responsables…">
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="neAddDesc">
+                    <label class="form-check-label" for="neAddDesc">Agregar una descripción</label>
+                </div>
+                <div id="neDescPane" class="mb-3 d-none">
+                    <textarea id="neDesc" class="form-control" rows="2" placeholder="Descripción…"></textarea>
+                </div>
+
+                <div class="mb-2">
+                    <!-- Botón opcional para un futuro selector de disponibilidad -->
+                    <div class="mb-2" hidden>
+                        <button type="button" class="btn btn-sm btn-danger rounded-pill px-3" id="neBtnDisponibles">
+                            Ver horarios disponibles
+                        </button>
+                    </div>
+
+                    <!-- Fecha / hora -->
+                    <div class="row g-2 align-items-center">
+                        <div class="col-12 col-sm-4">
+                            <div class="input-group">
+                                <input id="neFecha" type="date" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="neAllDay">
+                                <label class="form-check-label" for="neAllDay">Todo el día</label>
+                            </div>
+                        </div>
+
+                        <div id="neTimeRow" class="col-12 col-sm-8">
+                            <div class="row g-2 mt-1">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input id="neHoraIni" type="time" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input id="neHoraFin" type="time" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Mensajes de validación -->
+                            <small id="neTimeHelp" class="text-danger d-none">
+                                La hora de inicio debe ser menor a la hora final.
+                            </small>
+                            <div id="neConflictHelp" class="alert alert-danger mt-2 d-none p-2 py-1 small">
+                                <!-- Aquí se inyectan conflictos detectados -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Repetición</label>
+                    <select id="neRecurrencia" class="form-select">
+                        <option value="none">Sin repeticiones</option>
+                        <option value="daily">Diaria</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly">Mensual</option>
+                    </select>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <button type="button" class="btn btn-light border rounded-pill" id="btnNePart">
+                        <i class="bi bi-person-plus me-1"></i>Agregar participantes
+                    </button>
+                    <button type="button" class="btn btn-light border rounded-pill" id="btnNeUbic">
+                        <i class="bi bi-geo-alt me-1"></i>Agregar ubicación
+                    </button>
+                </div>
+
+                <div id="nePartPane1" class="mb-3 d-none" hidden>
+                    <input id="nePartInput" class="form-control mb-2" placeholder="Escribe un nombre y presiona Enter">
+                    <div id="nePartChips" class="d-flex flex-column gap-2"></div>
+                </div>
+
+                <div class="mb-3 d-none" id="nePartPane">
+                    <label class="form-label">*Asistentes</label>
+                    <select id="destinatarioSelect" name="destinatarioSelect"
+                            class="form-control form-select"
+                            multiple="multiple" style="width:100%;"></select>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div id="neUbicPane" class="mb-3 d-none">
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input id="neUbicSearch" class="form-control" placeholder="Buscar ubicaciones">
+                    </div>
+                    <div id="neUbicList" class="vstack gap-1" style="max-height:220px;overflow:auto;"></div>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="neAddFiles">
+                    <label class="form-check-label" for="neAddFiles">Agregar archivos</label>
+                </div>
+                <div id="neFilesPane" class="mt-2 d-none">
+                    <input id="neFiles" type="file" class="form-control" multiple>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger" id="neSubmitBtn">Crear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Template fila notificación -->
+<template id="notif-row-template">
+    <div class="row g-2 align-items-center notif-row">
+        <div class="col-12 col-md-4">
+            <select class="form-select form-select-sm" data-field="channel">
+                <option value="push">Notificación</option>
+                <option value="email">Correo</option>
+                <option value="sms">SMS</option>
+            </select>
+        </div>
+        <div class="col-4 col-md-2">
+            <input type="number" min="0" step="1" class="form-control form-control-sm" data-field="amount" value="10">
+        </div>
+        <div class="col-7 col-md-4">
+            <select class="form-select form-select-sm" data-field="unit">
+                <option value="minutes">Minutos</option>
+                <option value="hours">Horas</option>
+                <option value="days">Días</option>
+            </select>
+        </div>
+        <div class="col-1 text-end">
+            <button class="btn btn-link text-danger p-0 btn-remove" type="button" title="Eliminar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- TOASTS -->
+<div id="appToasts" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080;"></div>
+
+<style>
+    #calendar { width: 100%; }
+    .fc-daygrid-day-frame { position: relative; }
+    .fc-day-action { position: absolute; top: 2px; right: 2px; }
+    .fc-daygrid-day-frame .fc-day-action { opacity: 0; transition: opacity .15s; right: 0; }
+    .fc-daygrid-day-frame:hover .fc-day-action { opacity: 1; z-index: 5000; }
+    .fc .fc-daygrid-day, .fc .fc-daygrid-day-top, .fc .fc-daygrid-day-frame, .fc .fc-daygrid-day-events { overflow: visible !important; }
+    .fc .dropdown-menu { z-index: 5000; }
+    #ConfiguracionModal .notif-row .form-select, #ConfiguracionModal .notif-row .form-control { min-height: 34px; }
+    .fc-side { font-size: .92rem; }
+
+    /* Mini calendario */
+    .mini-cal-week, .mini-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+    .mini-cal-week > div { text-align: center; }
+    .mini-cal-grid .day { text-align: center; font-size: .85rem; padding: .35rem 0; border-radius: .5rem; cursor: pointer; user-select: none; }
+    .mini-cal-grid .muted { color: #adb5bd; }
+    .mini-cal-grid .today { background: #e7f1ff; border: 1px solid #9ec5fe; }
+    .mini-cal-grid .day:hover { background: #f1f3f5; }
+
+    .side-section { border-top: 1px solid #e9ecef; padding-top: .6rem; }
+    .section-header { cursor: default; color: #495057; }
+
+    .form-check-sm .form-check-input { width: 1rem; height: 1rem; margin-top: .2rem; }
+    .form-check-sm .form-check-label { font-size: .92rem; }
+
+    #swMiAgenda:checked { background-color: #dc3545; border-color: #dc3545; }
+
+    .user-chip { display: flex; align-items: center; gap: .5rem; padding: .25rem .5rem; border-radius: 999px; border: 1px solid #99e2a1; background: #effaf0; width: 100%; }
+    .user-chip .avatar { width: 22px; height: 22px; border-radius: 50%; background: #2ecc71; color: #fff; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 600; }
+    .user-chip .name { flex: 1; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-chip .btn-close { float: right; }
+
+    #btnSidebarConfig { border-radius: 999px; }
+    .bg-success-subtle { background-color: rgba(25,135,84,.15) !important }
+    .bg-warning-subtle { background-color: rgba(255,193,7,.15) !important }
+    .bg-danger-subtle  { background-color: rgba(220,53,69,.15) !important }
+
+    /* Chips de participantes */
+    .ne-chip { display: flex; align-items: center; gap: .5rem; padding: .25rem .5rem; border-radius: 999px; border: 1px solid #b6d4fe; background: #eef6ff; width: 100%; }
+    .ne-chip .avatar { width: 22px; height: 22px; border-radius: 50%; background: #0d6efd; color: #fff; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 600; }
+    .ne-chip .name { flex: 1; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Select2 dentro del modal */
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        position: relative; display: inline-block; background-color: #0d3b66; color: #fff; border: 0; border-radius: 9999px;
+        padding: 4px 28px 4px 10px; margin: 6px 6px 0 0; font-weight: 600;
+    }
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        position: absolute; right: 8px; left: auto !important; top: 50%; transform: translateY(-50%);
+        color: #fff !important; border: 0; padding: 0; margin: 0; font-size: 16px; line-height: 1; cursor: pointer;
+    }
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice:hover { background-color: #0c345a; }
+    #modalNuevoEvento .modal-body { overflow-y: auto; max-height: calc(100vh - 200px); }
+    #modalNuevoEvento .select2-container, #modalNuevoEvento .select2-container .select2-dropdown { z-index: 2000 !important; }
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice__remove { background: transparent !important; color: #fff !important; border: 0 !important; outline: none !important; box-shadow: none !important; }
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover,
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus,
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:active { background: transparent !important; color: #ffd166 !important; }
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice { position: relative; padding: 4px 28px 4px 10px; }
+    #modalNuevoEvento .select2-container--default .select2-selection--multiple .select2-selection__choice__remove { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
+</style>
+
+<script>
+  // ================================================================
+  // RUTAS / ESTADO GLOBAL
+  // ================================================================
+  const routes = {
+    calendarUri: '@Url.Action("Get", "Calendario")',                 // GET eventos
+    configUri: '@Url.Action("Configuracion", "Calendario")',         // GET configuración
+    saveConfigUri: '@Url.Action("SaveConfiguracion", "Calendario")', // PUT configuración
+    createEventoUri: '@Url.Action("CrearEvento", "Calendario")',     // POST crear evento
+    usuario: '@Url.Action("Listar", "Usuario")',
+    usuarioId: '@Url.Action("GetById", "Usuario")'
+  };
+
+  const DEFAULT_USUARIO_ID = 1;
+  const DEFAULT_CALENDARIO_ID = 2;
+
+  let calendar, currentSource = null;
+  let _configModal, _nfModal, _neModal;
+  let _lastConfigData = null;
+
+  // Cache con todos los eventos del backend
+  let ALL_EVENTS = [];
+
+  // ================================================================
+  // UTILS / TOASTS
+  // ================================================================
+  function showToast(message, type='info', title=null) {
+    const host = document.getElementById('appToasts');
+    if (!host) return alert(message);
+    const id = 't' + Math.random().toString(36).slice(2);
+    const headerColor = { success:'text-bg-success', danger:'text-bg-danger', warning:'text-bg-warning', info:'text-bg-primary' }[type] || 'text-bg-secondary';
+    const node = document.createElement('div');
+    node.className = 'toast align-items-center show';
+    node.id = id;
+    node.setAttribute('role','alert'); node.setAttribute('aria-live','assertive'); node.setAttribute('aria-atomic','true');
+    node.innerHTML = `
+      <div class="toast-header ${headerColor}">
+        <strong class="me-auto">${title ?? ({success:'Listo',danger:'Error',warning:'Aviso',info:'Información'}[type])}</strong>
+        <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">${message}</div>`;
+    host.appendChild(node);
+    const toast = new bootstrap.Toast(node, { delay: 3500, autohide: true });
+    toast.show();
+    node.addEventListener('hidden.bs.toast', () => node.remove());
+  }
+
+  /** Normaliza typeCode a EVENTO | CUESTIONARIO | TAREA */
+  function getTypeCode(evt) {
+    const raw = (evt.typeCode || evt.extendedProps?.typeCode || '').toString().trim().toUpperCase();
+    if (raw === 'CUEST' || raw === 'CUESTION' || raw === 'FORM') return 'CUESTIONARIO';
+    return raw;
+  }
+
+  // ===================== FECHA/HORA =====================
+  function toUtcIso(dateStr, timeStr) {
+    const [Y, M, D] = (dateStr || '').split('-').map(Number);
+    const [h, m] = (timeStr || '00:00').split(':').map(Number);
+    if (!Y || !M || !D) return null;
+    const local = new Date(Y, (M || 1) - 1, D, h || 0, m || 0, 0, 0);
+    return local.toISOString();
+  }
+  function dayStartUtcIso(dateStr) { return toUtcIso(dateStr, '00:00'); }
+  function dayEndUtcIso(dateStr)   { return toUtcIso(dateStr, '23:59'); }
+  function toHms(hhmm) { return !hhmm ? '00:00:00' : (hhmm.length === 5 ? hhmm + ':00' : hhmm); }
+
+  // ================================================================
+  // FILTROS "Mis actividades"
+  // ================================================================
+  const FILTERS = { EVENTO:true, CUESTIONARIO:true, TAREA:true };
+  const chkAll = document.getElementById('chkAll');
+  const chkEventos = document.getElementById('chkEventos');
+  const chkFormularios = document.getElementById('chkFormularios');
+  const chkTareas = document.getElementById('chkTareas');
+
+  function isTypeVisible(typeCode) {
+    const key = String(typeCode || '').toUpperCase();
+    return FILTERS[key] !== false;
+  }
+
+  function applyFilterFromUI() {
+    FILTERS.EVENTO       = !!chkEventos.checked;
+    FILTERS.CUESTIONARIO = !!chkFormularios.checked;
+    FILTERS.TAREA        = !!chkTareas.checked;
+    chkAll.checked = chkEventos.checked && chkFormularios.checked && chkTareas.checked;
+    if (calendar) applyFilters();
+  }
+
+  function setChildrenFromChkAll() {
+    const v = !!chkAll.checked;
+    ['chkEventos','chkFormularios','chkTareas'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = v;
+    });
+  }
+  function syncChkAllFromChildren() {
+    chkAll.checked = chkEventos.checked && chkFormularios.checked && chkTareas.checked;
+  }
+
+  /** Aplica filtros al arreglo ALL_EVENTS y recarga el source del calendario */
+  function applyFilters() {
+    const filtered = ALL_EVENTS.filter(e => {
+      const type = getTypeCode(e);
+      if (type === 'EVENTO')       return FILTERS.EVENTO;
+      if (type === 'CUESTIONARIO') return FILTERS.CUESTIONARIO;
+      if (type === 'TAREA')        return FILTERS.TAREA;
+      return true;
+    });
+
+    if (currentSource) { try { currentSource.remove(); } catch(_){} currentSource = null; }
+    try { calendar.removeAllEvents(); } catch(_){}
+    currentSource = calendar.addEventSource(filtered);
+  }
+
+  // ================================================================
+  // CARGA INICIAL DE EVENTOS
+  // ================================================================
+  async function loadEvents() {
+    try {
+      const res = await fetch(routes.calendarUri);
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const data = await res.json();
+
+      // Normalizamos y guardamos todos para filtrado y validación de traslapes
+      ALL_EVENTS = (Array.isArray(data) ? data : []).map(ev => ({
+        ...ev,
+        start: ev.start ?? ev.startUtc ?? ev.fechaInicioUtc, // por si viene con otros nombres
+        end:   ev.end   ?? ev.endUtc   ?? ev.fechaFinUtc,
+        extendedProps: { ...(ev.extendedProps || {}), typeCode: getTypeCode(ev) }
+      }));
+
+      applyFilters();
+    } catch (err) {
+      console.error('No se pudieron cargar los eventos:', err);
+      alert('No se pudieron cargar los eventos del calendario.');
+    }
+  }
+
+  // ================================================================
+  // FULLCALENDAR
+  // ================================================================
+  document.addEventListener('DOMContentLoaded', function () {
+    const el = document.getElementById('calendar');
+    const selView = (document.getElementById('cfgDefaultView')?.value) || 'dayGridMonth';
+    const selWeekStart = parseInt(document.getElementById('cfgWeekStart')?.value ?? '1', 10);
+
+    const dayActionModalEl = document.getElementById('dayActionModal');
+    const dayActionModal   = new bootstrap.Modal(dayActionModalEl);
+    const modalDateInput   = document.getElementById('modalDate');
+    const actionSelected   = document.getElementById('actionSelected');
+
+    calendar = new FullCalendar.Calendar(el, {
+      locale: 'es',
+      firstDay: selWeekStart,
+      initialView: selView,
+      buttonText: { today:'Hoy', month:'Mes', week:'Semana', day:'Día', list:'Lista' },
+      headerToolbar: { left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+
+      dayCellDidMount: (info) => {
+        // Acciones rápidas por día
+        const dateIso = info.date.toISOString().slice(0,10);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'dropdown fc-day-action';
+        wrapper.innerHTML = `
+          <button class="btn btn-sm btn-light border" type="button" title="Acciones">⋮</button>
+          <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item js-day-action" href="#" data-action="evento" data-date="${dateIso}"><i class="bi bi-send-plus-fill"></i> Evento</a></li>
+              <li><a class="dropdown-item js-day-action" href="#" data-action="cuestionario" data-date="${dateIso}"><i class="bi bi-window-plus"></i> Formulario</a></li>
+          </ul>`;
+        (info.el.querySelector('.fc-daygrid-day-frame')||info.el).appendChild(wrapper);
+        const btn  = wrapper.querySelector('button');
+        const menu = wrapper.querySelector('.dropdown-menu');
+        const dd   = new bootstrap.Dropdown(btn, { autoClose:'outside', display:'static' });
+        btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); dd.toggle(); });
+        menu.addEventListener('click', (e) => {
+          const a = e.target.closest('.js-day-action'); if(!a) return;
+          e.preventDefault(); e.stopPropagation();
+          const dateStr = a.dataset.date;
+          const action  = a.dataset.action;
+          if (action === 'evento') openNuevoEvento(dateStr);
+          else if (action === 'cuestionario') openNuevoFormulario(dateStr);
+          else {
+            modalDateInput.value = dateStr;
+            actionSelected.textContent = `Acción seleccionada: ${action}`;
+            dayActionModal.show();
+          }
+          dd.hide();
+        });
+      },
+
+      events: [],
+
+      eventClick: (info) => {
+        info.jsEvent.preventDefault();
+        populateEventModal(info.event);
+        _evModal.show();
+      },
+
+      dayHeaderDidMount: (arg) => {
+        // Iconitos por día, solo decorativo
+        const d = arg.date.getDay();
+        const ICON_BY_DAY = {
+          0:'bi-sun-fill text-warning',1:'bi-briefcase-fill text-primary',2:'bi-people-fill text-primary',
+          3:'bi-lightning-charge-fill text-info',4:'bi-megaphone-fill text-success',5:'bi-music-note-beamed text-danger',6:'bi-house-fill text-muted'
+        };
+        const cushion = arg.el.querySelector('.fc-col-header-cell-cushion');
+        if (cushion) cushion.insertAdjacentHTML('beforeend', ` <i class="bi ${ICON_BY_DAY[d] || 'bi-calendar-event'} ms-1"></i>`);
+      },
+
+      eventDidMount: (arg) => {
+        // Aplica el filtro visual por tipo
+        const ep = arg.event.extendedProps || {};
+        if (!isTypeVisible(ep.typeCode)) { arg.el.style.display = 'none'; return; }
+        const type = String(ep.type || '').toUpperCase();
+        const ICON_BY_TYPE = { 'EVENTO':'bi-send-plus-fill','CUESTIONARIO':'bi-clipboard2-check-fill','TAREA':'bi-check2-square' };
+        const iconClass = ep.icon || ICON_BY_TYPE[type] || 'bi-calendar-event';
+        const i = document.createElement('i');
+        i.className = `bi ${iconClass} fc-ev-icon`;
+        const color = arg.event.backgroundColor || arg.event.borderColor;
+        if (color) i.style.color = color;
+        const viewType = arg.view.type;
+        if (viewType.startsWith('dayGrid')) {
+          const titleEl = arg.el.querySelector('.fc-event-title'); if (titleEl) titleEl.prepend(i);
+        } else if (viewType.startsWith('timeGrid')) {
+          const frame = arg.el.querySelector('.fc-event-main-frame') || arg.el.querySelector('.fc-event-title');
+          (frame || arg.el).prepend(i);
+        } else if (viewType.startsWith('list')) {
+          const a = arg.el.querySelector('.fc-list-event-title a, .fc-list-event-title'); if (a) a.prepend(i);
+        }
+      }
+    });
+
+    calendar.render();
+    loadEvents();
+
+    // Wiring filtros
+    chkAll?.addEventListener('change', () => { setChildrenFromChkAll(); applyFilters(); });
+    [chkEventos, chkFormularios, chkTareas].forEach(el => {
+      el?.addEventListener('change', () => { syncChkAllFromChildren(); applyFilters(); });
+    });
+    syncChkAllFromChildren();
+
+    // Ajustes de vista desde configuración
+    document.getElementById('cfgDefaultView')?.addEventListener('change', (e) => {
+      calendar.changeView((e.target.value || 'dayGridMonth').trim());
+    });
+    document.getElementById('cfgWeekStart')?.addEventListener('change', (e) => {
+      const v = parseInt(e.target.value, 10);
+      calendar.setOption('firstDay', isNaN(v) ? 1 : v);
+    });
+  });
+
+  // ================================================================
+  // MODAL EVENTO EXISTENTE
+  // ================================================================
+  const _evModal = new bootstrap.Modal(document.getElementById('eventModal'));
+  const STATUS_BADGE = { finalizado: 'text-success bg-success-subtle', pendiente: 'text-warning bg-warning-subtle', cancelado: 'text-danger bg-danger-subtle' };
+  function formatRange(start,end,allDay){
+    const d1=new Date(start), d2=end?new Date(end):null;
+    const dayFmt=new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    const timeFmt=new Intl.DateTimeFormat('es-MX',{hour:'numeric',minute:'2-digit'});
+    const left=`${dayFmt.format(d1)}, ${allDay?'':timeFmt.format(d1)}`;
+    const right=d2?(allDay?'':timeFmt.format(d2)):'';
+    return allDay?left:`${left} – ${right}`;
+  }
+  function populateEventModal(fcEvent){
+    const x=fcEvent.extendedProps||{};
+    document.getElementById('evTitle').textContent=fcEvent.title||'(Sin título)';
+    document.getElementById('evWhen').textContent=formatRange(fcEvent.start,fcEvent.end,fcEvent.allDay);
+    const list=document.getElementById('evFormList'); list.innerHTML='';
+    const lugares=Array.isArray(x.formPlaces)?x.formPlaces:[];
+    if(lugares.length){ lugares.forEach((txt,i)=>{const li=document.createElement('li'); li.innerHTML=`<label class="d-flex align-items-center gap-2"><input class="form-check-input" type="radio" name="evPlace" ${i===0?'checked':''}><span>${txt}</span></label>`; list.appendChild(li);}); }
+    else { const li=document.createElement('li'); li.className='text-muted'; li.textContent='—'; list.appendChild(li); }
+    const statusText=(x.status||'finalizado').toString().toLowerCase();
+    const badge=document.getElementById('evStatusBadge');
+    badge.textContent=x.statusLabel||(statusText.charAt(0).toUpperCase()+statusText.slice(1));
+    badge.className='badge rounded-pill fw-semibold '+(STATUS_BADGE[statusText]||'text-success bg-success-subtle');
+    document.getElementById('evScore').textContent=(x.score!=null?`${x.score}%`:'—');
+    document.getElementById('evDuration').textContent=x.durationText||'—';
+    const btnVer=document.getElementById('btnVerFormulario');
+    if(x.viewFormUrl){ btnVer.classList.remove('disabled'); btnVer.onclick=()=>window.location.href=x.viewFormUrl; }
+    else { btnVer.classList.add('disabled'); btnVer.onclick=null; }
+  }
+
+  // ================================================================
+  // CONFIGURACIÓN (GET/PUT)
+  // ================================================================
+  function mapViewToFC(view) {
+    switch ((view || '').toLowerCase()) {
+      case 'month': return 'dayGridMonth';
+      case 'week':  return 'timeGridWeek';
+      case 'day':   return 'timeGridDay';
+      case 'list':  return 'listWeek';
+      default:      return 'dayGridMonth';
+    }
+  }
+  function validateWorkHours() {
+    const iniEl = document.getElementById('cfgHoraIni');
+    const finEl = document.getElementById('cfgHoraFin');
+    const ini = iniEl.value, fin = finEl.value;
+    iniEl.classList.remove('is-invalid'); finEl.classList.remove('is-invalid');
+    if (!ini || !fin) return true;
+    const toMin = (s)=>{const [h,m]=s.split(':').map(Number);return h*60+(m||0);};
+    if (toMin(ini) >= toMin(fin)) {
+      iniEl.classList.add('is-invalid'); finEl.classList.add('is-invalid');
+      showToast('La hora de inicio debe ser menor que la hora de fin.', 'warning', 'Horario inválido');
+      iniEl.focus(); return false;
+    }
+    return true;
+  }
+  function populateNotifications(notificaciones = []) {
+    ['eventos','formularios','tareas'].forEach(sec => { const cont=document.getElementById(`rows-${sec}`); if (cont) cont.innerHTML=''; });
+    for (const n of notificaciones) {
+      const sec = (n.seccion || '').toLowerCase();
+      if (!['eventos','formularios','tareas'].includes(sec)) continue;
+      addNotifRow(sec, { channel:(n.canal||'').toLowerCase(), amount:Number(n.cantidad||0), unit:(n.unidad||'').toLowerCase() });
+    }
+    ['eventos','formularios','tareas'].forEach(_refreshSectionUI);
+  }
+  function fillConfigModal(data) {
+    const colorInput = document.getElementById('agendaColor');
+    const swPersonal = document.getElementById('switchColorPersonal');
+    if (colorInput)  colorInput.value = data.colorHex || '#1e90ff';
+    if (swPersonal)  swPersonal.checked = !!data.usarColorPersonal;
+
+    const fcView = mapViewToFC(data.vistaPorDefecto);
+    const weekStart = (typeof data.primerDiaSemana === 'number') ? data.primerDiaSemana : 1;
+    const selView = document.getElementById('cfgDefaultView');
+    const selWeek = document.getElementById('cfgWeekStart');
+    if (selView) selView.value = fcView;
+    if (selWeek) selWeek.value = String(weekStart);
+
+    const horaIni = (data.horaLaboralInicio || '09:00:00').toString().slice(0,5);
+    const horaFin = (data.horaLaboralFin   || '18:00:00').toString().slice(0,5);
+    document.getElementById('cfgHoraIni').value = horaIni;
+    document.getElementById('cfgHoraFin').value = horaFin;
+
+    populateNotifications(Array.isArray(data.notificaciones) ? data.notificaciones : []);
+
+    try {
+      if (calendar) {
+        calendar.setOption('firstDay', weekStart);
+        if (calendar.view.type !== fcView) calendar.changeView(fcView);
+        if (swPersonal?.checked && colorInput?.value) calendar.setOption('eventColor', colorInput.value);
+        else calendar.setOption('eventColor', null);
+      }
+    } catch (_) {}
+  }
+  async function loadConfiguracion(usuarioId, calendarioId) {
+    try {
+      const url = `${routes.configUri}?usuarioId=${encodeURIComponent(usuarioId)}&calendarioId=${encodeURIComponent(calendarioId)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const data = await res.json();
+      _lastConfigData = data;
+      fillConfigModal(data);
+    } catch (err) {
+      console.error(err);
+      showToast((err && err.message) || 'No se pudo cargar la configuración.', 'danger', 'Error');
+    }
+  }
+  document.getElementById('configForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateWorkHours()) return;
+
+    const btnSave = e.submitter ?? document.querySelector('#configForm button[type="submit"]');
+    const originalText = btnSave ? btnSave.innerHTML : '';
+    if (btnSave) { btnSave.disabled = true; btnSave.innerHTML = 'Guardando…'; }
+
+    try {
+      const calendarioId = (_lastConfigData?.calendarioId ?? DEFAULT_CALENDARIO_ID);
+      const usuarioId    = (_lastConfigData?.usuarioId ?? DEFAULT_USUARIO_ID);
+      const creadoEn     = _lastConfigData?.creadoEn ?? new Date().toISOString();
+      const actualizadoEn= new Date().toISOString();
+
+      const colorHex          = document.getElementById('agendaColor').value;
+      const usarColorPersonal = document.getElementById('switchColorPersonal').checked;
+      const vistaPorDefecto   = document.getElementById('cfgDefaultView').value;
+      const primerDiaSemana   = parseInt(document.getElementById('cfgWeekStart').value, 10);
+      const horaLaboralInicio = toHms(document.getElementById('cfgHoraIni').value);
+      const horaLaboralFin    = toHms(document.getElementById('cfgHoraFin').value);
+
+      const notificaciones = [
+        ...collectNotificacionesSeccion('eventos'),
+        ...collectNotificacionesSeccion('formularios'),
+        ...collectNotificacionesSeccion('tareas')
+      ];
+
+      const payload = {
+        calendarioId, usuarioId, colorHex, usarColorPersonal,
+        creadoEn, actualizadoEn, vistaPorDefecto, primerDiaSemana,
+        horaLaboralInicio, horaLaboralFin, notificaciones
+      };
+
+      const res = await fetch(routes.saveConfigUri, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(await res.text() || 'No se pudo guardar la configuración.');
+
+      showToast('Configuración guardada correctamente.', 'success', 'Guardado');
+      bootstrap.Modal.getInstance(document.getElementById('ConfiguracionModal')).hide();
+      _lastConfigData = payload;
+
+      try {
+        if (calendar) {
+          calendar.setOption('firstDay', primerDiaSemana);
+          if (calendar.view.type !== vistaPorDefecto) calendar.changeView(vistaPorDefecto);
+          calendar.setOption('eventColor', usarColorPersonal ? colorHex : null);
+        }
+      } catch (_) {}
+    } catch (err) {
+      console.error(err);
+      showToast((err && err.message) || 'Ocurrió un error al guardar.', 'danger', 'Error');
+    } finally {
+      if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = originalText; }
+    }
+  });
+  function configuracion(usuarioId = DEFAULT_USUARIO_ID, calendarioId = DEFAULT_CALENDARIO_ID) {
+    if (!_configModal) {
+      _configModal = new bootstrap.Modal(document.getElementById('ConfiguracionModal'), { backdrop: 'static' });
+    }
+    _configModal.show();
+    loadConfiguracion(usuarioId, calendarioId);
+  }
+
+  // ================================================================
+  // NOTIFICACIONES UI
+  // ================================================================
+  const CHANNELS = ['push','email','sms'];
+  const notifContainers = {
+    eventos: ()=>document.getElementById('rows-eventos'),
+    formularios: ()=>document.getElementById('rows-formularios'),
+    tareas: ()=>document.getElementById('rows-tareas')
+  };
+  const _btnAdd = (section)=>document.getElementById(`btn-add-${section}`);
+  const _selects = (section)=>[...notifContainers[section]().querySelectorAll('.notif-row [data-field="channel"]')];
+  const _usedChannels = (section)=>new Set(_selects(section).map(s=>s.value));
+  const _availableChannels = (section)=>CHANNELS.filter(c=>!_usedChannels(section).has(c));
+  function _updateRowSelects(section){
+    const selects=_selects(section);
+    selects.forEach(sel=>{
+      const others=new Set(selects.filter(s=>s!==sel).map(s=>s.value));
+      [...sel.options].forEach(opt=>{opt.disabled=others.has(opt.value);});
+    });
+  }
+  function _updateAddButtonState(section){
+    const btn=_btnAdd(section); if(!btn) return;
+    const canAdd=_availableChannels(section).length>0;
+    btn.disabled=!canAdd; btn.classList.toggle('disabled',!canAdd);
+    btn.title=canAdd?'':'Ya agregaste Notificación, Correo y SMS';
+  }
+  function _refreshSectionUI(section){ _updateRowSelects(section); _updateAddButtonState(section); }
+  function addNotifRow(section, preset){
+    const container = notifContainers[section]();
+    const tpl = document.getElementById('notif-row-template');
+    let channel = preset?.channel;
+    const avail = _availableChannels(section);
+    if(!channel || !avail.includes(channel)) channel = avail[0];
+    if(!channel){ _refreshSectionUI(section); return; }
+    const row = tpl.content.firstElementChild.cloneNode(true);
+    const sel = row.querySelector('[data-field="channel"]');
+    sel.value = channel;
+    row.querySelector('[data-field="amount"]').value = preset?.amount ?? 10;
+    row.querySelector('[data-field="unit"]').value   = preset?.unit ?? 'minutes';
+    sel.addEventListener('change', ()=> _refreshSectionUI(section));
+    row.querySelector('.btn-remove').addEventListener('click', ()=>{ row.remove(); _refreshSectionUI(section); });
+    container.appendChild(row);
+    _refreshSectionUI(section);
+  }
+  function collectNotificacionesSeccion(section) {
+    const container = document.getElementById(`rows-${section}`);
+    if (!container) return [];
+    return [...container.querySelectorAll('.notif-row')].map(row => ({
+      seccion: section,
+      canal: row.querySelector('[data-field="channel"]').value,
+      cantidad: parseInt(row.querySelector('[data-field="amount"]').value||'0', 10),
+      unidad: row.querySelector('[data-field="unit"]').value
+    }));
+  }
+
+  // ================================================================
+  // NUEVO FORMULARIO (sin cambios funcionales)
+  // ================================================================
+  let NF_FORMULARIOS = [
+    { id:101, nombre:'Prueba - Rutina Operativa RF' },
+    { id:102, nombre:'Checklist de Seguridad' },
+    { id:103, nombre:'Evaluación Semanal' }
+  ];
+  const NF_UBICACIONES = [
+    { id:1, grupo:'Unión', nombre:'SITUACIONAL UNIÓN' },
+    { id:2, grupo:'San Francisco de Asís', nombre:'SITUACIONAL SF' },
+    { id:3, grupo:'San Francisco de Asís', nombre:'PRUEBA' },
+    { id:4, grupo:'Farmatodo', nombre:'SITUACIONAL FARMATODO' }
+  ];
+  function openNuevoFormulario(dateStr){
+    if(!_nfModal){
+      _nfModal = new bootstrap.Modal(document.getElementById('modalNuevoFormulario'), { backdrop:'static' });
+      document.getElementById('nfAsignarResp').addEventListener('change',(e)=>{ document.getElementById('nfRespPane').classList.toggle('d-none',!e.target.checked); });
+      document.getElementById('nfAddDesc').addEventListener('change',(e)=>{ document.getElementById('nfDescPane').classList.toggle('d-none',!e.target.checked); });
+      document.getElementById('nfAllDay').addEventListener('change',(e)=>{ document.getElementById('nfTimeRow').classList.toggle('d-none',e.target.checked); });
+      document.getElementById('nfUbicSearch').addEventListener('input',(e)=>{ renderUbicaciones(e.target.value.trim().toLowerCase()); });
+      document.getElementById('nfForm').addEventListener('submit',(e)=>{
+        e.preventDefault();
+        if(!validateNuevoFormulario()) return;
+        const payload = collectNuevoFormulario();
+        console.log('Nuevo formulario -> payload:', payload);
+        _nfModal.hide();
+      });
+    }
+    seedFormularios(); renderUbicaciones('');
+    document.getElementById('nfFormulario').value = NF_FORMULARIOS[0]?.id ?? '';
+    document.getElementById('nfAsignarResp').checked=false; document.getElementById('nfRespPane').classList.add('d-none');
+    document.getElementById('nfAddDesc').checked=false; document.getElementById('nfDescPane').classList.add('d-none');
+    document.getElementById('nfFecha').value = dateStr ?? new Date().toISOString().slice(0,10);
+    document.getElementById('nfAllDay').checked=false; document.getElementById('nfTimeRow').classList.remove('d-none');
+    document.getElementById('nfHoraIni').value='09:00'; document.getElementById('nfHoraFin').value='10:00';
+    document.getElementById('nfRecurrencia').value='none';
+    document.getElementById('nfDesc').value=''; document.getElementById('nfResp').value='';
+    document.getElementById('nfUbicSearch').value=''; document.getElementById('nfTimeHelp').classList.add('d-none');
+    _nfModal.show();
+  }
+  function seedFormularios(){
+    const sel=document.getElementById('nfFormulario'); if(sel.options.length) return;
+    NF_FORMULARIOS.forEach(f=>{ const opt=document.createElement('option'); opt.value=f.id; opt.textContent=f.nombre; sel.appendChild(opt);});
+  }
+  function renderUbicaciones(filter){
+    const host=document.getElementById('nfUbicList'); host.innerHTML='';
+    const byGroup={};
+    NF_UBICACIONES.forEach(u=>{
+      if(filter && !(`${u.grupo} ${u.nombre}`.toLowerCase().includes(filter))) return;
+      (byGroup[u.grupo]??=[]).push(u);
+    });
+    Object.entries(byGroup).forEach(([grupo,items])=>{
+      const header=document.createElement('div'); header.className='small text-muted mt-2'; header.textContent=grupo; host.appendChild(header);
+      items.forEach(u=>{
+        const row=document.createElement('label'); row.className='d-flex align-items-center gap-2 ps-2';
+        row.innerHTML=`<input class="form-check-input mt-0" type="radio" name="nfUbicSel" value="${u.id}"><span>${u.nombre}</span>`;
+        host.appendChild(row);
+      });
+    });
+  }
+  function validateNuevoFormulario(){
+    const allDay=document.getElementById('nfAllDay').checked;
+    const help=document.getElementById('nfTimeHelp');
+    if(!allDay){
+      const ini=document.getElementById('nfHoraIni').value;
+      const fin=document.getElementById('nfHoraFin').value;
+      if(!ini || !fin || ini>=fin){ help.classList.remove('d-none'); return false; }
+    }
+    help.classList.add('d-none'); return true;
+  }
+  function collectNuevoFormulario(){
+    const fecha=document.getElementById('nfFecha').value;
+    const allDay=document.getElementById('nfAllDay').checked;
+    const horaIni=document.getElementById('nfHoraIni').value;
+    const horaFin=document.getElementById('nfHoraFin').value;
+    const startUtc = allDay ? `${fecha}T00:00:00Z` : `${fecha}T${horaIni}:00Z`;
+    const endUtc   = allDay ? `${fecha}T23:59:59Z` : `${fecha}T${horaFin}:00Z`;
+    const ubic = document.querySelector('input[name="nfUbicSel"]:checked');
+    return {
+      formularioId: parseInt(document.getElementById('nfFormulario').value,10),
+      asignarResponsables: document.getElementById('nfAsignarResp').checked ? document.getElementById('nfResp').value : null,
+      descripcion: document.getElementById('nfAddDesc').checked ? document.getElementById('nfDesc').value : null,
+      fecha, allDay, startUtc, endUtc,
+      recurrencia: document.getElementById('nfRecurrencia').value,
+      ubicacionId: ubic ? parseInt(ubic.value,10) : null,
+      zonaHorariaIana: 'UTC'
+    };
+  }
+
+  // ================================================================
+  // NUEVO EVENTO (con VALIDACIÓN DE TRASLAPE)
+  // ================================================================
+  // --- Select2: asistentes ---
+  async function initSupervisoresSelect(preseleccion = []) {
+    const $el = $('#destinatarioSelect');
+    if ($el.data('select2')) $el.select2('destroy');
+    $el.empty();
+
+    const nombreDe = u => {
+      const parts = [u?.nombre, u?.apellidoPaterno, u?.apellidoMaterno].filter(Boolean);
+      const t = parts.join(' ').trim();
+      return t.length ? t : (u?.email || '').trim() || null;
+    };
+
+    $el.select2({
+      placeholder: 'Busca usuario...',
+      width: '100%',
+      closeOnSelect: false,
+      multiple: true,
+      allowClear: true,
+      dropdownParent: $('#modalNuevoEvento'),
+      tags: false,
+      minimumInputLength: 0,
+      ajax: {
+        url: routes.usuario,
+        type: 'GET',
+        dataType: 'json',
+        delay: 250,
+        data: params => ({ q: params.term || '' }),
+        processResults: r => {
+          const fuente = Array.isArray(r) ? r : (Array.isArray(r?.data) ? r.data : []);
+          const seen = new Set();
+          const results = [];
+          for (const u of fuente) {
+            if (!u || u.id == null) continue;
+            const id = String(u.id);
+            if (seen.has(id)) continue;
+            const text = nombreDe(u);
+            if (!text) continue;
+            seen.add(id);
+            results.push({ id, text });
+          }
+          return { results };
+        }
+      }
+    }).on('change', function () {
+      // Revalidar traslapes al cambiar asistentes (si quisieras cruzar por recursos)
+      checkTimeConflictsAndHint();
+    });
+
+    // Precarga opcional
+    if (!Array.isArray(preseleccion) || preseleccion.length === 0) return;
+    try {
+      const respuestas = await Promise.all(preseleccion.map(id => getJsonAsync(routes.usuarioId, { id })));
+      const usuarios = respuestas.filter(r => r?.success && r.data).map(r => r.data);
+      for (const u of usuarios) {
+        const text = nombreDe(u) ?? (u.email ?? '').trim();
+        if (!text) continue;
+        const opt = new Option(text, String(u.id), true, true);
+        $el.append(opt);
+      }
+      $el.trigger('change');
+    } catch (err) {
+      console.error('Precarga de supervisores falló:', err);
+    }
+  }
+  function resetAsistentes() {
+    const $el = $('#destinatarioSelect');
+    if ($el.data('select2')) { $el.val(null).trigger('change'); $el.find('option').remove(); }
+    else { $el.val(null).empty(); }
+  }
+  function getDestinatariosSeleccionados() {
+    const $el = $('#destinatarioSelect');
+    const data = ($el.data('select2') ? $el.select2('data') : []) || [];
+    const ids = []; const nombres = [];
+    for (const item of data) {
+      const idNum = parseInt(item.id, 10);
+      if (Number.isFinite(idNum)) ids.push(idNum);
+      if (item.text && item.text.trim()) nombres.push(item.text.trim());
+    }
+    return { ids, nombres };
+  }
+
+  // ---- Funciones de traslape ----
+  /** Devuelve true si [aStart,aEnd) y [bStart,bEnd) se traslapan */
+  function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+    return aStart < bEnd && aEnd > bStart;
+  }
+  /** Extiende un intervalo allDay a todo el/los día(s) locales */
+  function expandAllDay(start, end) {
+    const s = new Date(start), e = new Date(end || start);
+    const sFull = new Date(s.getFullYear(), s.getMonth(), s.getDate(), 0, 0, 0, 0);
+    const eFull = new Date(e.getFullYear(), e.getMonth(), e.getDate(), 23, 59, 59, 999);
+    return [sFull, eFull];
+  }
+  /**
+   * Busca conflictos contra ALL_EVENTS.
+   * Puedes filtrar por tipo, por calendario, por asistentes, etc.
+   */
+  function findConflicts(proposedStartIso, proposedEndIso, isAllDay) {
+    let pStart = new Date(proposedStartIso);
+    let pEnd   = new Date(proposedEndIso || proposedStartIso);
+    if (isAllDay) { [pStart, pEnd] = expandAllDay(pStart, pEnd); }
+
+    const conflicts = [];
+    for (const ev of ALL_EVENTS) {
+      // Si quieres limitar solo a eventos (excluye tareas/cuestionarios), descomenta:
+      // if (getTypeCode(ev) !== 'EVENTO') continue;
+
+      let eStart = new Date(ev.start);
+      let eEnd   = ev.end ? new Date(ev.end) : new Date(ev.start);
+      if (ev.allDay) { [eStart, eEnd] = expandAllDay(eStart, eEnd); }
+
+      if (rangesOverlap(pStart, pEnd, eStart, eEnd)) {
+        conflicts.push({
+          id: ev.id || '(sin id)',
+          title: ev.title || '(sin título)',
+          start: eStart,
+          end: eEnd,
+          allDay: !!ev.allDay
+        });
+      }
+    }
+    return conflicts;
+  }
+
+  /** Construye payload de creación desde el modal */
+  function buildAddEventoRequestFromModal() {
+    const fecha  = document.getElementById('neFecha').value;
+    const allDay = document.getElementById('neAllDay').checked;
+    const ini    = document.getElementById('neHoraIni').value;
+    const fin    = document.getElementById('neHoraFin').value;
+
+    const { ids: asistentesUsuarioId } = getDestinatariosSeleccionados();
+
+    const startUtc = allDay ? dayStartUtcIso(fecha) : toUtcIso(fecha, ini);
+    const endUtc   = allDay ? dayEndUtcIso(fecha)   : toUtcIso(fecha, fin);
+
+    return {
+      calendarioId: DEFAULT_CALENDARIO_ID,
+      asignarUsuario: document.getElementById('neResp').value.trim(),
+      usuarioId: DEFAULT_USUARIO_ID,
+      titulo: document.getElementById('neTitulo').value.trim(),
+      descripcion: document.getElementById('neAddDesc').checked ? document.getElementById('neDesc').value : null,
+      fechaInicioUtc: startUtc,
+      fechaFinUtc: endUtc,
+      todoElDia: allDay,
+      zonaHorariaIana: 'UTC',
+      estatus:1,
+      visibilidad:1,
+      colorHex:"#7Fe6C8",
+      esRecurrente:false,
+      etiquetaId: 1,
+      recurrencia: document.getElementById('neRecurrencia').value,
+      asistentesUsuarioId: (asistentesUsuarioId?.length ? asistentesUsuarioId : null),
+      archivosId:[1],
+      ubicacion: 'UBICACION',
+      CreadoPorId:1,
+    };
+  }
+
+  /** Muestra/oculta y llena el panel de conflictos */
+  function renderConflicts(conflicts) {
+    const el = document.getElementById('neConflictHelp');
+    const submit = document.getElementById('neSubmitBtn');
+    if (!conflicts || !conflicts.length) {
+      el.classList.add('d-none'); el.innerHTML = ''; submit.disabled = false; return;
+    }
+    // Armamos una lista compacta
+    const fmtTime = d => d.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+    const items = conflicts.map(c => {
+      const rango = c.allDay ? 'todo el día' : `${fmtTime(c.start)}–${fmtTime(c.end)}`;
+      return `<li><strong>${c.title}</strong> (${rango})</li>`;
+    }).join('');
+    el.innerHTML = `<div><strong>Conflicto de horario:</strong></div><ul class="mb-0 ps-3">${items}</ul>`;
+    el.classList.remove('d-none');
+    submit.disabled = true; // Bloquea el envío si hay choque
+  }
+
+  /** Valida formulario del modal, incluyendo traslapes */
+  function validateNuevoEvento(){
+    const title=document.getElementById('neTitulo').value.trim();
+    const allDay=document.getElementById('neAllDay').checked;
+    const timeHelp = document.getElementById('neTimeHelp');
+    const conflictBox = document.getElementById('neConflictHelp');
+    conflictBox.classList.add('d-none'); conflictBox.innerHTML = '';
+
+    if(!title){ document.getElementById('neTitleHelp').classList.remove('d-none'); return false; }
+    document.getElementById('neTitleHelp').classList.add('d-none');
+
+    if(!allDay){
+      const ini=document.getElementById('neHoraIni').value;
+      const fin=document.getElementById('neHoraFin').value;
+      if(!ini || !fin || ini>=fin){
+        timeHelp.classList.remove('d-none');
+        return false;
+      }
+    }
+    timeHelp.classList.add('d-none');
+
+    // Validación de traslape
+    const fecha  = document.getElementById('neFecha').value;
+    const ini    = document.getElementById('neHoraIni').value;
+    const fin    = document.getElementById('neHoraFin').value;
+    const startUtc = allDay ? dayStartUtcIso(fecha) : toUtcIso(fecha, ini);
+    const endUtc   = allDay ? dayEndUtcIso(fecha)   : toUtcIso(fecha, fin);
+    const conflicts = findConflicts(startUtc, endUtc, allDay);
+
+    renderConflicts(conflicts);
+
+    return conflicts.length === 0;
+  }
+
+  /** Reevaluación en vivo mientras el usuario cambia fecha/horas */
+  function checkTimeConflictsAndHint() {
+    const fecha  = document.getElementById('neFecha').value;
+    const allDay = document.getElementById('neAllDay').checked;
+    const ini    = document.getElementById('neHoraIni').value;
+    const fin    = document.getElementById('neHoraFin').value;
+
+    // Si faltan datos y no es allDay, no evaluamos aún
+    if (!fecha) { renderConflicts([]); return; }
+    if (!allDay && (!ini || !fin || ini >= fin)) { renderConflicts([]); return; }
+
+    const startUtc = allDay ? dayStartUtcIso(fecha) : toUtcIso(fecha, ini);
+    const endUtc   = allDay ? dayEndUtcIso(fecha)   : toUtcIso(fecha, fin);
+    const conflicts = findConflicts(startUtc, endUtc, allDay);
+    renderConflicts(conflicts);
+  }
+
+  // --- Apertura del modal "Nuevo evento" ---
+  const EV_UBICACIONES = [
+    { id:1, grupo:'Unión', nombre:'SITUACIONAL UNIÓN' },
+    { id:2, grupo:'San Francisco de Asís', nombre:'SITUACIONAL SF' },
+    { id:3, grupo:'San Francisco de Asís', nombre:'PRUEBA' },
+    { id:4, grupo:'Farmatodo', nombre:'SITUACIONAL FARMATODO' }
+  ];
+  function renderEvUbic(filter){
+    const host=document.getElementById('neUbicList'); host.innerHTML='';
+    const byGroup={};
+    EV_UBICACIONES.forEach(u=>{
+      if(filter && !(`${u.grupo} ${u.nombre}`.toLowerCase().includes(filter))) return;
+      (byGroup[u.grupo]??=[]).push(u);
+    });
+    Object.entries(byGroup).forEach(([grupo,items])=>{
+      const header=document.createElement('div'); header.className='small text-muted mt-2'; header.textContent=grupo; host.appendChild(header);
+      items.forEach(u=>{
+        const row=document.createElement('label'); row.className='d-flex align-items-center gap-2 ps-2';
+        row.innerHTML=`<input class="form-check-input mt-0" type="radio" name="neUbicSel" value="${u.id}"><span>${u.nombre}</span>`;
+        host.appendChild(row);
+      });
+    });
+  }
+  function addNeChip(name, userId = null){
+    const host = document.getElementById('nePartChips');
+    const chip = document.createElement('div');
+    chip.className = 'ne-chip';
+    chip.dataset.userid = (userId != null && userId !== '') ? String(userId) : '';
+    chip.innerHTML = `
+      <div class="avatar">${(name[0]||'?').toUpperCase()}</div>
+      <div class="name">${name}</div>
+      <button type="button" class="btn-close" aria-label="Eliminar"></button>`;
+    chip.querySelector('.btn-close').onclick = () => chip.remove();
+    host.appendChild(chip);
+  }
+
+  async function openNuevoEvento(dateStr){
+    if(!_neModal){
+      _neModal = new bootstrap.Modal(document.getElementById('modalNuevoEvento'), { backdrop:'static' });
+
+      // Toggles
+      document.getElementById('neAsignarResp').addEventListener('change', e => {
+        document.getElementById('neRespPane').classList.toggle('d-none', !e.target.checked);
+      });
+      document.getElementById('neAddDesc').addEventListener('change', e => {
+        document.getElementById('neDescPane').classList.toggle('d-none', !e.target.checked);
+      });
+      document.getElementById('neAllDay').addEventListener('change', e => {
+        document.getElementById('neTimeRow').classList.toggle('d-none', e.target.checked);
+        checkTimeConflictsAndHint();
+      });
+      document.getElementById('neAddFiles').addEventListener('change', e => {
+        document.getElementById('neFilesPane').classList.toggle('d-none', !e.target.checked);
+      });
+      document.getElementById('btnNePart').addEventListener('click', () => {
+        document.getElementById('nePartPane').classList.toggle('d-none');
+      });
+      document.getElementById('neUbicSearch').addEventListener('input', e => {
+        renderEvUbic(e.target.value.trim().toLowerCase());
+      });
+
+      // Revalidación en vivo de traslapes
+      ['neFecha','neHoraIni','neHoraFin'].forEach(id => {
+        document.getElementById(id).addEventListener('input', checkTimeConflictsAndHint);
+      });
+
+      // Inicializa Select2 de destinatarios
+      await initSupervisoresSelect();
+
+      // Submit con validación FINAL anti-traslapes
+      document.getElementById('neForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        // revalida choques
+        if(!validateNuevoEvento()) return;
+
+        const btn = e.submitter || document.getElementById('neSubmitBtn');
+        const btnText = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.innerHTML = 'Creando…'; }
+
+        try {
+          const payload = buildAddEventoRequestFromModal();
+
+          // Revalida justo antes de enviar por si ALL_EVENTS cambió
+          const conflicts = findConflicts(payload.fechaInicioUtc, payload.fechaFinUtc, payload.todoElDia);
+          if (conflicts.length) { renderConflicts(conflicts); if (btn) { btn.disabled=false; btn.innerHTML=btnText; } return; }
+
+          const res = await fetch(routes.createEventoUri, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const dto = await res.json().catch(() => ({}));
+          const ok = res.ok && (dto?.success === true || dto?.Success === true || dto?.eventoId || dto?.EventoId);
+
+          if (!ok) {
+            const msg = dto?.errorMessage || dto?.ErrorMessage || `Error ${res.status}`;
+            showToast(msg, 'danger', 'No se pudo crear');
+            return;
+          }
+
+          // Si todo bien, añadimos al cache y re-renderizamos
+          const newId = dto?.eventoId ?? dto?.EventoId ?? Math.random().toString(36).slice(2);
+          const fcEvent = {
+            id: `EV:${newId}`,
+            title: payload.titulo,
+            start: payload.fechaInicioUtc,
+            end: payload.fechaFinUtc,
+            allDay: !!payload.todoElDia,
+            extendedProps: { typeCode: 'EVENTO' }
+          };
+          ALL_EVENTS.push(fcEvent);
+          applyFilters();
+
+          showToast('Evento creado correctamente.', 'success', 'Listo');
+          bootstrap.Modal.getInstance(document.getElementById('modalNuevoEvento'))?.hide();
+        } catch (err) {
+          console.error(err);
+          showToast(err?.message || 'Error al crear el evento.', 'danger', 'Error');
+        } finally {
+          if (btn) { btn.disabled = false; btn.innerHTML = btnText; }
+        }
+      });
+
+      document.getElementById('neBtnDisponibles').addEventListener('click', () => {
+        showToast('Abrir selector de disponibilidad', 'info');
+      });
+    }
+
+    // Resetea campos cada que abres el modal
+    document.getElementById('neTitulo').value = '';
+    document.getElementById('neTitleHelp').classList.add('d-none');
+    document.getElementById('neAsignarResp').checked=false; document.getElementById('neRespPane').classList.add('d-none');
+    document.getElementById('neAddDesc').checked=false;     document.getElementById('neDescPane').classList.add('d-none');
+    document.getElementById('neFecha').value = dateStr ?? new Date().toISOString().slice(0,10);
+    document.getElementById('neAllDay').checked=false;      document.getElementById('neTimeRow').classList.remove('d-none');
+    document.getElementById('neHoraIni').value='09:00';
+    document.getElementById('neHoraFin').value='10:00';
+    document.getElementById('neRecurrencia').value='none';
+    document.getElementById('neAddFiles').checked=false;    document.getElementById('neFilesPane').classList.add('d-none');
+    document.getElementById('neFiles').value='';
+    document.getElementById('nePartChips').innerHTML='';
+    document.getElementById('neUbicSearch').value='';
+    renderEvUbic('');
+
+    // Limpiar y preparar Select2
+    resetAsistentes();
+    await initSupervisoresSelect();
+
+    // Limpiar alertas de conflicto y calcular por defecto
+    renderConflicts([]);
+    checkTimeConflictsAndHint();
+
+    _neModal.show();
+  }
+
+  // ================================================================
+  // MINI CALENDARIO / CHIPS USUARIOS (decorativo)
+  // ================================================================
+  const calTitle=document.getElementById('calTitle');
+  const calGrid =document.getElementById('calGrid');
+  let calDate   =new Date(); calDate.setDate(1);
+  function esESMonthName(y,m){return new Date(y,m,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'})}
+  function renderMiniCal(){
+    const y=calDate.getFullYear(), m=calDate.getMonth();
+    calTitle.textContent=esESMonthName(y,m);
+    calGrid.innerHTML='';
+    const first=new Date(y,m,1);
+    const firstDow=(first.getDay()+6)%7;
+    const daysInM=new Date(y,m+1,0).getDate();
+    const daysPrev=new Date(y,m,0).getDate();
+    for(let i=firstDow-1;i>=0;i--){const d=document.createElement('div');d.className='day muted';d.textContent=(daysPrev-i);calGrid.appendChild(d);}
+    const today=new Date(); const isSame=(today.getFullYear()===y&&today.getMonth()===m);
+    for(let d=1;d<=daysInM;d++){const el=document.createElement('div');el.className='day'+(isSame&&d===today.getDate()?' today':'');el.textContent=d;calGrid.appendChild(el);}
+    const rem=calGrid.children.length%7; if(rem) for(let i=0;i<7-rem;i++){const d=document.createElement('div');d.className='day muted';d.textContent=(i+1);calGrid.appendChild(d);}
+  }
+  document.getElementById('calPrev').onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderMiniCal();};
+  document.getElementById('calNext').onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderMiniCal();};
+  renderMiniCal();
+
+  const userSearch=document.getElementById('userSearch');
+  const userChips =document.getElementById('userChips');
+  function initialsFrom(name){return name.trim().split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase();}
+  function addUserChip(name){
+    const chip=document.createElement('div');
+    chip.className='user-chip';
+    chip.innerHTML=`<div class="avatar">${initialsFrom(name)}</div><div class="name">${name}</div><button type="button" class="btn-close" aria-label="Eliminar"></button>`;
+    chip.querySelector('.btn-close').onclick=()=>chip.remove();
+    userChips.appendChild(chip);
+  }
+  userSearch.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); const name=userSearch.value.trim(); if(name){ addUserChip(name); userSearch.value=''; }}});
+
+  // ================================================================
+  // COLOR AGENDA SWITCH
+  // ================================================================
+  const colorSwitch = document.getElementById('switchColorPersonal');
+  const colorInput  = document.getElementById('agendaColor');
+  function syncAgendaColorEnabled() {
+    const enabled = colorSwitch.checked;
+    colorInput.disabled = !enabled;
+    colorInput.title = enabled ? 'Elige un color' : 'Color desactivado';
+    colorInput.style.opacity = enabled ? '' : '0.5';
+    colorInput.style.cursor  = enabled ? '' : 'not-allowed';
+  }
+  document.addEventListener('DOMContentLoaded', syncAgendaColorEnabled);
+  document.getElementById('ConfiguracionModal').addEventListener('shown.bs.modal', syncAgendaColorEnabled);
+  colorSwitch.addEventListener('change', () => {
+    syncAgendaColorEnabled();
+    try {
+      if (calendar) {
+        if (colorSwitch.checked) calendar.setOption('eventColor', colorInput.value);
+        else calendar.setOption('eventColor', null);
+      }
+    } catch(err) { console.error(err); }
+  });
+
+  // (Opcional) Prefetch usuarios para tener opciones listas
+  async function prefetchUsuarios() {
+    const $el = $('#destinatarioSelect');
+    try {
+      const r = await $.ajax({ url: routes.usuario, dataType: 'json', data: { q: '' } });
+      const list = Array.isArray(r?.data) ? r.data : [];
+      $el.find('option').not(':selected').remove();
+      const frag = document.createDocumentFragment();
+      for (const u of list) {
+        const parts = [u?.nombre, u?.apellidoPaterno, u?.apellidoMaterno].filter(Boolean);
+        const text = parts.join(' ').trim() || (u?.email || '');
+        if (!text || u?.id == null) continue;
+        frag.appendChild(new Option(text, String(u.id), false, false));
+      }
+      $el.append(frag).trigger('change.select2');
+    } catch (e) { console.error('Prefetch usuarios falló:', e); }
+  }
+</script>
