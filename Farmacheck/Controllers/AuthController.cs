@@ -75,6 +75,12 @@ public class AuthController : Controller
 
             Response.Cookies.Append("AuthToken", vm.Token, cookieOptions);
 
+            if (!string.IsNullOrWhiteSpace(model?.Email))
+            {
+                var user = await _userApiClient.GetUserByEmailAsync(model.Email);
+                vm.UserId = user?.Id;
+            }
+
             return Json(new { success = true, data = vm });
         }
         catch (Exception ex)
