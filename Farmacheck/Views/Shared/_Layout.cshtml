@@ -63,51 +63,7 @@
         </div>
 
         <!-- MENÚ -->
-        <div class="px-3 pt-3 w-100 flex-grow-1 menu-scroll">
-
-            <a href="#" class="d-block py-2 text-white"><i class="bi bi-geo-alt me-2"></i> Ubicaciones</a>
-            <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#submenuFormularios" role="button" aria-expanded="false" aria-controls="submenuFormularios">
-                <i class="bi bi-ui-checks-grid me-2"></i> Formularios
-            </a>
-            <div class="collapse ps-3" id="submenuFormularios">
-                <a asp-controller="Formularios" asp-action="Index" class="d-block py-2 text-white">
-                    <i class="bi bi-file-earmark-text me-2"></i> Formularios
-                </a>
-                <a asp-controller="PeriodicidadCuestionario" asp-action="Index" class="d-block py-2 text-white">
-                    <i class="bi bi-tag-fill me-2"></i> Periodicidad Cuestionario
-                </a>
-            </div>
-            <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#submenuCatalogos" role="button" aria-expanded="false" aria-controls="submenuCatalogos"><i class="bi bi-journal-text me-2"></i> Catálogos</a>
-            <div class="collapse ps-3" id="submenuCatalogos">
-                <a asp-controller="UnidadDeNegocio" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-building me-2"></i> Unidades de Negocio</a>
-                <a asp-controller="Marca" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag me-2"></i> Marca</a>
-                <a asp-controller="SubMarca" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Submarca</a>
-                <a asp-controller="Zona" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Zonas</a>
-                <a asp-controller="Cliente" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Farmacias</a>
-                <a asp-controller="CategoriaCuestionario" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Área</a>
-                <a asp-controller="Categoria" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Categorias</a>
-                <a asp-controller="PeriodicidadCuestionario" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Periodicidad Cuestionario</a>
-                <a asp-controller="Rol" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Roles</a>
-                <a asp-controller="Jerarquia" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Jerarquias</a>
-                <a asp-controller="Usuario" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-tag-fill me-2"></i> Usuarios</a>
-            </div>
-            <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#submenuMisiones" role="button" aria-expanded="false" aria-controls="submenuMisiones"><i class="bi bi-rocket me-2"></i> Misiones</a>
-            <div class="collapse ps-3" id="submenuMisiones">
-                <a asp-controller="Sprint" asp-action="Index" class="d-block py-2 text-white"><i class="bi bi-lightning me-2"></i> Sprints</a>              
-            </div>
-            
-            <a href="#" class="d-block py-2 text-white"><i class="bi bi-megaphone me-2"></i> Campañas</a>
-            <a href="@Url.Action("Index", "Mailing")" class="d-block py-2 text-white">
-                <i class="bi bi-envelope-paper me-2"></i> Mailing
-            </a>
-
-            <a href="@Url.Action("Index", "Calendario")" class="d-block py-2 text-white">
-                <i class="bi bi-calendar-date me-2"></i> Agenda
-            </a>
-
-            <a href="@Url.Action("Index", "CentroNotificacion")" class="d-block py-2 text-white"><i class="bi bi-bell me-2"></i> Centro de Notificaciones</a>
-            <a href="@Url.Action("Index", "AsignacionMenuRol")" class="d-block py-2 text-white"><i class="bi bi-gear me-2"></i> Configuración</a>
-
+        <div id="menuContainer" class="px-3 pt-3 w-100 flex-grow-1 menu-scroll">
         </div>
     </div>
 
@@ -185,9 +141,133 @@
 
                 localStorage.removeItem('token');
                 localStorage.removeItem('username');
-                window.location.href = '@Url.Content("~/Security/Login")'; 
+                localStorage.removeItem('userId');
+                window.location.href = '@Url.Content("~/Security/Login")';
               });
             }
+
+            const menuContainer = document.getElementById('menuContainer');
+            const rolMenuUrl = '@Url.Action("ListarPorUsuario", "RolMenus")';
+            const baseUrl = '@Url.Content("~/")';
+
+            const escapeHtml = (value) => {
+                if (typeof value !== 'string') {
+                    return '';
+                }
+                return value
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
+
+            const buildUrl = (item) => {
+                const rawPath = item.ruta ?? (item.controller && item.cAction ? `${item.controller}/${item.cAction}` : null);
+                if (!rawPath) {
+                    return '#';
+                }
+
+                if (/^https?:/i.test(rawPath)) {
+                    return rawPath;
+                }
+
+                const hasTrailingSlash = baseUrl.endsWith('/');
+                if (rawPath.startsWith('/')) {
+                    if (hasTrailingSlash) {
+                        return baseUrl === '/' ? rawPath : baseUrl + rawPath.substring(1);
+                    }
+                    return baseUrl + rawPath;
+                }
+
+                return hasTrailingSlash ? baseUrl + rawPath : `${baseUrl}/${rawPath}`;
+            };
+
+            const iconClass = (icon) => {
+                const sanitized = (typeof icon === 'string' && icon.trim().length > 0) ? icon.trim() : 'bi-circle';
+                return `bi ${sanitized} me-2`;
+            };
+
+            const buildMenuMarkup = (itemsMap, parentKey) => {
+                const items = itemsMap.get(parentKey);
+                if (!items || items.length === 0) {
+                    return '';
+                }
+
+                return items
+                    .map(item => {
+                        const childrenMarkup = buildMenuMarkup(itemsMap, item.menuId);
+                        const displayName = escapeHtml(item.nombre ?? '');
+                        const iconMarkup = `<i class="${iconClass(item.icono)}"></i>`;
+
+                        if (childrenMarkup) {
+                            const collapseId = `submenu-${item.menuId}`;
+                            return `
+<a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#${collapseId}" role="button" aria-expanded="false" aria-controls="${collapseId}">${iconMarkup} ${displayName}</a>
+<div class="collapse ps-3" id="${collapseId}">
+${childrenMarkup}
+</div>`;
+                        }
+
+                        const href = buildUrl(item);
+                        return `<a href="${href}" class="d-block py-2 text-white">${iconMarkup} ${displayName}</a>`;
+                    })
+                    .join('\n');
+            };
+
+            const loadDynamicMenu = async () => {
+                if (!menuContainer) {
+                    return;
+                }
+
+                const userId = localStorage.getItem('userId');
+                if (!userId) {
+                    menuContainer.innerHTML = '';
+                    return;
+                }
+
+                const token = localStorage.getItem('token');
+
+                try {
+                    const response = await fetch(`${rolMenuUrl}?usuarioId=${userId}`, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error al obtener el menú (${response.status})`);
+                    }
+
+                    const result = await response.json();
+                    if (!result.success || !Array.isArray(result.data)) {
+                        menuContainer.innerHTML = '';
+                        return;
+                    }
+
+                    const filteredItems = result.data
+                        .filter(item => item && item.visible && item.puedeVer)
+                        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+
+                    const itemsMap = new Map();
+                    filteredItems.forEach(item => {
+                        const key = item.parentId === null || item.parentId === undefined ? null : item.parentId;
+                        if (!itemsMap.has(key)) {
+                            itemsMap.set(key, []);
+                        }
+                        itemsMap.get(key).push(item);
+                    });
+
+                    itemsMap.forEach(list => list.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)));
+
+                    const markup = buildMenuMarkup(itemsMap, null);
+                    menuContainer.innerHTML = markup || '';
+                } catch (error) {
+                    console.error('Error cargando el menú del usuario:', error);
+                    menuContainer.innerHTML = '';
+                }
+            };
+
+            loadDynamicMenu();
 
             const dropdownBtn = document.getElementById('userDropdownBtn');
             const dropdownMenu = document.getElementById('userDropdownMenu');

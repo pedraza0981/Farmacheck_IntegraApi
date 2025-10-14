@@ -356,6 +356,11 @@
                     loginEmail = email;
                     localStorage.setItem('username', email);
                     localStorage.setItem('token', result.data.token);
+                    if (result.data.userId !== undefined && result.data.userId !== null) {
+                        localStorage.setItem('userId', result.data.userId);
+                    } else {
+                        localStorage.removeItem('userId');
+                    }
 
                     const mustUpdatePassword = await needsPasswordUpdate(email);
                     if (mustUpdatePassword) {
