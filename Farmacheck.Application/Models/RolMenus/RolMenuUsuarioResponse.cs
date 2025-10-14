@@ -23,5 +23,9 @@ namespace Farmacheck.Application.Models.RolMenus
         public bool Visible { get; set; }
 
         public int? ParentId { get; set; }
+
+        public string? Controller { get; set; }
+
+        public string? CAction { get; set; }
     }
 }
