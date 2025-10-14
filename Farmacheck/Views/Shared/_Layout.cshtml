@@ -162,10 +162,46 @@
                     .replace(/'/g, '&#39;');
             };
 
+            const normalizeKey = (value) => {
+                if (value === null || value === undefined) {
+                    return 'root';
+                }
+                return String(value);
+            };
+
+            const getString = (value) => (typeof value === 'string' ? value.trim() : '');
+
+            const resolveValue = (item, ...candidates) => {
+                for (const key of candidates) {
+                    if (key in item) {
+                        const candidate = getString(item[key]);
+                        if (candidate) {
+                            return candidate;
+                        }
+                    }
+                }
+                return '';
+            };
+
             const buildUrl = (item) => {
-                const rawPath = item.ruta ?? (item.controller && item.cAction ? `${item.controller}/${item.cAction}` : null);
+                const ruta = resolveValue(item, 'ruta', 'Ruta');
+                const controller = resolveValue(item, 'controller', 'Controller');
+                const action = resolveValue(item, 'cAction', 'CAction');
+
+                let rawPath = ruta;
+
                 if (!rawPath) {
-                    return '#';
+                    if (controller) {
+                        rawPath = action ? `${controller}/${action}` : controller;
+                    } else {
+                        return '#';
+                    }
+                } else if (controller && action) {
+                    const trimmedRuta = rawPath.replace(/^\/+|\/+$/g, '');
+                    const controllerPath = controller.replace(/^\/+|\/+$/g, '');
+                    if (trimmedRuta.toLowerCase() === controllerPath.toLowerCase()) {
+                        rawPath = `${controllerPath}/${action}`;
+                    }
                 }
 
                 if (/^https?:/i.test(rawPath)) {
@@ -183,6 +219,27 @@
                 return hasTrailingSlash ? baseUrl + rawPath : `${baseUrl}/${rawPath}`;
             };
 
+            const resolveBool = (item, ...candidates) => {
+                for (const key of candidates) {
+                    if (key in item) {
+                        return Boolean(item[key]);
+                    }
+                }
+                return false;
+            };
+
+            const resolveNumber = (item, ...candidates) => {
+                for (const key of candidates) {
+                    if (key in item) {
+                        const value = Number(item[key]);
+                        if (!Number.isNaN(value)) {
+                            return value;
+                        }
+                    }
+                }
+                return 0;
+            };
+
             const iconClass = (icon) => {
                 const sanitized = (typeof icon === 'string' && icon.trim().length > 0) ? icon.trim() : 'bi-circle';
                 return `bi ${sanitized} me-2`;
@@ -196,12 +253,13 @@
 
                 return items
                     .map(item => {
-                        const childrenMarkup = buildMenuMarkup(itemsMap, item.menuId);
-                        const displayName = escapeHtml(item.nombre ?? '');
-                        const iconMarkup = `<i class="${iconClass(item.icono)}"></i>`;
+                        const key = normalizeKey(item.menuId ?? item.MenuId);
+                        const childrenMarkup = buildMenuMarkup(itemsMap, key);
+                        const displayName = escapeHtml(item.nombre ?? item.Nombre ?? '');
+                        const iconMarkup = `<i class="${iconClass(item.icono ?? item.Icono)}"></i>`;
 
                         if (childrenMarkup) {
-                            const collapseId = `submenu-${item.menuId}`;
+                            const collapseId = `submenu-${key}`;
                             return `
 <a class="d-block py-2 text-white" data-bs-toggle="collapse" href="#${collapseId}" role="button" aria-expanded="false" aria-controls="${collapseId}">${iconMarkup} ${displayName}</a>
 <div class="collapse ps-3" id="${collapseId}">
@@ -245,21 +303,21 @@ ${childrenMarkup}
                     }
 
                     const filteredItems = result.data
-                        .filter(item => item && item.visible && item.puedeVer)
-                        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+                        .filter(item => item && resolveBool(item, 'visible', 'Visible') && resolveBool(item, 'puedeVer', 'PuedeVer'))
+                        .sort((a, b) => resolveNumber(a, 'orden', 'Orden') - resolveNumber(b, 'orden', 'Orden'));
 
                     const itemsMap = new Map();
                     filteredItems.forEach(item => {
-                        const key = item.parentId === null || item.parentId === undefined ? null : item.parentId;
+                        const key = normalizeKey(item.parentId ?? item.ParentId);
                         if (!itemsMap.has(key)) {
                             itemsMap.set(key, []);
                         }
                         itemsMap.get(key).push(item);
                     });
 
-                    itemsMap.forEach(list => list.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)));
+                    itemsMap.forEach(list => list.sort((a, b) => resolveNumber(a, 'orden', 'Orden') - resolveNumber(b, 'orden', 'Orden')));
 
-                    const markup = buildMenuMarkup(itemsMap, null);
+                    const markup = buildMenuMarkup(itemsMap, 'root');
                     menuContainer.innerHTML = markup || '';
                 } catch (error) {
                     console.error('Error cargando el menú del usuario:', error);
