@@ -86,7 +86,7 @@
                     </div>
                     <div class="col-md-3">
                         <label>Teléfono</label>
-                        <input type="text" class="form-control rounded-3" id="telefono" placeholder="Teléfono" />
+                        <input type="text" class="form-control rounded-3" id="telefono" placeholder="Teléfono" inputmode="numeric" pattern="[0-9]*" />
                     </div>
                     <div class="col-md-3 d-flex align-items-center">
                         <div class="form-check form-switch mb-3">
@@ -437,6 +437,13 @@
                 usuarioGuardado = false;
                 $('#collapseRoles').collapse('hide');
                 $('#modalEntidad').modal('show');
+            });
+
+            $('#telefono').on('input', function () {
+                const soloDigitos = this.value.replace(/\D/g, '');
+                if (this.value !== soloDigitos) {
+                    this.value = soloDigitos;
+                }
             });
 
             $('#btnResetPassword').click(function () {
