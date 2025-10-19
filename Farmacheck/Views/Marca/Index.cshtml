@@ -132,7 +132,8 @@
             formData.append('Id', id);
             formData.append('Nombre', $('#nombre').val());
             formData.append('UnidadDeNegocioId', $('#unidadNegocio').val());
-            formData.append('Logotipo', $('#logotipoBase64').val());
+            formData.append('ImagenDeReferencia', $('#logotipoBase64').val());
+            formData.append('ArchivoImagen', $('#logotipoNombre').val());
             formData.append('Estatus', $('#estatusCheck').prop('checked'));
 
             const file = $('#logotipoArchivo')[0].files[0];
@@ -241,8 +242,8 @@
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#unidadNegocio').val(u.unidadDeNegocioId);
-                    $('#logotipoBase64').val(u.logotipo);
-                    $('#logotipoNombre').val(u.logotipo);
+                    $('#logotipoBase64').val(u.imagenDeReferencia);
+                    $('#logotipoNombre').val(u.archivoImagen || '');
                     $('#logotipoArchivo').val('');
                     $('#estatusCheck').prop('checked', u.estatus === true);
                     $('#modalEntidad').modal('show');

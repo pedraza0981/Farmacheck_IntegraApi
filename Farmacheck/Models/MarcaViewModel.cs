@@ -7,8 +7,8 @@ namespace Farmacheck.Models
         public int Id { get; set; }
         public int UnidadDeNegocioId { get; set; }
         public string Nombre { get; set; }
-        public string Logotipo { get; set; }
-        public string LogotipoNombreArchivo { get; set; }
+        public string? ImagenDeReferencia { get; set; }
+        public string? ArchivoImagen { get; set; }
         public bool? Estatus { get; set; }
 
 
