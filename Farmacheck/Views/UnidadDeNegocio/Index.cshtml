@@ -236,8 +236,8 @@
                     $('#nombre').val(u.nombre);
                     $('#rfc').val(u.rfc);
                     $('#direccion').val(u.direccion);
-                    $('#logotipoBase64').val(u.imagenDeReferencia || u.logotipo || '');
-                    $('#logotipoNombre').val(u.archivoImagen || u.logotipoNombreArchivo || '');
+                    $('#logotipoBase64').val(u.logotipo || u.imagenDeReferencia || '');
+                    $('#logotipoNombre').val(u.imagenDeReferencia || u.archivoImagen || u.logotipoNombreArchivo || '');
                     $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
 
                     $('#logotipoArchivo').val('');
