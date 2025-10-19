@@ -13,6 +13,7 @@ namespace Farmacheck.Application.DTOs
         public string Nombre { get; set; }
         public string? ImagenDeReferencia { get; set; }
         public string? ArchivoImagen { get; set; }
+        public string? Logotipo { get; set; }
         public bool? Estatus { get; set; }
 
     }
