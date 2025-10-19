@@ -62,8 +62,10 @@ namespace Farmacheck.Helpers
             CreateMap<EtiquetasPorEscalaNumericaDto, EtiquetasPorEscalaNumericaViewModel>();
 
             CreateMap<BusinessUnitDto, UnidadDeNegocio>()
-            .ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.Ignore()) // No viene del DTO
-            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
+            .ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.MapFrom(src => src.ArchivoImagen))
+            .ForMember(dest => dest.ArchivoImagen, opt => opt.MapFrom(src => src.ArchivoImagen))
+            .ForMember(dest => dest.ImagenDeReferencia, opt => opt.MapFrom(src => src.ImagenDeReferencia ?? src.Logotipo))
+            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.ImagenDeReferencia ?? src.Logotipo ?? string.Empty))
             .ForMember(dest => dest.Rfc, opt => opt.MapFrom(src => src.Rfc ?? string.Empty))
             .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.Direccion ?? string.Empty));
 
@@ -192,7 +194,9 @@ namespace Farmacheck.Helpers
 
 
             CreateMap<UnidadDeNegocio, BusinessUnitRequest>()
-            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo ?? string.Empty))
+            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo))
+            .ForMember(dest => dest.ImagenDeReferencia, opt => opt.MapFrom(src => src.ImagenDeReferencia ?? src.Logotipo))
+            .ForMember(dest => dest.ArchivoImagen, opt => opt.MapFrom(src => src.ArchivoImagen ?? src.LogotipoNombreArchivo))
             .ForMember(dest => dest.Rfc, opt => opt.MapFrom(src => src.Rfc ?? string.Empty))
             .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.Direccion ?? string.Empty));
 

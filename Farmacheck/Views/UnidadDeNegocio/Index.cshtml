@@ -78,7 +78,8 @@
                 <div class="mb-2">
                     <label>Logotipo</label>
                     <input type="file" class="form-control" id="logotipoArchivo" accept="image/*" />
-                    <input type="text" class="form-control mt-2" id="logotipo" readonly />
+                    <input type="hidden" id="logotipoBase64" />
+                    <input type="text" class="form-control mt-2" id="logotipoNombre" readonly />
                 </div>
             </div>
             <div class="modal-footer">
@@ -123,7 +124,10 @@
 
             $('#logotipoArchivo').change(function () {
                 const file = this.files[0];
-                $('#logotipo').val(file ? file.name : '');
+                $('#logotipoNombre').val(file ? file.name : '');
+                if (file) {
+                    $('#logotipoBase64').val('');
+                }
             });
 
             $('#btnGuardar').click(function () {
@@ -134,6 +138,8 @@
                 formData.append('Rfc', $('#rfc').val());
                 formData.append('Direccion', $('#direccion').val());
                 formData.append('Estatus', $('#estatusCheck').prop('checked'));
+                formData.append('ImagenDeReferencia', $('#logotipoBase64').val());
+                formData.append('ArchivoImagen', $('#logotipoNombre').val());
 
                 const file = $('#logotipoArchivo')[0].files[0];
                 if (file) {
@@ -230,7 +236,8 @@
                     $('#nombre').val(u.nombre);
                     $('#rfc').val(u.rfc);
                     $('#direccion').val(u.direccion);
-                    $('#logotipo').val(u.logotipoNombreArchivo);
+                    $('#logotipoBase64').val(u.imagenDeReferencia || u.logotipo || '');
+                    $('#logotipoNombre').val(u.archivoImagen || u.logotipoNombreArchivo || '');
                     $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
 
                     $('#logotipoArchivo').val('');
@@ -260,7 +267,8 @@
             $('#nombre').val('');
             $('#rfc').val('');
             $('#direccion').val('');
-            $('#logotipo').val('');
+            $('#logotipoBase64').val('');
+            $('#logotipoNombre').val('');
             $('#logotipoArchivo').val('');
             $('#estatusCheck').prop('checked', true).prop('disabled', true);
         }
