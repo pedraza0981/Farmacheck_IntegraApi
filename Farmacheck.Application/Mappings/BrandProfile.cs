@@ -12,12 +12,14 @@ namespace Farmacheck.Application.Mappings
                 .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
 
-            CreateMap<BrandResponse, MarcaDto>()           
-           
+            CreateMap<BrandResponse, MarcaDto>()
+
            .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocio));
 
             CreateMap<MarcaDto, BrandRequest>()
                 .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId))
+                .ForMember(dest => dest.ImagenDeReferencia, opt => opt.MapFrom(src => src.ImagenDeReferencia))
+                .ForMember(dest => dest.ArchivoImagen, opt => opt.MapFrom(src => src.ArchivoImagen))
                 .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
 

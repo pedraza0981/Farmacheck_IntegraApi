@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Farmacheck.Application.Models.Brands
 {
     public class UpdateBrandRequest : BrandRequest
-    {        
+    {
         public int Id { get; set; }
 
         public bool? Estatus { get; set; }

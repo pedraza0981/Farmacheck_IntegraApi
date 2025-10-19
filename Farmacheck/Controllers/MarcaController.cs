@@ -96,9 +96,15 @@ namespace Farmacheck.Controllers
                 {
                     using var ms = new MemoryStream();
                     await LogotipoArchivo.CopyToAsync(ms);
-                    model.Logotipo = Convert.ToBase64String(ms.ToArray());
-                    model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
+                    model.ImagenDeReferencia = Convert.ToBase64String(ms.ToArray());
+                    model.ArchivoImagen = LogotipoArchivo.FileName;
                 }
+
+                if (string.IsNullOrWhiteSpace(model.ImagenDeReferencia))
+                    model.ImagenDeReferencia = null;
+
+                if (string.IsNullOrWhiteSpace(model.ArchivoImagen))
+                    model.ArchivoImagen = null;
 
                 model.Estatus ??= true;
 

@@ -76,15 +76,16 @@ namespace Farmacheck.Helpers
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId))
                 .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre))
-                .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo))
+                .ForMember(dest => dest.ImagenDeReferencia, opt => opt.MapFrom(src => src.ImagenDeReferencia))
+                .ForMember(dest => dest.ArchivoImagen, opt => opt.MapFrom(src => src.ArchivoImagen))
                 .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
-                //.ForMember(dest => dest.LogotipoNombreArchivo, opt => opt.MapFrom(src => src.LogotipoNombreArchivo));
 
 
             CreateMap<MarcaViewModel, BrandRequest>()
             .ForMember(dest => dest.UnidadDeNegocioId, opt => opt.MapFrom(src => src.UnidadDeNegocioId))
             .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Nombre))
-            .ForMember(dest => dest.Logotipo, opt => opt.MapFrom(src => src.Logotipo))
+            .ForMember(dest => dest.ImagenDeReferencia, opt => opt.MapFrom(src => src.ImagenDeReferencia))
+            .ForMember(dest => dest.ArchivoImagen, opt => opt.MapFrom(src => src.ArchivoImagen))
             .ForMember(dest => dest.Estatus, opt => opt.MapFrom(src => src.Estatus));
 
             CreateMap<MenuDto, MenuViewModel>().ReverseMap();
