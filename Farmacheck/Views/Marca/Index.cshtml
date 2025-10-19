@@ -243,7 +243,7 @@
                     $('#nombre').val(u.nombre);
                     $('#unidadNegocio').val(u.unidadDeNegocioId);
                     $('#logotipoBase64').val(u.imagenDeReferencia);
-                    $('#logotipoNombre').val(u.archivoImagen || '');
+                    $('#logotipoNombre').val(u.logotipo || u.archivoImagen || '');
                     $('#logotipoArchivo').val('');
                     $('#estatusCheck').prop('checked', u.estatus === true);
                     $('#modalEntidad').modal('show');
