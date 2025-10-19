@@ -69,9 +69,25 @@ namespace Farmacheck.Controllers
                 {
                     using var ms = new MemoryStream();
                     await LogotipoArchivo.CopyToAsync(ms);
-                    model.Logotipo = Convert.ToBase64String(ms.ToArray());
-                    model.LogotipoNombreArchivo = LogotipoArchivo.FileName;
+                    var base64 = Convert.ToBase64String(ms.ToArray());
+                    var fileName = LogotipoArchivo.FileName;
+                    model.Logotipo = base64;
+                    model.ImagenDeReferencia = base64;
+                    model.LogotipoNombreArchivo = fileName;
+                    model.ArchivoImagen = fileName;
                 }
+
+                model.Logotipo = string.IsNullOrWhiteSpace(model.Logotipo) ? null : model.Logotipo;
+                model.LogotipoNombreArchivo = string.IsNullOrWhiteSpace(model.LogotipoNombreArchivo) ? null : model.LogotipoNombreArchivo;
+
+                if (string.IsNullOrWhiteSpace(model.ImagenDeReferencia))
+                    model.ImagenDeReferencia = model.Logotipo;
+
+                if (string.IsNullOrWhiteSpace(model.ArchivoImagen))
+                    model.ArchivoImagen = model.LogotipoNombreArchivo;
+
+                model.ImagenDeReferencia = string.IsNullOrWhiteSpace(model.ImagenDeReferencia) ? null : model.ImagenDeReferencia;
+                model.ArchivoImagen = string.IsNullOrWhiteSpace(model.ArchivoImagen) ? null : model.ArchivoImagen;
 
                 var request = _mapper.Map<BusinessUnitRequest>(model);
 
