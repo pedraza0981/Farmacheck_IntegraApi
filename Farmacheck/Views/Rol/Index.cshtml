@@ -118,9 +118,10 @@
         <thead>
             <tr>
                 <th style="width:10%;">Id</th>
-                <th style="width:30%;">Nombre</th>
-                <th style="width:30%;">Unidad de Negocio</th>
+                <th style="width:25%;">Nombre</th>
+                <th style="width:25%;">Unidad de Negocio</th>
                 <th style="width:10%;">Estatus</th>
+                <th style="width:10%;">Acceso Web</th>
                 <th style="width:20%;" class="text-center">Acciones</th>
             </tr>
         </thead>
@@ -132,6 +133,7 @@
                 <td>@u.Nombre</td>
                 <td>@u.UnidadDeNegocioNombre</td>
                 <td>@(u.Estatus ? "Activo" : "Inactivo")</td>
+                <td>@(u.AccesoWeb ? "Sí" : "No")</td>
                 <td class="text-center">
                     <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(@u.Id)"><i class="bi bi-pencil"></i></button>
                 </td>
@@ -165,6 +167,10 @@
                             <div class="form-check form-switch mb-3">
                                 <input class="form-check-input" type="checkbox" id="estatusCheck">
                                 <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="accesoWebCheck">
+                                <label class="form-check-label" for="accesoWebCheck">Acceso a Web</label>
                             </div>
                             <div class="mb-3 d-none" id="permisosSection">
                                 <label class="form-label">Permisos</label>
@@ -422,6 +428,7 @@
                 limpiar();
                 $('#modalTitulo').text('Nuevo Rol');
                 $('#estatusCheck').prop('checked', true).prop('disabled', true);
+                $('#accesoWebCheck').prop('checked', false).prop('disabled', false);
                 cargarUnidades(unidadId).then(function () {
                     $('#modalEntidad').modal('show');
                     cargarPermisos();
@@ -468,6 +475,7 @@
                     Nombre: nombre,
                     UnidadDeNegocioId: unidadIdSeleccionada,
                     Estatus: $('#estatusCheck').prop('checked'),
+                    AccesoWeb: $('#accesoWebCheck').prop('checked'),
                     Permisos: []
                 };
 
@@ -556,6 +564,7 @@
                             <td>${u.nombre}</td>
                             <td>${u.unidadDeNegocioNombre}</td>
                             <td>${u.estatus ? 'Activo' : 'Inactivo'}</td>
+                            <td>${u.accesoWeb ? 'Sí' : 'No'}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm" style="background-color:#00ab8e; color:white;" onclick="editar(${u.id})"><i class="bi bi-pencil"></i></button>
                             </td>
@@ -617,6 +626,7 @@
                     $('#entidadId').val(u.id);
                     $('#nombre').val(u.nombre);
                     $('#estatusCheck').prop('checked', u.estatus).prop('disabled', false);
+                    $('#accesoWebCheck').prop('checked', !!u.accesoWeb).prop('disabled', false);
                     cargarUnidades(u.unidadDeNegocioId).then(function () {
                         $('#modalEntidad').modal('show');
                         cargarPermisos(u.id, u.permisos || []);
@@ -647,6 +657,7 @@
             $('#nombre').val('');
             $('#unidadNegocio').empty();
             $('#estatusCheck').prop('checked', true).prop('disabled', true);
+            $('#accesoWebCheck').prop('checked', false).prop('disabled', false);
             $('#contenedorPermisos').empty();
             clearMenuSelections();
         }
