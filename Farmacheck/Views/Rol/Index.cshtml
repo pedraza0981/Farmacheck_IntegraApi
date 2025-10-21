@@ -166,7 +166,7 @@
                                 <input class="form-check-input" type="checkbox" id="estatusCheck">
                                 <label class="form-check-label" for="estatusCheck">Habilitado</label>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-none" id="permisosSection">
                                 <label class="form-label">Permisos</label>
                                 <div id="contenedorPermisos" class="border rounded p-3 permisos-container">
                                     <!-- Permisos serán insertados aquí -->
@@ -353,19 +353,6 @@
                 .filter(id => !Number.isNaN(id) && id > 0);
         }
 
-        function haveMenusChanged(selectedMenuIds) {
-            if (!Array.isArray(selectedMenuIds)) {
-                return false;
-            }
-
-            if (selectedMenuIds.length !== lastFetchedMenuIds.size) {
-                return true;
-            }
-
-            return selectedMenuIds.some(id => !lastFetchedMenuIds.has(id)) ||
-                Array.from(lastFetchedMenuIds).some(id => !selectedMenuIds.includes(id));
-        }
-
         async function guardarMenus(roleId, selectedMenuIds) {
             const response = await fetch(saveMenuAssignmentUrl, {
                 method: 'POST',
@@ -452,20 +439,44 @@
 
             $('#btnGuardar').click(async function () {
                 const button = $(this);
-                const id = parseInt($('#entidadId').val()) || 0;
+                const id = parseInt($('#entidadId').val(), 10) || 0;
+                const rawNombre = $('#nombre').val() || '';
+                const nombre = rawNombre.trim();
+                const unidadSeleccionada = $('#unidadNegocio').val();
+                const unidadIdSeleccionada = unidadSeleccionada ? parseInt(unidadSeleccionada, 10) : NaN;
+                const selectedMenuIds = getSelectedMenuIds();
+
+                if (!nombre) {
+                    showAlert('Debe capturar el nombre del rol.', 'warning');
+                    $('#nombre').focus();
+                    return;
+                }
+
+                if (Number.isNaN(unidadIdSeleccionada)) {
+                    showAlert('Debe seleccionar una unidad de negocio.', 'warning');
+                    $('#unidadNegocio').focus();
+                    return;
+                }
+
+                if (!Array.isArray(selectedMenuIds) || selectedMenuIds.length === 0) {
+                    showAlert('Debe seleccionar al menos un menú en la asignación de permisos por rol.', 'warning');
+                    return;
+                }
+
                 const data = {
                     Id: id,
-                    Nombre: $('#nombre').val(),
-                    UnidadDeNegocioId: $('#unidadNegocio').val(),
+                    Nombre: nombre,
+                    UnidadDeNegocioId: unidadIdSeleccionada,
                     Estatus: $('#estatusCheck').prop('checked'),
                     Permisos: []
                 };
 
                 $('.permiso-check:checked').each(function () {
-                    data.Permisos.push($(this).val());
+                    const valor = parseInt($(this).val(), 10);
+                    if (!Number.isNaN(valor)) {
+                        data.Permisos.push(valor);
+                    }
                 });
-
-                const selectedMenuIds = getSelectedMenuIds();
 
                 button.prop('disabled', true);
 
@@ -485,7 +496,7 @@
                     const roleId = response.id || id;
                     let assignmentResult = null;
 
-                    if (roleId && haveMenusChanged(selectedMenuIds)) {
+                    if (roleId) {
                         assignmentResult = await guardarMenus(roleId, selectedMenuIds);
 
                         if (!assignmentResult?.success) {
