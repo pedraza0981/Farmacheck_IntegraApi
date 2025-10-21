@@ -8,7 +8,10 @@ namespace Farmacheck.Application.Mappings
     {
         public RoleProfile()
         {
-            CreateMap<RoleResponse, RoleDto>().ReverseMap();
+            CreateMap<RoleResponse, RoleDto>()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb))
+                .ReverseMap()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb));
         }
     }
 }

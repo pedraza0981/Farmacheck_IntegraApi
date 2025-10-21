@@ -12,6 +12,8 @@
 
         public string UnidadDeNegocioNombre { get; set; }
 
+        public bool AccesoWeb { get; set; }
+
         public List<int> Permisos { get; set; } = new List<int>();
     }
 }
