@@ -1,11 +1,103 @@
-﻿@model List<Farmacheck.Models.RolViewModel>
+﻿@using Farmacheck.Models
+@using Microsoft.AspNetCore.Html
+@model List<Farmacheck.Models.RolViewModel>
 @{
     ViewData["Title"] = "Roles";
+    var menuTree = ViewBag.MenuTree as List<MenuTreeNode> ?? new List<MenuTreeNode>();
 }
 <style>
     #tablaDatos thead th {
         text-align: center;
         vertical-align: middle;
+    }
+
+    .modal-dialog.modal-xl {
+        max-width: 1100px;
+    }
+
+    .permisos-container {
+        max-height: 320px;
+        overflow-y: auto;
+        background-color: #ffffff;
+    }
+
+    .asignacion-card {
+        border: 1px solid #dee2e6;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        background-color: #ffffff;
+    }
+
+    .asignacion-card-header {
+        background-color: #0C4C98;
+    }
+
+    .asignacion-card-body {
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.05), transparent 70%);
+        min-height: 420px;
+    }
+
+    #menuTreeModal {
+        max-height: 360px;
+        overflow-y: auto;
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.75rem;
+        padding: 1rem;
+    }
+
+    #menuTreeModal ul {
+        list-style-type: none;
+        padding-left: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    #menuTreeModal li {
+        margin: 0.25rem 0;
+        position: relative;
+    }
+
+    #menuTreeModal .toggle {
+        cursor: pointer;
+        display: inline-block;
+        width: 1.25rem;
+        color: #0C4C98;
+        font-weight: 600;
+        margin-right: 0.15rem;
+        user-select: none;
+    }
+
+    #menuTreeModal ul.collapsed {
+        display: none;
+    }
+
+    #menuTreeModal label {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #1f2937;
+        font-weight: 500;
+    }
+
+    #menuTreeModal .node-checkbox {
+        accent-color: #0C4C98;
+        transform: scale(1.05);
+    }
+
+    #menuTreeModal li:hover > label {
+        color: #0C4C98;
+    }
+
+    @media (max-width: 992px) {
+        .asignacion-card-body {
+            min-height: auto;
+        }
+
+        #menuTreeModal {
+            max-height: 300px;
+        }
     }
 </style>
 
@@ -51,7 +143,7 @@
 
 <!-- MODAL -->
 <div class="modal fade" id="modalEntidad" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary_form text-white">
                 <h5 class="modal-title" id="modalTitulo">Nuevo Rol</h5>
@@ -59,22 +151,50 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="entidadId" />
-                <div class="mb-3">
-                    <label>Nombre</label>
-                    <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
-                </div>
-                <div class="mb-3">
-                    <label>Unidad de Negocio</label>
-                    <select class="form-select" id="unidadNegocio"></select>
-                </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="estatusCheck">
-                    <label class="form-check-label" for="estatusCheck">Habilitado</label>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Permisos</label>
-                    <div id="contenedorPermisos" class="border rounded p-2" style="max-height:300px; overflow-y:auto;">
-                        <!-- Permisos serán insertados aquí -->
+                <div class="container-fluid">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" placeholder="Nombre" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Unidad de Negocio</label>
+                                <select class="form-select" id="unidadNegocio"></select>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="estatusCheck">
+                                <label class="form-check-label" for="estatusCheck">Habilitado</label>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Permisos</label>
+                                <div id="contenedorPermisos" class="border rounded p-3 permisos-container">
+                                    <!-- Permisos serán insertados aquí -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="asignacion-card h-100 d-flex flex-column">
+                                <div class="asignacion-card-header py-3 px-3">
+                                    <h6 class="mb-0 text-white">Asignación de permisos por rol</h6>
+                                </div>
+                                <div class="asignacion-card-body p-3 flex-grow-1 d-flex flex-column">
+                                    <h6 class="text-secondary fw-semibold mb-3">Menús disponibles</h6>
+                                    <div id="menuTreeModal" class="menu-tree-modal flex-grow-1">
+                                        @if (menuTree != null && menuTree.Any())
+                                        {
+                                            <ul class="tree-root">
+                                                @RenderNodes(menuTree)
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted mb-0">No hay menús disponibles.</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -89,8 +209,210 @@
 @section Scripts {
     <script>
         const unidadId = @ViewBag.UnidadId;
+        const fetchRoleMenusUrl = '@Url.Action("GetMenusByRole", "Rol")';
+        const saveMenuAssignmentUrl = '@Url.Action("GuardarAsignaciones", "Rol")';
+
+        let lastFetchedMenuIds = new Set();
+
+        function getMenuTreeElement() {
+            return document.getElementById('menuTreeModal');
+        }
+
+        function getMenuCheckboxes() {
+            const tree = getMenuTreeElement();
+            return tree ? tree.querySelectorAll('.node-checkbox') : [];
+        }
+
+        function updateAllToggleIcons() {
+            const tree = getMenuTreeElement();
+            if (!tree) {
+                return;
+            }
+
+            tree.querySelectorAll('.toggle').forEach(toggle => {
+                const listItem = toggle.closest('li');
+                const childList = listItem ? listItem.querySelector(':scope > ul') : null;
+
+                if (!childList || childList.children.length === 0) {
+                    toggle.textContent = '';
+                    toggle.style.cursor = 'default';
+                } else if (childList.classList.contains('collapsed')) {
+                    toggle.textContent = '▶';
+                    toggle.style.cursor = 'pointer';
+                } else {
+                    toggle.textContent = '▼';
+                    toggle.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        function resetMenuTreeCollapse() {
+            const tree = getMenuTreeElement();
+            if (!tree) {
+                return;
+            }
+
+            tree.querySelectorAll('ul').forEach(list => {
+                if (list.classList.contains('tree-root')) {
+                    list.classList.remove('collapsed');
+                } else {
+                    list.classList.add('collapsed');
+                }
+            });
+
+            updateAllToggleIcons();
+        }
+
+        function clearMenuSelections() {
+            getMenuCheckboxes().forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            lastFetchedMenuIds = new Set();
+            resetMenuTreeCollapse();
+        }
+
+        function expandAncestors(checkbox) {
+            let currentLi = checkbox.closest('li');
+
+            while (currentLi) {
+                const parentList = currentLi.parentElement;
+                if (parentList && parentList.classList.contains('collapsed')) {
+                    parentList.classList.remove('collapsed');
+                }
+
+                const parentLi = parentList ? parentList.closest('li') : null;
+                if (parentLi) {
+                    const toggle = parentLi.querySelector(':scope > .toggle');
+                    if (toggle) {
+                        toggle.textContent = '▼';
+                    }
+                }
+
+                currentLi = parentLi;
+            }
+        }
+
+        function applyMenuSelections(rolMenus) {
+            resetMenuTreeCollapse();
+
+            const selectedIds = new Set();
+            lastFetchedMenuIds = new Set();
+
+            (rolMenus || []).forEach(menu => {
+                if (!menu) {
+                    return;
+                }
+
+                const menuId = menu.menuId !== undefined ? menu.menuId : menu.MenuId;
+                const canView = menu.puedeVer !== undefined ? menu.puedeVer : menu.PuedeVer;
+
+                if (menuId && (canView === undefined || canView === null || canView)) {
+                    const numericId = Number(menuId);
+                    selectedIds.add(numericId);
+                    lastFetchedMenuIds.add(numericId);
+                }
+            });
+
+            getMenuCheckboxes().forEach(checkbox => {
+                const menuId = Number(checkbox.dataset.id || checkbox.value);
+                const isSelected = selectedIds.has(menuId);
+                checkbox.checked = isSelected;
+
+                if (isSelected) {
+                    expandAncestors(checkbox);
+                }
+            });
+
+            updateAllToggleIcons();
+        }
+
+        async function cargarMenusPorRol(roleId) {
+            clearMenuSelections();
+
+            if (!roleId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${fetchRoleMenusUrl}?roleId=${encodeURIComponent(roleId)}`);
+                if (!response.ok) {
+                    throw new Error('No se pudo obtener los menús del rol.');
+                }
+
+                const rolMenus = await response.json();
+                applyMenuSelections(rolMenus);
+            } catch (error) {
+                console.error('Error al obtener los menús por rol:', error);
+            }
+        }
+
+        function getSelectedMenuIds() {
+            return Array.from(getMenuCheckboxes())
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => Number(checkbox.dataset.id || checkbox.value))
+                .filter(id => !Number.isNaN(id) && id > 0);
+        }
+
+        function haveMenusChanged(selectedMenuIds) {
+            if (!Array.isArray(selectedMenuIds)) {
+                return false;
+            }
+
+            if (selectedMenuIds.length !== lastFetchedMenuIds.size) {
+                return true;
+            }
+
+            return selectedMenuIds.some(id => !lastFetchedMenuIds.has(id)) ||
+                Array.from(lastFetchedMenuIds).some(id => !selectedMenuIds.includes(id));
+        }
+
+        async function guardarMenus(roleId, selectedMenuIds) {
+            const response = await fetch(saveMenuAssignmentUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    roleId: Number(roleId),
+                    menuIds: selectedMenuIds
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'No se pudo guardar la asignación de menús.');
+            }
+
+            return await response.json();
+        }
+
+        function initializeTreeToggles() {
+            const tree = getMenuTreeElement();
+            if (!tree) {
+                return;
+            }
+
+            tree.querySelectorAll('.toggle').forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const listItem = toggle.closest('li');
+                    const childList = listItem ? listItem.querySelector(':scope > ul') : null;
+
+                    if (!childList || childList.children.length === 0) {
+                        return;
+                    }
+
+                    childList.classList.toggle('collapsed');
+                    updateAllToggleIcons();
+                });
+            });
+
+            updateAllToggleIcons();
+        }
 
         $(document).ready(function () {
+            initializeTreeToggles();
+            resetMenuTreeCollapse();
+
             const storedLength = localStorage.getItem('rolesPageLength');
             const initialPageLength = storedLength ? parseInt(storedLength) : 5;
             const tabla = $('#tablaDatos').DataTable({
@@ -116,6 +438,7 @@
                 cargarUnidades(unidadId).then(function () {
                     $('#modalEntidad').modal('show');
                     cargarPermisos();
+                    clearMenuSelections();
                 });
             });
 
@@ -123,7 +446,12 @@
                 descargarReporte();
             });
 
-            $('#btnGuardar').click(function () {
+            $('#modalEntidad').on('hidden.bs.modal', function () {
+                clearMenuSelections();
+            });
+
+            $('#btnGuardar').click(async function () {
+                const button = $(this);
                 const id = parseInt($('#entidadId').val()) || 0;
                 const data = {
                     Id: id,
@@ -137,23 +465,52 @@
                     data.Permisos.push($(this).val());
                 });
 
-                $.ajax({
-                    url: '@Url.Action("Guardar", "Rol")',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    success: function (r) {
-                        if (r.success) {
-                            $('#modalEntidad').modal('hide');
-                            const msg = id === 0 ? 'Rol creado correctamente' : 'Rol actualizado';
-                            showAlert(msg, 'success');
-                            cargar();
-                        } else {
-                            showAlert(r.error || 'Error al guardar', 'error');
-                        }
+                const selectedMenuIds = getSelectedMenuIds();
+
+                button.prop('disabled', true);
+
+                try {
+                    const response = await $.ajax({
+                        url: '@Url.Action("Guardar", "Rol")',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data)
+                    });
+
+                    if (!response.success) {
+                        showAlert(response.error || 'Error al guardar', 'error');
+                        return;
                     }
-                });
-          });
+
+                    const roleId = response.id || id;
+                    let assignmentResult = null;
+
+                    if (roleId && haveMenusChanged(selectedMenuIds)) {
+                        assignmentResult = await guardarMenus(roleId, selectedMenuIds);
+
+                        if (!assignmentResult?.success) {
+                            showAlert((assignmentResult && assignmentResult.message) || 'No se pudo guardar la asignación de menús.', 'error');
+                            return;
+                        }
+
+                        lastFetchedMenuIds = new Set(selectedMenuIds);
+                    }
+
+                    $('#modalEntidad').modal('hide');
+                    const msg = id === 0 ? 'Rol creado correctamente' : 'Rol actualizado';
+                    showAlert(msg, 'success');
+                    if (assignmentResult?.message) {
+                        showAlert(assignmentResult.message, 'success');
+                    }
+                    cargar();
+                } catch (error) {
+                    console.error(error);
+                    const message = error?.responseJSON?.error || error?.message || 'Error al guardar';
+                    showAlert(message, 'error');
+                } finally {
+                    button.prop('disabled', false);
+                }
+            });
         });
 
         function descargarReporte() {
@@ -252,6 +609,7 @@
                     cargarUnidades(u.unidadDeNegocioId).then(function () {
                         $('#modalEntidad').modal('show');
                         cargarPermisos(u.id, u.permisos || []);
+                        cargarMenusPorRol(u.id);
                     });
                 } else {
                     showAlert(r.error || 'Error al cargar', 'error');
@@ -279,6 +637,72 @@
             $('#unidadNegocio').empty();
             $('#estatusCheck').prop('checked', true).prop('disabled', true);
             $('#contenedorPermisos').empty();
+            clearMenuSelections();
         }
     </script>
+}
+
+@functions {
+    private IHtmlContent RenderNodes(List<MenuTreeNode>? nodes)
+    {
+        if (nodes == null || !nodes.Any())
+        {
+            return HtmlString.Empty;
+        }
+
+        var builder = new System.Text.StringBuilder();
+        foreach (var node in nodes)
+        {
+            builder.Append("<li>");
+
+            var hasChildren = node.Hijos != null && node.Hijos.Any();
+            var shouldExpand = hasChildren && HasSelectedDescendant(node);
+
+            if (hasChildren)
+            {
+                builder.Append("<span class='toggle'></span>");
+            }
+            else
+            {
+                builder.Append("<span class='toggle'></span>");
+            }
+
+            builder.Append($"<input type='checkbox' class='node-checkbox' data-id='{node.Id}' id='node_{node.Id}' name='Seleccionados' value='{node.Id}' {(node.Seleccionado ? "checked" : string.Empty)} />");
+            builder.Append($"<label for='node_{node.Id}'> {node.Nombre}</label>");
+
+            if (hasChildren)
+            {
+                builder.Append(shouldExpand ? "<ul>" : "<ul class='collapsed'>");
+                builder.Append(RenderNodes(node.Hijos).ToString());
+                builder.Append("</ul>");
+            }
+
+            builder.Append("</li>");
+        }
+
+        return new HtmlString(builder.ToString());
+    }
+
+    private bool HasSelectedDescendant(MenuTreeNode node)
+    {
+        if (node.Seleccionado)
+        {
+            return true;
+        }
+
+        if (node.Hijos == null || !node.Hijos.Any())
+        {
+            return false;
+        }
+
+        foreach (var child in node.Hijos)
+        {
+            if (HasSelectedDescendant(child))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
