@@ -217,10 +217,21 @@ namespace Farmacheck.Helpers
             
             CreateMap<ZonaViewModel, UpdateZoneRequest>();
 
-            CreateMap<RoleResponse, RoleDto>().ReverseMap();
-            CreateMap<RoleDto, RolViewModel>().ReverseMap();
-            CreateMap<RolViewModel, RoleRequest>();
-            CreateMap<RolViewModel, UpdateRoleRequest>();
+            CreateMap<RoleResponse, RoleDto>()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb))
+                .ReverseMap()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb));
+
+            CreateMap<RoleDto, RolViewModel>()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb))
+                .ReverseMap()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb));
+
+            CreateMap<RolViewModel, RoleRequest>()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb));
+
+            CreateMap<RolViewModel, UpdateRoleRequest>()
+                .ForMember(dest => dest.AccesoWeb, opt => opt.MapFrom(src => src.AccesoWeb));
 
             CreateMap<CategoryByQuestionnaireResponse, CategoryByQuestionnaireDto>().ReverseMap();
 
